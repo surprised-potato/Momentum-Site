@@ -121,15 +121,20 @@ function initializeTakeoffModule() {
         }
     });
 
-    addQuantityBtn.addEventListener('pointerdown', async () => {
-        await populateCategoryDatalist();
-        quantityModalTitle.textContent = 'Add Quantity';
-        quantityForm.reset();
-        quantityIdInput.value = '';
-        subquantitiesTableBody.innerHTML = '';
-        quantityInput.readOnly = false;
-        openQuantityModal();
-    });
+    addQuantityBtn.addEventListener('pointerdown', () => {
+    // 1. Perform all synchronous UI updates immediately.
+    quantityModalTitle.textContent = 'Add Quantity';
+    quantityForm.reset();
+    quantityIdInput.value = '';
+    subquantitiesTableBody.innerHTML = '';
+    quantityInput.readOnly = false;
+    openQuantityModal(); // This opens the modal right away.
+
+    // 2. Then, call the async function to load data in the background.
+    // This prevents data-loading from blocking the UI.
+    populateCategoryDatalist();
+});
+
 
     quantityModalClose.addEventListener('click', closeQuantityModal);
     

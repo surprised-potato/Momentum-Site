@@ -121,7 +121,7 @@ function initializeTakeoffModule() {
         }
     });
 
-    addQuantityBtn.addEventListener('click', async () => {
+    addQuantityBtn.addEventListener('pointerdown', async () => {
         await populateCategoryDatalist();
         quantityModalTitle.textContent = 'Add Quantity';
         quantityForm.reset();

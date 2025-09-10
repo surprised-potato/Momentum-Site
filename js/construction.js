@@ -1,0 +1,1256 @@
+// Author: Gemini
+// OS support: Cross-platform
+// Description: Logic for the construction phase modules, including accomplishment tracking and reporting.
+
+let currentConstructionProjectId = null;
+let trackingGanttChart = null;
+let trackingSCurveChart = null;
+
+const accomplishmentProjectsListDiv = document.getElementById('accomplishment-projects-list');
+const accomplishmentProjectName = document.getElementById('accomplishment-project-name');
+const accomplishmentEntryView = document.getElementById('accomplishment-entry-view');
+const accomplishmentDateInput = document.getElementById('accomplishment-date');
+const accomplishmentTableBody = document.querySelector('#accomplishment-table tbody');
+const accomplishmentForm = document.getElementById('accomplishment-form');
+const backToAccomplishmentProjectsBtn = document.getElementById('back-to-accomplishment-projects');
+const trackingGanttChartView = document.getElementById('tracking-gantt-chart-view');
+const trackingGanttProjectName = document.getElementById('tracking-gantt-project-name');
+const backToTrackingGanttProjectsBtn = document.getElementById('back-to-tracking-gantt-projects');
+const trackingSCurveChartView = document.getElementById('tracking-s-curve-chart-view');
+const trackingSCurveProjectName = document.getElementById('tracking-s-curve-project-name');
+const trackingSCurveCanvas = document.getElementById('tracking-s-curve-chart');
+const backToTrackingSCurveProjectsBtn = document.getElementById('back-to-tracking-s-curve-projects');
+const showAccomplishmentList = (projectId) => {
+    document.getElementById('accomplishment-entry-view').classList.add('hidden');
+    document.getElementById('accomplishment-detail-view').classList.add('hidden');
+    document.getElementById('accomplishment-list-view').classList.remove('hidden');
+    displayAccomplishmentHistory(projectId);
+};
+
+const showAccomplishmentDetail = (projectId, date) => {
+    document.getElementById('accomplishment-list-view').classList.add('hidden');
+    document.getElementById('accomplishment-detail-view').classList.remove('hidden');
+    displayAccomplishmentDetails(projectId, date);
+};
+const calculateDupaTotalCost = (dupa) => {
+    if (!dupa || !dupa.directCosts || !Array.isArray(dupa.directCosts) || dupa.directCosts.length === 0) return 0;
+    
+    let finalTotal = 0;
+
+    if (dupa.changeOrderItemId) {
+        const firstDirectCost = dupa.directCosts[0];
+        if (firstDirectCost?.type === 'calculated') {
+            finalTotal = firstDirectCost.total;
+        } else if (firstDirectCost?.type === 'total') {
+            const directCost = firstDirectCost.total;
+            const ocm = directCost * (dupa.indirectCosts.ocm / 100);
+            const profit = directCost * (dupa.indirectCosts.profit / 100);
+            const subtotal = directCost + ocm + profit;
+            const taxes = subtotal * (dupa.indirectCosts.taxes / 100);
+            finalTotal = subtotal + taxes;
+        }
+    }
+    
+    if (finalTotal === 0) {
+        const directCosts = dupa.directCosts.reduce((total, dc) => {
+            if (!dc) return total;
+            switch (dc.type) {
+                case 'labor': return total + (dc.mandays * dc.rate);
+                case 'material': return total + (dc.quantity * dc.unitPrice);
+                case 'equipment': return total + (dc.hours * dc.rate);
+                default: return total;
+            }
+        }, 0);
+        const ocmCost = directCosts * (dupa.indirectCosts.ocm / 100);
+        const profitCost = directCosts * (dupa.indirectCosts.profit / 100);
+        const totalBeforeTax = directCosts + ocmCost + profitCost;
+        const taxCost = totalBeforeTax * (dupa.indirectCosts.taxes / 100);
+        finalTotal = totalBeforeTax + taxCost;
+    }
+
+    return Math.round(finalTotal * 100) / 100;
+};
+
+// 1. ADD THIS NEW, UNIFIED FUNCTION
+// This is the new "source of truth" for fetching all task types with their real-time progress.
+const getProjectTasks = async (projectId) => {
+    // 1. Get all base items
+    const quantities = await db.quantities.where({ projectId }).toArray();
+    const approvedChangeOrders = await db.changeOrders.where({ projectId, status: 'Approved' }).toArray();
+    const approvedChangeOrderIds = approvedChangeOrders.map(co => co.id);
+    const changeOrderItems = approvedChangeOrderIds.length > 0
+        ? await db.changeOrderItems.where('changeOrderId').anyOf(approvedChangeOrderIds).toArray()
+        : [];
+
+    // 2. Get all DUPAs to calculate costs
+    const quantityIds = quantities.map(q => q.id);
+    const changeOrderItemIds = changeOrderItems.map(ci => ci.id);
+    const dupas = await db.dupas.where('quantityId').anyOf(quantityIds).toArray();
+    const coDupas = changeOrderItemIds.length > 0 ? await db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray() : [];
+    const dupaMap = new Map();
+    dupas.forEach(d => dupaMap.set(d.quantityId, d));
+    coDupas.forEach(d => dupaMap.set(d.changeOrderItemId, d));
+
+    // 3. Get all accomplishment records to calculate progress
+    const qtyAccomplishments = await db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').toArray();
+    // **THIS LINE IS FIXED**
+    const coAccomplishments = await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(r => r.type === 'changeOrderItem').toArray();
+    const allAccomplishments = [...qtyAccomplishments, ...coAccomplishments];
+
+    const progressMap = new Map();
+    allAccomplishments.forEach(acc => {
+        let key;
+        if (acc.type === 'changeOrderItem') key = `co-${acc.taskId}`;
+        else key = (acc.subIndex !== null) ? `sub-${acc.taskId}-${acc.subIndex}` : `qty-${acc.taskId}`;
+        progressMap.set(key, (progressMap.get(key) || 0) + acc.percentComplete);
+    });
+
+    // 4. Build the final list of tasks, including their calculated cost
+    const expandedTasks = [];
+    quantities.forEach(q => {
+        const dupa = dupaMap.get(q.id);
+        const parentTotalCost = calculateDupaTotalCost(dupa);
+
+        if (Array.isArray(q.subquantities) && q.subquantities.length > 0) {
+            const numSubtasks = q.subquantities.length;
+            const apportionedCost = numSubtasks > 0 ? parentTotalCost / numSubtasks : 0;
+            
+            q.subquantities.forEach((subName, index) => {
+                const uniqueId = `sub-${q.id}-${index}`;
+                expandedTasks.push({
+                    uniqueId: uniqueId, id: uniqueId, quantityId: q.id, subIndex: index,
+                    displayName: `${q.scopeOfWork} - ${subName.name}`, type: 'subquantity',
+                    percentComplete: Math.min(100, progressMap.get(uniqueId) || 0),
+                    cost: apportionedCost, category: q.category
+                });
+            });
+        } else {
+            const uniqueId = `qty-${q.id}`;
+            expandedTasks.push({
+                ...q, uniqueId: uniqueId, displayName: q.scopeOfWork, type: 'quantity',
+                percentComplete: Math.min(100, progressMap.get(uniqueId) || 0),
+                cost: parentTotalCost
+            });
+        }
+    });
+
+    changeOrderItems.forEach(ci => {
+        const uniqueId = `co-${ci.id}`;
+        const totalCost = calculateDupaTotalCost(dupaMap.get(ci.id));
+        expandedTasks.push({
+            ...ci, uniqueId: uniqueId, displayName: `(CO) ${ci.scopeOfWork}`,
+            type: 'changeOrderItem',
+            percentComplete: Math.min(100, progressMap.get(uniqueId) || 0),
+            cost: totalCost
+        });
+    });
+
+    // Sorting by display name is a sensible default
+    return expandedTasks.sort((a, b) => a.displayName.localeCompare(b.displayName));
+};
+
+
+// 2. REPLACE your existing getAllTasksForReport function with this one.
+// It now uses the new function and provides the data in the format your reports expect.
+const getAllTasksForReport = async (projectId, isRevised = false) => {
+    const allTasks = await getProjectTasks(projectId);
+    
+    // Reports also need the DUPA data, so we'll fetch that here.
+    const quantities = await db.quantities.where({ projectId }).toArray();
+    const quantityIds = quantities.map(q => q.id);
+    let allDupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
+    
+    if (isRevised) {
+        const approvedChangeOrders = await db.changeOrders.where({ projectId, status: 'Approved' }).toArray();
+        const approvedChangeOrderIds = approvedChangeOrders.map(co => co.id);
+        const changeOrderItems = approvedChangeOrderIds.length > 0 ? await db.changeOrderItems.where('changeOrderId').anyOf(approvedChangeOrderIds).toArray() : [];
+        const changeOrderItemIds = changeOrderItems.map(item => item.id);
+        if (changeOrderItemIds.length > 0) {
+            const changeOrderDupas = await db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray();
+            allDupas.push(...changeOrderDupas);
+        }
+    }
+
+    return { allTasks, allDupas };
+};
+
+
+// 3. REPLACE your existing getAllAccomplishmentTasks function with this one.
+// It now just calls our new, reliable function.
+const getAllAccomplishmentTasks = async (projectId) => {
+    return await getProjectTasks(projectId);
+};
+
+const getPertCpmData = async (projectId, isRevised = false) => {
+    const { allTasks, allDupas } = await getAllTasksForReport(projectId, isRevised);
+    const links = await db.tasks.where('projectId').equals(projectId).toArray();
+    if (allTasks.length === 0) return null;
+
+    const dupaMap = new Map();
+    allDupas.forEach(d => {
+        const key = d.quantityId || d.changeOrderItemId;
+        const parentId = allTasks.find(t => t.id === key || (t.parentQuantityId === key))?.parentQuantityId || key;
+        dupaMap.set(key, allDupas.find(dupa => dupa.quantityId === parentId));
+    });
+
+    const tasks = new Map(allTasks.map(t => {
+        const dupa = dupaMap.get(t.parentQuantityId || t.id);
+        let duration = dupa?.duration || 0;
+
+        if (t.parentQuantityId && t.totalParentQuantity > 0 && dupa) {
+            const proportion = t.quantity / t.totalParentQuantity;
+            duration = Math.round(dupa.duration * proportion);
+        }
+
+        return [t.id, { id: t.id, name: t.displayName, duration: duration, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() }]
+    }));
+    tasks.set('PROJECT_START', { id: 'PROJECT_START', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
+    tasks.set('PROJECT_END', { id: 'PROJECT_END', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
+    
+    links.forEach(link => {
+        if (tasks.has(link.predecessorId) && tasks.has(link.successorId)) {
+            tasks.get(link.successorId).predecessors.add(link.predecessorId);
+            tasks.get(link.predecessorId).successors.add(link.successorId);
+        }
+    });
+
+    const sortedNodes = [];
+    const queue = new Map();
+    tasks.forEach((task, id) => {
+        queue.set(id, task.predecessors.size);
+        if (task.predecessors.size === 0) {
+            sortedNodes.push(id);
+        }
+    });
+    
+    let head = 0;
+    while(head < sortedNodes.length) {
+        const currentId = sortedNodes[head++];
+        const currentNode = tasks.get(currentId);
+        if (!currentNode) continue;
+
+        currentNode.ef = currentNode.es + currentNode.duration;
+
+        currentNode.successors.forEach(succId => {
+            const succNode = tasks.get(succId);
+            if(succNode) {
+                succNode.es = Math.max(succNode.es, currentNode.ef);
+                const newPredCount = queue.get(succId) - 1;
+                queue.set(succId, newPredCount);
+                if (newPredCount === 0) {
+                    sortedNodes.push(succId);
+                }
+            }
+        });
+    }
+
+    const projectDuration = tasks.get('PROJECT_END').ef;
+    tasks.forEach(task => task.lf = projectDuration);
+    for (let i = sortedNodes.length - 1; i >= 0; i--) {
+        const currentId = sortedNodes[i];
+        const currentNode = tasks.get(currentId);
+        if (!currentNode) continue;
+
+        if (currentNode.successors.size === 0) currentNode.lf = projectDuration;
+        currentNode.ls = currentNode.lf - currentNode.duration;
+        currentNode.predecessors.forEach(predId => {
+            const predNode = tasks.get(predId);
+            if(predNode) {
+                predNode.lf = Math.min(predNode.lf, currentNode.ls);
+            }
+        });
+    }
+    return { tasks, quantities: allTasks, projectDuration, links, allDupas };
+};
+
+const getSCurveData = async (projectId, isRevised = false) => {
+    const pertData = await getPertCpmData(projectId, isRevised);
+    const project = await db.projects.get(projectId);
+
+    if (!pertData || pertData.projectDuration === 0) return null;
+
+    const { tasks, quantities, projectDuration } = pertData;
+    
+    const { allDupas } = await getAllTasksForReport(projectId, isRevised);
+    const dupaMap = new Map();
+    allDupas.forEach(d => {
+        const key = d.quantityId || d.changeOrderItemId;
+        dupaMap.set(key, d);
+    });
+
+    let grandTotalCost = 0;
+    const parentQuantityMap = new Map((await db.quantities.where({ projectId }).toArray()).map(q => [q.id, q]));
+    
+    quantities.forEach(q => {
+        if (q.type === 'subquantity') {
+            const parentDupa = dupaMap.get(q.quantityId);
+            const parentQuantity = parentQuantityMap.get(q.quantityId);
+            const parentTotalCost = calculateDupaTotalCost(parentDupa);
+            const numSubtasks = parentQuantity?.subquantities?.length || 1;
+            grandTotalCost += parentTotalCost / numSubtasks;
+        } else {
+            const dupa = dupaMap.get(q.id);
+            grandTotalCost += calculateDupaTotalCost(dupa);
+        }
+    });
+
+    if (grandTotalCost === 0) return null;
+
+    const dailyCosts = new Array(projectDuration + 1).fill(0);
+    quantities.forEach(q => {
+        const task = tasks.get(q.id);
+        if (!task) return;
+        let totalTaskCost = 0;
+        if (q.type === 'subquantity') {
+            const parentDupa = dupaMap.get(q.quantityId);
+            const parentQuantity = parentQuantityMap.get(q.quantityId);
+            const parentTotalCost = calculateDupaTotalCost(parentDupa);
+            const numSubtasks = parentQuantity?.subquantities?.length || 1;
+            totalTaskCost = parentTotalCost / numSubtasks;
+        } else {
+            totalTaskCost = calculateDupaTotalCost(dupaMap.get(q.id));
+        }
+        if (task.duration > 0) {
+            const costPerDay = totalTaskCost / task.duration;
+            for (let day = task.es; day < task.ef; day++) {
+                if (day < dailyCosts.length) dailyCosts[day] += costPerDay;
+            }
+        }
+    });
+
+    let cumulativeSum = 0;
+    const cumulativeCosts = Array.from({ length: projectDuration }, (_, i) => {
+        cumulativeSum += dailyCosts[i];
+        return cumulativeSum;
+    });
+    
+    const plannedPercentage = cumulativeCosts.map(cost => (cost / grandTotalCost) * 100);
+
+    const labels = [];
+    if (project.startDate) {
+        const projectStartDate = new Date(project.startDate);
+        projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
+        const dateFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+        for (let i = 0; i < projectDuration; i++) {
+            const currentDate = new Date(projectStartDate);
+            currentDate.setDate(currentDate.getDate() + i);
+            labels.push(dateFormatter.format(currentDate));
+        }
+    } else {
+        for (let i = 0; i < projectDuration; i++) {
+            labels.push(`Day ${i + 1}`);
+        }
+    }
+
+    return {
+        labels: labels,
+        plannedPercentage: plannedPercentage,
+        grandTotalCost: grandTotalCost,
+        projectDuration: projectDuration
+    };
+};
+
+const displayAccomplishmentProjects = async () => {
+    const allProjects = await db.projects.orderBy('projectName').toArray();
+    accomplishmentProjectsListDiv.innerHTML = '';
+    if (allProjects.length === 0) {
+        accomplishmentProjectsListDiv.innerHTML = '<p>No projects with a generated BOQ found. Please generate a BOQ in the "Pre-construction Reports" module first.</p>';
+    } else {
+        allProjects.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'list-item';
+            item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-accomplishment-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
+            accomplishmentProjectsListDiv.appendChild(item);
+        });
+    }
+};
+
+const populateAccomplishmentTable = async (projectId) => {
+    try {
+        console.log('Fetching all accomplishment tasks...');
+        const allTasks = await getAllAccomplishmentTasks(projectId);
+        console.log(`Found ${allTasks.length} tasks.`);
+        const pertData = await getPertCpmData(projectId, true);
+        console.log('PERT data fetched for sorting.');
+        
+        if (pertData && pertData.tasks) {
+            const esMap = new Map();
+            pertData.tasks.forEach((task, id) => esMap.set(id, task.es));
+            allTasks.sort((a, b) => (esMap.get(a.id) || Infinity) - (esMap.get(b.id) || Infinity) || a.displayName.localeCompare(b.displayName));
+            console.log('Tasks sorted by Early Start date.');
+        }
+        
+        accomplishmentTableBody.innerHTML = '';
+        if (allTasks.length === 0) {
+            accomplishmentTableBody.innerHTML = '<tr><td colspan="3">No tasks found for this project.</td></tr>';
+            console.log('Rendered empty table message.');
+            return;
+        }
+
+        allTasks.forEach(task => {
+            const row = accomplishmentTableBody.insertRow();
+            const overallProgress = task.percentComplete || 0;
+            row.dataset.taskId = task.id;
+            row.dataset.parentQuantityId = task.parentQuantityId || task.id;
+            row.dataset.isSubtask = !!task.parentQuantityId;
+            
+            row.innerHTML = `
+                <td>${task.displayName}</td>
+                <td><progress value="${overallProgress}" max="100"></progress> ${overallProgress.toFixed(2)}%</td>
+                <td><input type="number" class="progress-input" min="0" max="${(100 - overallProgress).toFixed(2)}" step="any" placeholder="0.00"> %</td>
+            `;
+        });
+        console.log(`Rendered ${allTasks.length} tasks into the table.`);
+    } catch (error) {
+        console.error('Error populating accomplishment table:', error);
+        accomplishmentTableBody.innerHTML = '<tr><td colspan="3">Could not load tasks due to an error.</td></tr>';
+    }
+};
+
+const showAccomplishmentForm = async (projectId, projectName) => {
+    currentConstructionProjectId = projectId;
+    accomplishmentProjectName.textContent = projectName;
+    
+    showView(accomplishmentView);
+    document.getElementById('accomplishment-project-list-view').classList.add('hidden');
+    document.getElementById('accomplishment-list-view').classList.add('hidden');
+    document.getElementById('accomplishment-detail-view').classList.add('hidden');
+    accomplishmentEntryView.classList.remove('hidden');
+
+    accomplishmentDateInput.removeAttribute('readonly');
+    document.getElementById('view-past-reports-btn').classList.remove('hidden');
+    accomplishmentDateInput.valueAsDate = new Date();
+    accomplishmentTableBody.innerHTML = '<tr><td colspan="3">Loading tasks...</td></tr>';
+    
+    const project = await db.projects.get(projectId);
+    if (!project.startDate) {
+        const inputDate = prompt("This is the first report for this project.\nPlease enter the Project Start Date (YYYY-MM-DD):");
+        if (inputDate && !isNaN(new Date(inputDate))) {
+            await db.projects.update(projectId, { startDate: inputDate });
+        } else {
+            alert("Invalid date. Please select the project again to set a valid start date.");
+            showAccomplishment();
+            return;
+        }
+    }
+
+    let allTasks = await getProjectTasks(projectId);
+    const pertData = await getPertCpmData(projectId, true);
+    
+    const sortBy = document.getElementById('accomplishment-sort').value;
+    if (pertData && pertData.tasks) {
+        const startTaskIds = new Set(pertData.links
+            .filter(link => link.predecessorId === 'PROJECT_START')
+            .map(link => link.successorId)
+        );
+
+        const esMap = new Map(Array.from(pertData.tasks.values()).map(task => [task.id, task.es]));
+        allTasks.sort((a, b) => {
+            if (sortBy === 'name') return a.displayName.localeCompare(b.displayName);
+            if (sortBy === 'progress') return (a.percentComplete || 0) - (b.percentComplete || 0);
+
+            const aIsStart = startTaskIds.has(a.id);
+            const bIsStart = startTaskIds.has(b.id);
+
+            if (aIsStart && !bIsStart) return -1;
+            if (!aIsStart && bIsStart) return 1;
+
+            const taskA_es = esMap.get(a.id) || Infinity;
+            const taskB_es = esMap.get(b.id) || Infinity;
+            if (taskA_es === taskB_es) return a.displayName.localeCompare(b.displayName);
+            return taskA_es - taskB_es;
+        });
+    }
+
+    accomplishmentTableBody.innerHTML = '';
+    if (allTasks.length === 0) {
+        accomplishmentTableBody.innerHTML = '<tr><td colspan="3">No tasks found for this project.</td></tr>';
+        return;
+    }
+
+    const groupBy = document.getElementById('accomplishment-group').value;
+
+    const renderTaskRow = (task) => {
+        const row = accomplishmentTableBody.insertRow();
+        const overallProgress = task.percentComplete || 0;
+        row.dataset.uniqueId = task.uniqueId;
+        row.dataset.type = task.type;
+        if (task.type === 'subquantity') {
+            row.dataset.quantityId = task.quantityId;
+            row.dataset.subquantityIndex = task.subIndex;
+        } else {
+            row.dataset.quantityId = task.id;
+        }
+        row.innerHTML = `
+            <td>${task.displayName}</td>
+            <td><progress value="${overallProgress}" max="100"></progress> ${overallProgress.toFixed(2)}%</td>
+            <td><input type="number" class="progress-input" min="0" max="${(100 - overallProgress).toFixed(2)}" step="any" placeholder="0.00"> %</td>
+        `;
+    };
+
+    if (groupBy === 'category') {
+        const groupedTasks = allTasks.reduce((acc, task) => {
+            const category = task.category || (task.type === 'changeOrderItem' ? 'Change Orders' : 'Uncategorized');
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(task);
+            return acc;
+        }, {});
+        
+        Object.keys(groupedTasks).sort().forEach(category => {
+            const tasksInCategory = groupedTasks[category];
+            
+            let totalCategoryValue = 0;
+            let accomplishedCategoryValue = 0;
+            tasksInCategory.forEach(task => {
+                const taskCost = task.cost || 0;
+                totalCategoryValue += taskCost;
+                accomplishedCategoryValue += taskCost * ((task.percentComplete || 0) / 100);
+            });
+            const categoryWeightedProgress = (totalCategoryValue > 0)
+                ? (accomplishedCategoryValue / totalCategoryValue) * 100
+                : 0;
+
+            const headerRow = accomplishmentTableBody.insertRow();
+            headerRow.className = 'category-header-row';
+            headerRow.innerHTML = `
+                <td colspan="2">${category}</td>
+                <td style="font-weight: 500;">
+                    <progress value="${categoryWeightedProgress}" max="100" style="width: 70%; vertical-align: middle;"></progress> 
+                    ${categoryWeightedProgress.toFixed(2)}%
+                </td>
+            `;
+            tasksInCategory.forEach(renderTaskRow);
+        });
+    } else {
+        allTasks.forEach(renderTaskRow);
+    }
+};
+
+const displayAccomplishmentHistory = async (projectId) => {
+    document.getElementById('accomplishment-list-project-name').textContent = `Past Reports: ${accomplishmentProjectName.textContent}`;
+    const historyTableBody = document.querySelector('#accomplishment-history-table tbody');
+    if (!historyTableBody) return; // Safety check
+    historyTableBody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
+    // 1. Get all tasks, which now includes their calculated costs
+    const allTasks = await getProjectTasks(projectId);
+    if (allTasks.length === 0) {
+        historyTableBody.innerHTML = '<tr><td colspan="3">No tasks found for this project.</td></tr>';
+        return;
+    }
+    const taskMap = new Map(allTasks.map(t => [t.uniqueId, t]));
+
+    // 2. Calculate the total value of the entire project
+    const totalProjectValue = allTasks.reduce((sum, task) => sum + (task.cost || 0), 0);
+
+    // 3. Fetch all accomplishment records for the project
+    const quantityTaskIds = allTasks.filter(t => t.type !== 'changeOrderItem').map(t => t.quantityId || t.id);
+    const coTaskIds = allTasks.filter(t => t.type === 'changeOrderItem').map(t => t.id);
+    const qtyAccomplishments = await db.accomplishments.where('taskId').anyOf(quantityTaskIds).and(r => r.type === 'quantity').toArray();
+    const coAccomplishments = coTaskIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(coTaskIds).and(r => r.type === 'changeOrderItem').toArray() : [];
+    const allReports = [...qtyAccomplishments, ...coAccomplishments];
+
+    // 4. Group reports by date and sum their cost-weighted "earned value"
+    const dailyEarnedValue = allReports.reduce((acc, report) => {
+        const date = report.date;
+        let taskUniqueId;
+        if (report.type === 'changeOrderItem') {
+            taskUniqueId = `co-${report.taskId}`;
+        } else {
+            taskUniqueId = (report.subIndex !== null) ? `sub-${report.taskId}-${report.subIndex}` : `qty-${report.taskId}`;
+        }
+        
+        const task = taskMap.get(taskUniqueId);
+        const taskCost = task ? (task.cost || 0) : 0;
+        const earnedValue = taskCost * (report.percentComplete / 100);
+        
+        acc.set(date, (acc.get(date) || 0) + earnedValue);
+        return acc;
+    }, new Map());
+    
+    const sortedDates = [...dailyEarnedValue.keys()].sort((a, b) => new Date(b) - new Date(a));
+
+    if (sortedDates.length === 0) {
+        historyTableBody.innerHTML = '<tr><td colspan="3">No past accomplishment reports found.</td></tr>';
+        return;
+    }
+
+    historyTableBody.innerHTML = '';
+    sortedDates.forEach(date => {
+        const earnedValueForDay = dailyEarnedValue.get(date);
+        // 5. Calculate the day's progress as a percentage of the TOTAL project value
+        const weightedPercent = (totalProjectValue > 0) ? (earnedValueForDay / totalProjectValue) * 100 : 0;
+        
+        const row = historyTableBody.insertRow();
+        row.innerHTML = `
+            <td>${new Date(date).toLocaleDateString(undefined, { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+            <td><strong>${weightedPercent.toFixed(2)}%</strong></td>
+            <td class="actions-cell"><button class="btn btn-primary view-accomplishment-detail-btn" data-date="${date}">View</button></td>
+        `;
+    });
+};
+const displayAccomplishmentDetails = async (projectId, date) => {
+    document.getElementById('accomplishment-detail-title').textContent = `Report for: ${new Date(date).toLocaleDateString(undefined, { timeZone: 'UTC' })}`;
+    document.getElementById('edit-accomplishment-btn').dataset.date = date;
+    const detailTableBody = document.querySelector('#accomplishment-detail-table tbody');
+    detailTableBody.innerHTML = '<tr><td colspan="2">Loading details...</td></tr>';
+
+    // Use the new, correct getProjectTasks function to get a map of all task names
+    const allTasks = await getProjectTasks(projectId);
+    const taskMap = new Map(allTasks.map(t => [t.uniqueId, t.displayName]));
+
+    // Fetch the reports for the specific date
+    const reportsForDate = await db.accomplishments.where('date').equals(date).toArray();
+    // Filter down to only reports for this project (since accomplishments table has no projectId)
+    const projectReports = reportsForDate.filter(r => {
+        const taskUniqueId = r.type === 'changeOrderItem' ? `co-${r.taskId}` : 
+                             (r.subIndex !== null ? `sub-${r.taskId}-${r.subIndex}` : `qty-${r.taskId}`);
+        return taskMap.has(taskUniqueId);
+    });
+
+    if (projectReports.length === 0) {
+        detailTableBody.innerHTML = '<tr><td colspan="2">No accomplishments recorded for this date.</td></tr>';
+        return;
+    }
+
+    detailTableBody.innerHTML = '';
+    projectReports.forEach(report => {
+        const taskUniqueId = report.type === 'changeOrderItem' ? `co-${report.taskId}` : 
+                             (report.subIndex !== null ? `sub-${report.taskId}-${report.subIndex}` : `qty-${report.taskId}`);
+        const taskName = taskMap.get(taskUniqueId) || 'Unknown Task';
+        
+        const row = detailTableBody.insertRow();
+        row.innerHTML = `
+            <td>${taskName}</td>
+            <td>${report.percentComplete.toFixed(2)}%</td>
+        `;
+    });
+};
+
+const editAccomplishmentReport = async (projectId, date) => {
+    // Show the correct view and pre-fill the form for editing
+    showView(accomplishmentView);
+    accomplishmentEntryView.classList.remove('hidden');
+    document.getElementById('accomplishment-list-view').classList.add('hidden');
+    document.getElementById('accomplishment-detail-view').classList.add('hidden');
+    accomplishmentDateInput.value = date;
+    accomplishmentDateInput.setAttribute('readonly', true);
+    document.getElementById('view-past-reports-btn').classList.add('hidden');
+
+    // Get the comprehensive list of all tasks using our reliable, updated function
+    const allTasks = await getProjectTasks(projectId);
+    
+    // Fetch all accomplishment records for the specific date using the correct 'date' index
+    const reportsForDate = await db.accomplishments.where({ date }).toArray();
+    
+    // Create a map of the reports using the uniqueId format for easy lookup
+    const reportMap = new Map();
+    reportsForDate.forEach(r => {
+        let key;
+        if (r.type === 'changeOrderItem') {
+            key = `co-${r.taskId}`;
+        } else { // type is 'quantity'
+            key = (r.subIndex !== undefined && r.subIndex !== null)
+                ? `sub-${r.taskId}-${r.subIndex}`
+                : `qty-${r.taskId}`;
+        }
+        reportMap.set(key, r);
+    });
+
+    accomplishmentTableBody.innerHTML = '';
+    for (const task of allTasks) {
+        const report = reportMap.get(task.uniqueId);
+        const overallProgress = task.percentComplete || 0;
+        const progressOnDate = report ? report.percentComplete : 0;
+        // This is the progress already recorded BEFORE the date we are editing
+        const progressBeforeDate = overallProgress - progressOnDate;
+
+        const row = accomplishmentTableBody.insertRow();
+        // Set the necessary data attributes for the submit handler
+        row.dataset.uniqueId = task.uniqueId;
+        row.dataset.type = task.type;
+        if (task.type === 'subquantity') {
+            row.dataset.quantityId = task.quantityId;
+            row.dataset.subquantityIndex = task.subIndex;
+        } else {
+            row.dataset.quantityId = task.id; // This is the numeric taskId
+        }
+        if (report) row.dataset.accomplishmentId = report.id;
+        
+        row.innerHTML = `
+            <td>${task.displayName}</td>
+            <td><progress value="${progressBeforeDate}" max="100"></progress> ${progressBeforeDate.toFixed(2)}%</td>
+            <td><input type="number" class="progress-input" value="${progressOnDate}" min="0" max="${(100 - progressBeforeDate).toFixed(2)}" step="any"> %</td>
+        `;
+    }
+};
+
+const getConstructionReadyProjects = async () => {
+    const allProjects = await db.projects.orderBy('projectName').toArray();
+    const allBoqs = await db.boqs.toArray();
+    const boqProjectIds = new Set(allBoqs.map(b => b.projectId));
+    return allProjects.filter(p => boqProjectIds.has(p.id));
+};
+
+const displayTrackingGanttProjects = async () => {
+    const projects = await getConstructionReadyProjects();
+    const listDiv = document.getElementById('tracking-gantt-projects-list');
+    listDiv.innerHTML = '';
+    if (projects.length === 0) {
+        listDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
+        return;
+    }
+    projects.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-tracking-gantt-btn" data-id="${p.id}" data-name="${p.projectName}">View Chart</button>`;
+        listDiv.appendChild(item);
+    });
+};
+
+const displayTrackingSCurveProjects = async () => {
+    const projects = await getConstructionReadyProjects();
+    const listDiv = document.getElementById('tracking-s-curve-projects-list');
+    listDiv.innerHTML = '';
+    if (projects.length === 0) {
+        listDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
+        return;
+    }
+    projects.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-tracking-s-curve-btn" data-id="${p.id}" data-name="${p.projectName}">View Chart</button>`;
+        listDiv.appendChild(item);
+    });
+};
+
+const displayLookaheadProjects = async () => {
+    const projects = await getConstructionReadyProjects();
+    const listDiv = document.getElementById('lookahead-projects-list');
+    listDiv.innerHTML = '';
+    if (projects.length === 0) {
+        listDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
+        return;
+    }
+    projects.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary select-lookahead-project-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
+        listDiv.appendChild(item);
+    });
+};
+
+const showLookAheadReportView = (projectId, projectName) => {
+    currentConstructionProjectId = projectId;
+    document.getElementById('lookahead-project-list-view').classList.add('hidden');
+    document.getElementById('lookahead-report-view').classList.remove('hidden');
+    document.getElementById('lookahead-project-name').textContent = `Look-Ahead: ${projectName}`;
+    document.getElementById('lookahead-start-date').valueAsDate = new Date();
+    document.getElementById('lookahead-report-content').innerHTML = `<p class="placeholder-text">Please select a start date and click "Generate Report" to see the look-ahead schedule.</p>`;
+    document.getElementById('lookahead-kpi-container').innerHTML = '';
+};
+
+const showTrackingGanttChart = async (projectId, projectName) => {
+    currentConstructionProjectId = projectId; 
+    document.getElementById('tracking-gantt-project-list-view').classList.add('hidden');
+    trackingGanttChartView.classList.remove('hidden');
+    trackingGanttProjectName.textContent = `Tracking Gantt: ${projectName}`;
+
+    const ganttContainer = document.getElementById('tracking-gantt-chart-target');
+    ganttContainer.innerHTML = 'Loading Chart...';
+
+    const data = await getPertCpmData(projectId, true);
+    const project = await db.projects.get(projectId);
+
+    if (!project.startDate) {
+        ganttContainer.innerHTML = '<p>A project start date has not been set...</p>';
+        return;
+    }
+    if (!data || data.quantities.length === 0) {
+        ganttContainer.innerHTML = 'No tasks to display.';
+        return;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const projectStartDate = new Date(project.startDate);
+    projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
+
+    let tasksForGantt = data.quantities.map(q => {
+        const task = data.tasks.get(q.id);
+        if (!task) return null;
+        const progress = q.percentComplete || 0;
+        const startDate = new Date(projectStartDate);
+        startDate.setDate(startDate.getDate() + task.es);
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + task.duration);
+        let status_class = '';
+        if (progress >= 100) status_class = 'bar-done';
+        else if (today > endDate) status_class = 'bar-behind';
+        else if (today >= startDate && today <= endDate) {
+            const duration = Math.max(1, task.duration);
+            const daysElapsed = (today - startDate) / (1000 * 60 * 60 * 24) + 1;
+            const plannedProgress = (daysElapsed / duration) * 100;
+            status_class = (progress >= plannedProgress) ? 'bar-on-track' : 'bar-behind';
+        }
+        const dependencies = Array.from(task.predecessors)
+            .filter(pId => data.tasks.has(pId))
+            .map(pId => `task_${pId}`)
+            .join(', ');
+        return {
+            id: `task_${q.id}`, name: task.name,
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0],
+            progress: progress, dependencies: dependencies,
+            custom_class: status_class
+        };
+    }).filter(Boolean);
+
+    const sortBy = document.getElementById('tracking-gantt-sort').value;
+    tasksForGantt.sort((a, b) => {
+        if (sortBy === 'name') return a.name.localeCompare(b.name);
+        if (sortBy === 'progress') return a.progress - b.progress;
+        return new Date(a.start) - new Date(b.start);
+    });
+
+    ganttContainer.innerHTML = '';
+    trackingGanttChart = new Gantt("#tracking-gantt-chart-target", tasksForGantt, {
+        view_mode: 'Week',
+        custom_popup_html: function(task) {
+            const pertTask = data.tasks.get(task.id.replace('task_', ''));
+            const duration = pertTask ? pertTask.duration : 'N/A';
+            return `<div class="gantt-popup-wrapper">
+                <strong>${task.name}</strong>
+                <p>Progress: ${task.progress.toFixed(1)}%</p>
+                <p>Duration: ${duration} days</p>
+            </div>`;
+        }
+    });
+};
+
+const renderTrackingSCurve = async (projectId, projectName) => {
+    currentConstructionProjectId = projectId;
+    document.getElementById('tracking-s-curve-project-list-view').classList.add('hidden');
+    trackingSCurveChartView.classList.remove('hidden');
+    trackingSCurveProjectName.textContent = `Tracking S-Curve: ${projectName}`;
+
+    const plannedData = await getSCurveData(projectId, true);
+    const project = await db.projects.get(projectId);
+
+    if (!plannedData || !project.startDate) {
+        if (trackingSCurveChart) trackingSCurveChart.destroy();
+        alert("Cannot generate S-Curve. Ensure the project has a start date and a locked BOQ.");
+        return;
+    }
+    const { grandTotalCost, projectDuration } = plannedData;
+    const projectStartDate = new Date(project.startDate);
+    projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
+
+    const { allDupas } = await getAllTasksForReport(projectId, true);
+    const quantities = await db.quantities.where({ projectId }).toArray();
+    const approvedChangeOrders = await db.changeOrders.where({ projectId, status: 'Approved' }).toArray();
+    const approvedChangeOrderIds = approvedChangeOrders.map(co => co.id);
+    const changeOrderItems = approvedChangeOrderIds.length > 0 ? await db.changeOrderItems.where('changeOrderId').anyOf(approvedChangeOrderIds).toArray() : [];
+    
+    const quantityTaskIds = quantities.map(q => q.id);
+    const coTaskIds = changeOrderItems.map(item => item.id);
+    const qtyAccomplishments = await db.accomplishments.where('taskId').anyOf(quantityTaskIds).and(r => r.type === 'quantity').toArray();
+    const coAccomplishments = coTaskIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(coTaskIds).and(r => r.type === 'changeOrderItem').toArray() : [];
+    const allAccomplishments = [...qtyAccomplishments, ...coAccomplishments];
+
+    const accomplishmentValuesByDay = new Map();
+    if (allAccomplishments.length > 0) {
+        const dupaMap = new Map(allDupas.map(d => [d.quantityId || d.changeOrderItemId, d]));
+        const parentQuantityMap = new Map(quantities.map(q => [q.id, q]));
+        for (const acc of allAccomplishments) {
+            let taskCost = 0;
+            if (acc.type === 'changeOrderItem') taskCost = calculateDupaTotalCost(dupaMap.get(acc.taskId));
+            else {
+                const parentDupa = dupaMap.get(acc.taskId);
+                const parentQuantity = parentQuantityMap.get(acc.taskId);
+                if (parentQuantity?.subquantities?.length > 0) taskCost = calculateDupaTotalCost(parentDupa) / parentQuantity.subquantities.length;
+                else taskCost = calculateDupaTotalCost(parentDupa);
+            }
+            const earnedValue = taskCost * (acc.percentComplete / 100);
+            const reportDate = new Date(acc.date);
+            reportDate.setMinutes(reportDate.getMinutes() + reportDate.getTimezoneOffset());
+            const projectDay = Math.round((reportDate - projectStartDate) / (1000 * 60 * 60 * 24));
+            if (projectDay >= 0) accomplishmentValuesByDay.set(projectDay, (accomplishmentValuesByDay.get(projectDay) || 0) + earnedValue);
+        }
+    }
+
+    const actualPercentage = new Array(projectDuration).fill(null);
+    if (accomplishmentValuesByDay.size > 0 || project.startDate) {
+        let cumulativeValue = 0;
+        accomplishmentValuesByDay.set(0, accomplishmentValuesByDay.get(0) || 0);
+        const sortedDays = [...accomplishmentValuesByDay.keys()].sort((a, b) => a - b);
+        sortedDays.forEach(day => {
+            cumulativeValue += accomplishmentValuesByDay.get(day);
+            if (day < projectDuration) actualPercentage[day] = (cumulativeValue / grandTotalCost) * 100;
+        });
+        let lastDay = 0, lastValue = 0;
+        for (let i = 0; i < projectDuration; i++) {
+            if (actualPercentage[i] !== null) {
+                const nextValue = actualPercentage[i], nextDay = i;
+                if (nextDay > lastDay) {
+                    const daysBetween = nextDay - lastDay, valueStep = (nextValue - lastValue) / daysBetween;
+                    for (let j = 1; j < daysBetween; j++) actualPercentage[lastDay + j] = lastValue + (valueStep * j);
+                }
+                lastDay = nextDay;
+                lastValue = nextValue;
+            }
+        }
+        const today = new Date(), daysElapsed = Math.floor((today - projectStartDate) / (1000 * 60 * 60 * 24));
+        if (daysElapsed > lastDay && lastDay < projectDuration) {
+             for (let i = lastDay + 1; i <= daysElapsed && i < projectDuration; i++) actualPercentage[i] = lastValue;
+        }
+    }
+    
+    // **NEW**: Create styling arrays for the data points
+    const pointRadii = new Array(projectDuration).fill(2); // Small default radius
+    const pointColors = new Array(projectDuration).fill('rgba(255, 99, 132, 0.5)');
+    for (const day of accomplishmentValuesByDay.keys()) {
+        if (day > 0 && day < projectDuration) {
+            pointRadii[day] = 5; // Larger radius for actual report days
+            pointColors[day] = 'rgb(255, 99, 132)'; // Solid color for actual report days
+        }
+    }
+
+    if (trackingSCurveChart) trackingSCurveChart.destroy();
+    trackingSCurveChart = new Chart(trackingSCurveCanvas, {
+        type: 'line',
+        data: {
+            labels: plannedData.labels,
+            datasets: [
+                { label: 'Planned Cumulative %', data: plannedData.plannedPercentage, borderColor: 'rgb(75, 192, 192)', tension: 0.4, fill: false },
+                {
+                    label: 'Actual Cumulative %',
+                    data: actualPercentage,
+                    borderColor: 'rgb(255, 99, 132)',
+                    spanGaps: true, tension: 0.1, fill: false,
+                    // **NEW**: Apply the point styling
+                    pointRadius: pointRadii,
+                    pointBackgroundColor: pointColors,
+                    pointHoverRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
+            plugins: { title: { display: true, text: 'Planned vs. Actual S-Curve (As-Built)' } }
+        }
+    });
+};
+
+const generateLookAheadReport = async () => {
+    const projectId = currentConstructionProjectId;
+    const startDateStr = document.getElementById('lookahead-start-date').value;
+    const durationWeeks = parseInt(document.getElementById('lookahead-duration').value);
+    const contentDiv = document.getElementById('lookahead-report-content');
+    const kpiDiv = document.getElementById('lookahead-kpi-container');
+
+    contentDiv.innerHTML = `<p class="placeholder-text">Generating report...</p>`;
+    kpiDiv.innerHTML = '';
+
+    if (!startDateStr) {
+        alert('Please select a start date for the report.');
+        contentDiv.innerHTML = `<p class="placeholder-text">Please select a start date and click "Generate Report".</p>`;
+        return;
+    }
+
+    const project = await db.projects.get(projectId);
+    if (!project.startDate) {
+        alert('This project has no actual start date. Please file at least one accomplishment report before generating a look-ahead.');
+        contentDiv.innerHTML = `<p class="placeholder-text">Project has no start date.</p>`;
+        return;
+    }
+
+    const pertData = await getPertCpmData(projectId, true);
+    if (!pertData) {
+        alert('Could not generate schedule data for this project.');
+        return;
+    }
+    
+    const { tasks: pertTasks, allDupas } = pertData;
+    const allTasksWithProgress = await getAllAccomplishmentTasks(projectId);
+    const taskProgressMap = new Map(allTasksWithProgress.map(t => [t.uniqueId, t]));
+
+    const dupaMap = new Map();
+    if (allDupas) {
+        allDupas.forEach(d => {
+            const key = d.quantityId || d.changeOrderItemId;
+            dupaMap.set(key, d);
+        });
+    }
+
+    let totalProjectValue = 0;
+    let accomplishedProjectValue = 0;
+    allTasksWithProgress.forEach(task => {
+        totalProjectValue += task.cost || 0;
+        accomplishedProjectValue += (task.cost || 0) * ((task.percentComplete || 0) / 100);
+    });
+    const overallProgress = totalProjectValue > 0 ? (accomplishedProjectValue / totalProjectValue) * 100 : 0;
+    kpiDiv.innerHTML = `<strong>Overall Project Completion: ${overallProgress.toFixed(2)}%</strong>`;
+
+    const reportStartDate = new Date(startDateStr);
+    const reportEndDate = new Date(reportStartDate);
+    reportEndDate.setDate(reportEndDate.getDate() + durationWeeks * 7);
+
+    const projectStartDate = new Date(project.startDate);
+    
+    const dayInMillis = 1000 * 60 * 60 * 24;
+    const reportStartDay = Math.floor((reportStartDate - projectStartDate) / dayInMillis);
+    const reportEndDay = reportStartDay + (durationWeeks * 7);
+
+    const parentTasksInWindow = Array.from(pertTasks.values()).filter(task =>
+        (typeof task.id === 'number' || (typeof task.id === 'string' && task.id.includes('co-'))) &&
+        task.ls < reportEndDay &&
+        task.ef > reportStartDay
+    );
+
+    // New logic: Expand parent tasks into their sub-tasks
+    const finalTasksForReport = [];
+    for (const parentTask of parentTasksInWindow) {
+        const subTasks = allTasksWithProgress.filter(t => t.type === 'subquantity' && t.quantityId === parentTask.id);
+        if (subTasks.length > 0) {
+            subTasks.forEach(sub => {
+                finalTasksForReport.push({ ...sub, ...parentTask, id: sub.id, name: sub.displayName, originalParent: parentTask });
+            });
+        } else {
+            const originalTask = allTasksWithProgress.find(t => t.id === parentTask.id);
+            if(originalTask) {
+                 finalTasksForReport.push({ ...originalTask, ...parentTask, name: originalTask.displayName, originalParent: parentTask });
+            }
+        }
+    }
+
+    if (finalTasksForReport.length === 0) {
+        contentDiv.innerHTML = `<p class="placeholder-text">No tasks scheduled for this period.</p>`;
+        return;
+    }
+    
+    finalTasksForReport.sort((a,b) => a.es - b.es);
+
+    let reportHtml = '';
+    for (const task of finalTasksForReport) {
+        const taskMaster = taskProgressMap.get(task.uniqueId);
+        
+        let isAtRisk = false;
+        let predecessorHtml = '<ul>';
+        if (task.originalParent.predecessors.size === 0) {
+            predecessorHtml += '<li>None (Project Start)</li>';
+        } else {
+            for (const predId of task.originalParent.predecessors) {
+                const predMaster = allTasksWithProgress.find(t => t.id === predId);
+                if (predMaster) {
+                    const predProgress = predMaster.percentComplete || 0;
+                    if (predProgress < 100) isAtRisk = true;
+                    predecessorHtml += `<li>${predMaster.displayName} (${predProgress.toFixed(0)}% complete)</li>`;
+                }
+            }
+        }
+        predecessorHtml += '</ul>';
+        
+        const dupaId = task.type === 'subquantity' ? task.quantityId : task.id;
+        const dupa = dupaMap.get(dupaId);
+        let resourceHtml = '<ul>';
+        if (dupa && dupa.directCosts) {
+             const items = dupa.directCosts.map(dc => {
+                switch(dc.type) {
+                    case 'labor': return `<li>${dc.laborType} (${dc.mandays} mandays)</li>`;
+                    case 'equipment': return `<li>${dc.name} (${dc.hours} hours)</li>`;
+                    case 'material': return `<li>${dc.name} (${dc.quantity} ${dc.unit})</li>`;
+                    default: return '';
+                }
+            }).join('');
+            resourceHtml += items || '<li>No resources specified in DUPA.</li>';
+        } else {
+            resourceHtml += '<li>DUPA not found.</li>';
+        }
+        resourceHtml += '</ul>';
+
+        const earlyStartDate = new Date(projectStartDate);
+        earlyStartDate.setDate(projectStartDate.getDate() + task.es);
+        const lateFinishDate = new Date(projectStartDate);
+        lateFinishDate.setDate(projectStartDate.getDate() + task.lf);
+
+        reportHtml += `
+            <div class="lookahead-task ${isAtRisk ? 'at-risk' : ''}">
+                <div class="lookahead-task-header">
+                    <h3>
+                        <span>${task.name}</span>
+                        <span class="status ${isAtRisk ? 'at-risk' : 'on-track'}">${isAtRisk ? 'At Risk' : 'On Track'}</span>
+                    </h3>
+                    <small>Scheduled Window: ${earlyStartDate.toLocaleDateString()} - ${lateFinishDate.toLocaleDateString()}</small>
+                </div>
+                <div class="lookahead-task-body">
+                    <div>
+                        <h4>Constraints (Predecessors)</h4>
+                        ${predecessorHtml}
+                    </div>
+                    <div>
+                        <h4>Required Resources</h4>
+                        ${resourceHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    contentDiv.innerHTML = reportHtml;
+};
+
+
+function initializeConstructionModule() {
+    accomplishmentView.addEventListener('click', (e) => {
+        if (e.target.classList.contains('view-accomplishment-btn')) {
+            showAccomplishmentForm(parseInt(e.target.dataset.id), e.target.dataset.name);
+        }
+    });
+    document.getElementById('accomplishment-list-view').addEventListener('click', (e) => {
+        if (e.target.classList.contains('view-accomplishment-detail-btn')) {
+            showAccomplishmentDetail(currentConstructionProjectId, e.target.dataset.date);
+        }
+    });
+    document.getElementById('edit-accomplishment-btn').addEventListener('click', (e) => {
+        editAccomplishmentReport(currentConstructionProjectId, e.target.dataset.date);
+    });
+    document.getElementById('back-to-accomplishment-entry').addEventListener('click', () => {
+        showAccomplishmentForm(currentConstructionProjectId, accomplishmentProjectName.textContent);
+    });
+    backToAccomplishmentProjectsBtn.addEventListener('click', showAccomplishment);
+    
+    accomplishmentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const date = accomplishmentDateInput.value;
+    const isEditMode = accomplishmentDateInput.hasAttribute('readonly');
+
+    if (!date) {
+        alert('Please select a date.');
+        return;
+    }
+
+    const updates = [];
+    accomplishmentTableBody.querySelectorAll('tr[data-unique-id]').forEach(row => {
+        const progressInput = row.querySelector('.progress-input');
+        const progressToday = progressInput.value ? parseFloat(progressInput.value) : 0;
+        if (isNaN(progressToday) || progressToday <= 0) return;
+
+        const update = {
+            type: row.dataset.type,
+            progressToday: progressToday,
+        };
+        if (update.type === 'subquantity') {
+            update.taskId = parseInt(row.dataset.quantityId);
+            update.subIndex = parseInt(row.dataset.subquantityIndex);
+        } else {
+            update.taskId = parseInt(row.dataset.quantityId);
+        }
+        updates.push(update);
+    });
+
+    if (updates.length === 0) {
+        alert('No progress updates to save.');
+        return;
+    }
+
+    try {
+        await db.transaction('rw', db.accomplishments, db.quantities, db.changeOrderItems, async () => {
+            const recordsToAdd = updates.map(update => {
+                const record = {
+                    date: date,
+                    percentComplete: update.progressToday,
+                    taskId: update.taskId,
+                    subIndex: null,
+                    type: update.type === 'subquantity' ? 'quantity' : update.type
+                };
+                if (update.type === 'subquantity') {
+                    record.subIndex = update.subIndex;
+                }
+                return record;
+            });
+            await db.accomplishments.bulkAdd(recordsToAdd);
+
+            const tasksToRecalculate = new Map();
+            updates.forEach(upd => {
+                const key = `${upd.type}-${upd.taskId}`;
+                if (!tasksToRecalculate.has(key)) {
+                    tasksToRecalculate.set(key, { type: upd.type, id: upd.taskId });
+                }
+            });
+
+            for (const task of tasksToRecalculate.values()) {
+                if (task.type === 'changeOrderItem') {
+                    const allReports = await db.accomplishments.where({ type: 'changeOrderItem', taskId: task.id }).toArray();
+                    const totalProgress = allReports.reduce((sum, r) => sum + r.percentComplete, 0);
+                    await db.changeOrderItems.update(task.id, { percentComplete: Math.min(100, totalProgress) });
+                } else { 
+                    const parentQuantity = await db.quantities.get(task.id);
+                    if (!parentQuantity) continue;
+
+                    if (Array.isArray(parentQuantity.subquantities) && parentQuantity.subquantities.length > 0) {
+                        let totalSubProgress = 0;
+                        for (let i = 0; i < parentQuantity.subquantities.length; i++) {
+                            const subReports = await db.accomplishments.where({ type: 'quantity', taskId: task.id, subIndex: i }).toArray();
+                            const subTotal = subReports.reduce((sum, r) => sum + r.percentComplete, 0);
+                            totalSubProgress += Math.min(100, subTotal);
+                        }
+                        const finalParentProgress = totalSubProgress / parentQuantity.subquantities.length;
+                        await db.quantities.update(task.id, { percentComplete: finalParentProgress });
+                    } else {
+                        const allReports = await db.accomplishments.where({ type: 'quantity', taskId: task.id }).toArray();
+                        const totalProgress = allReports.reduce((sum, r) => sum + r.percentComplete, 0);
+                        await db.quantities.update(task.id, { percentComplete: Math.min(100, totalProgress) });
+                    }
+                }
+            }
+        });
+
+        alert(`Accomplishment report saved successfully!`);
+        showAccomplishmentForm(currentConstructionProjectId, accomplishmentProjectName.textContent);
+
+    } catch (error) {
+        console.error("Failed to save accomplishment report:", error);
+        alert('An error occurred. Please check the browser console for details.');
+    }
+});
+
+    trackingGanttView.addEventListener('click', e => {
+        if (e.target.classList.contains('view-tracking-gantt-btn')) {
+            showTrackingGanttChart(parseInt(e.target.dataset.id), e.target.dataset.name);
+        }
+    });
+    backToTrackingGanttProjectsBtn.addEventListener('click', showTrackingGantt);
+    document.getElementById('tracking-gantt-view-day').addEventListener('click', () => { if (trackingGanttChart) trackingGanttChart.change_view_mode('Day'); });
+    document.getElementById('tracking-gantt-view-week').addEventListener('click', () => { if (trackingGanttChart) trackingGanttChart.change_view_mode('Week'); });
+    document.getElementById('tracking-gantt-view-month').addEventListener('click', () => { if (trackingGanttChart) trackingGanttChart.change_view_mode('Month'); });
+    document.getElementById('tracking-gantt-sort').addEventListener('change', () => {
+        if (currentConstructionProjectId) {
+            const projectName = trackingGanttProjectName.textContent.replace('Tracking Gantt: ', '');
+            showTrackingGanttChart(currentConstructionProjectId, projectName);
+        }
+    });
+    
+    trackingSCurveView.addEventListener('click', e => {
+        if (e.target.classList.contains('view-tracking-s-curve-btn')) {
+            renderTrackingSCurve(parseInt(e.target.dataset.id), e.target.dataset.name);
+        }
+    });
+    backToTrackingSCurveProjectsBtn.addEventListener('click', showTrackingSCurve);
+
+    document.getElementById('lookahead-projects-list').addEventListener('click', (e) => {
+        if (e.target.classList.contains('select-lookahead-project-btn')) {
+            showLookAheadReportView(parseInt(e.target.dataset.id), e.target.dataset.name);
+        }
+    });
+    document.getElementById('back-to-lookahead-projects').addEventListener('click', showLookahead);
+    document.getElementById('generate-lookahead-btn').addEventListener('click', generateLookAheadReport);
+        document.getElementById('accomplishment-sort').addEventListener('change', () => {
+        showAccomplishmentForm(currentConstructionProjectId, accomplishmentProjectName.textContent);
+    });
+    document.getElementById('accomplishment-group').addEventListener('change', () => {
+        showAccomplishmentForm(currentConstructionProjectId, accomplishmentProjectName.textContent);
+    });
+}
+// --- End of construction.js ---

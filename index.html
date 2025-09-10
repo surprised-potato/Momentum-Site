@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
+    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+</head>
+
+<body>
+    <div class="page-container">
+        <nav class="navbar">
+            <a href="#" class="nav-brand" id="nav-brand-link">
+                <img src="Images/logo.png" alt="Momentum Logo" style="height: 40px;">
+                <div class="brand-text">
+                    <span class="brand-title">Momentum</span>
+                    <span class="brand-subtitle">Construction Management</span>
+                </div>
+            </a>
+                <ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" id="nav-preconstruction">Pre-construction</a>
+                        <div class="dropdown-content">
+                            <a href="#" id="nav-dashboard">Dashboard</a>
+                            <a href="#" id="nav-projects">Projects</a>
+                            <a href="#" id="nav-takeoff">Take Off</a>
+                            <a href="#" id="nav-dupa">DUPA</a>
+                            <a href="#" id="nav-sequencing">Task Sequencing</a>
+                            <a href="#" id="nav-reports">Pre-construction Reports</a>
+                            <a href="#" id="nav-change-orders">Change Orders</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" id="nav-construction">Construction</a>
+                        <div class="dropdown-content">
+                            <a href="#" id="nav-accomplishment">Accomplishment Report</a>
+                            <a href="#" id="nav-tracking-gantt">Tracking Gantt Chart</a>
+                            <a href="#" id="nav-tracking-s-curve">Tracking S-Curve</a>
+                            <a href="#" id="nav-revised-reports">Revised Reports</a>
+                            <a href="#" id="nav-lookahead">Look-Ahead Report</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" id="nav-libraries">Libraries</a>
+                        <div class="dropdown-content">
+                            <a href="#" id="nav-materials-library">Materials Library</a>
+                            <a href="#" id="nav-dupa-library">DUPA Labor & Equipment</a>
+                            <a href="#" id="nav-library-management">Import/Export Library</a>
+                        </div>
+                    </li>
+                    <li><a href="#" id="nav-documentation">Documentation</a></li>
+                </ul>
+        </nav>
+
+        <main class="content">
+            <div id="dashboard-view">
+                <header class="page-header">
+                    <h1>Dashboard</h1>
+                </header>
+                <div class="dashboard-grid-new">
+                        <div class="summary-card">
+                            <h2 class="card-title">On-Going Projects</h2>
+                            <p id="ongoing-project-count">0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h2 class="card-title">Completed Projects</h2>
+                            <p id="completed-project-count">0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h2 class="card-title">Pending Change Orders</h2>
+                            <p id="pending-co-count">0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h2 class="card-title">Value of Active Projects</h2>
+                            <p id="active-contract-value">₱0</p>
+                        </div>
+                        <div class="dashboard-chart-container">
+                            <h2 class="card-title">Projects by Status</h2>
+                            <canvas id="project-status-chart"></canvas>
+                        </div>
+                        <div class="dashboard-list-container">
+                            <h2 class="card-title">Projects Requiring Attention</h2>
+                            <ul id="attention-projects-list"></ul>
+                        </div>
+                </div>
+                    <div class="dashboard-gantt-container">
+                    <div class="page-header" style="margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin-bottom: 0;">Ongoing Project Timelines</h2>
+                        <div class="gantt-controls">
+                            <div class="form-group" style="margin-bottom: 0;">
+                            <select id="dashboard-gantt-sort" class="btn btn-secondary">
+                                <option value="start_date">Sort by Start Date</option>
+                                <option value="name">Sort by Name</option>
+                                <option value="progress">Sort by Progress</option>
+                            </select>
+                            </div>
+                            <span>View Mode:</span>
+                            <button id="dashboard-gantt-view-day" class="btn btn-secondary">Day</button>
+                            <button id="dashboard-gantt-view-week" class="btn btn-secondary">Week</button>
+                            <button id="dashboard-gantt-view-month" class="btn btn-secondary">Month</button>
+                        </div>
+                    </div>
+                    <div class="gantt-chart-container" id="dashboard-gantt-chart-target"></div>
+                    </div>
+            </div>
+                <div id="documentation-view" class="hidden">
+                    <header class="page-header">
+                        <h1>Application Guide</h1>
+                    </header>
+                    <div class="summary-container" style="max-width: 800px; margin: 0 auto; line-height: 1.6;">
+                        <h2>🏗️ ConstructApp Workflow: A Step-by-Step Guide</h2>
+                        <p>This guide walks you through the four main phases of managing a project in the application: <strong>Setup & Pre-construction</strong>, <strong>Handling Changes</strong>, <strong>Construction & Monitoring</strong>, and <strong>Data Management</strong>.</p>
+                        <hr>
+                        <h3>Phase 1: Setup & Pre-construction</h3>
+                        <p>This phase involves setting up your project, defining its scope, calculating costs, and creating an initial schedule.</p>
+                        <h4>1. Populate Your Libraries (Recommended First Step)</h4>
+                        <p>Before creating a project, it's best to add common data to your libraries. This will make the cost estimation process much faster.</p>
+                        <ul>
+                            <li><strong>Materials Library:</strong> Go to <strong>Libraries > Materials Library</strong> to add all your common construction materials, their units, and prices.</li>
+                            <li><strong>DUPA Library:</strong> Go to <strong>Libraries > DUPA Labor & Equipment</strong> to define reusable resources (like "Mason" or "Excavator") and crews (pre-defined teams with specific productivity rates).</li>
+                        </ul>
+                        <h4>2. Create Your Project</h4>
+                        <p>Navigate to the <strong>Projects</strong> module. Click the <strong>"Add New Project"</strong> button and fill in all the relevant details like the project name, client, address, and contract information.</p>
+                        <h4>3. Define the Scope in Take Off</h4>
+                        <p>Go to the <strong>Take Off</strong> module and select your newly created project. Here, you'll add every work item for the project by clicking <strong>"Add Quantity"</strong>. Assign each item a <strong>Category</strong> (e.g., "Earthworks," "Structural Concrete," "Finishes") for better organization.</p>
+                        <h4>4. Perform Detailed Unit Price Analysis (DUPA)</h4>
+                        <p>Navigate to the <strong>DUPA</strong> module and select your project. Click on a work item to define its cost breakdown by adding the required <strong>Labor</strong>, <strong>Materials</strong>, and <strong>Equipment</strong>, either manually or from your libraries.</p>
+                        <h4>5. Sequence the Tasks</h4>
+                        <p>Go to the <strong>Task Sequencing</strong> module. Click on a task to define its dependencies by selecting its <strong>Predecessors</strong> (tasks that must finish before) and <strong>Successors</strong> (tasks that start after).</p>
+                        <h4>6. Generate Pre-construction Reports</h4>
+                        <p>Go to the <strong>Pre-construction Reports</strong> module. First, generate the **Bill of Quantities (BOQ)**. This is a critical step that **locks all pre-construction data**. Once locked, you can view the **PERT-CPM**, initial **Gantt Chart**, planned **S-Curve**, and other reports.</p>
+                        <hr>
+                        <h3>Phase 2: Handling Changes</h3>
+                        <h4>Manage Change Orders</h4>
+                        <p>Navigate to the <strong>Change Orders</strong> module. You can create a new change order and add line items for new scope or to modify existing items (a Variation Order). For a change to be included in the official schedule, you must edit it and set its status to <strong>"Approved"</strong>.</p>
+                        <hr>
+                        <h3>Phase 3: Construction & Monitoring</h3>
+                        <h4>1. Set the Project Start Date</h4>
+                        <p>Go to the <strong>Accomplishment Report</strong> module. The first time you file a report for a project, the app will prompt you to set the official **project start date**, which is the baseline for all tracking.</p>
+                        <h4>2. File Accomplishment Reports</h4>
+                        <p>In the same module, you can enter the percentage of work completed for each task on a specific date to track progress over time.</p>
+                        <h4>3. Monitor Progress with Tracking Reports</h4>
+                        <ul>
+                            <li><strong>Tracking Gantt Chart:</strong> Visually compares your planned schedule against actual progress.</li>
+                            <li><strong>Tracking S-Curve:</strong> Plots planned vs. actual cumulative progress to see if the project is ahead or behind schedule.</li>
+                            <li><strong>Revised Reports:</strong> Shows the BOQ and PERT-CPM updated to include all **approved** change orders.</li>
+                            <li><strong>Look-Ahead Report:</strong> Helps with short-term planning by showing upcoming tasks and their resource requirements.</li>
+                        </ul>
+                        <hr>
+                        <h3>Phase 4: Data Management</h3>
+                        <h4>Import/Export Data</h4>
+                        <p>You can easily back up and share your data. The **Projects** module has an "Export" button for individual projects. The **Libraries > Import/Export Library** module allows you to save or load your entire materials, resources, and crews library.</p>
+                    </div>
+                </div>
+
+            <div id="projects-view" class="hidden">
+                <header class="page-header">
+                    <h1>Projects</h1>
+                    <div>
+                        <input type="file" id="import-project-input" class="hidden" accept=".json">
+                        <button id="import-project-btn" class="btn btn-secondary">Import Project</button>
+                        <button id="copy-project-btn" class="btn btn-secondary">Copy Project</button>
+                        <button id="add-project-btn" class="btn btn-primary">Add New Project</button>
+                    </div>
+                </header>
+                <div class="table-container">
+                    <table id="projects-table">
+                        <thead>
+                            <tr>
+                                <th>Project Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="project-summary-view" class="hidden">
+    <header class="page-header">
+        <div>
+            <button id="back-to-projects-from-summary" class="btn btn-secondary">&larr; Back to Projects List</button>
+            <h1 id="summary-project-name"></h1>
+        </div>
+    </header>
+    <div class="summary-container">
+        <div class="summary-grid">
+            <div class="summary-item"><strong>Client</strong> <span id="summary-client-name"></span></div>
+            <div class="summary-item"><strong>Address</strong> <span id="summary-address"></span></div>
+            <div class="summary-item"><strong>Status</strong> <span id="summary-status"></span></div>
+            <div class="summary-item"><strong>Project Manager</strong> <span id="summary-project-manager"></span></div>
+            <div class="summary-item"><strong>Client Contact</strong> <span id="summary-client-contact"></span></div>
+            <div class="summary-item"><strong>Contract Amount</strong> <span id="summary-contract-amount"></span></div>
+            <div class="summary-item"><strong>Contract Date</strong> <span id="summary-contract-date"></span></div>
+            <div class="summary-item"><strong>Target Start Date</strong> <span id="summary-target-start"></span></div>
+            <div class="summary-item"><strong>Contract Duration</strong> <span id="summary-duration"></span></div>
+            <div class="summary-item"><strong>Lot Area</strong> <span id="summary-lot-area"></span></div>
+            <div class="summary-item"><strong>Floor Area</strong> <span id="summary-floor-area"></span></div>
+            <div class="summary-item"><strong>Floors</strong> <span id="summary-floors"></span></div>
+        </div>
+        <div class="summary-description">
+            <strong>Description</strong>
+            <p id="summary-description"></p>
+        </div>
+    </div>
+            </div>
+            <div id="takeoff-view" class="hidden">
+                <div id="takeoff-project-list-view">
+                    <header class="page-header">
+                        <h1>Take Off - Select a Project</h1>
+                    </header>
+                    <div id="takeoff-projects-list" class="list-container"></div>
+                </div>
+                <div id="takeoff-quantities-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-takeoff-list" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="quantities-project-name"></h1>
+                        </div>
+                        <button id="add-quantity-btn" class="btn btn-primary">Add Quantity</button>
+                    </header>
+                    <div class="table-container">
+                        <table id="quantities-table">
+                            <thead>
+                                <tr>
+                                    <th>Scope of Work</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dupa-view" class="hidden">
+                <div id="dupa-project-list-view">
+                    <header class="page-header">
+                        <h1>DUPA - Select a Project</h1>
+                    </header>
+                    <div id="dupa-projects-list" class="list-container"></div>
+                </div>
+                <div id="dupa-quantity-list-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-dupa-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="dupa-project-name"></h1>
+                        </div>
+                    </header>
+                    <div id="dupa-quantities-list" class="list-container"></div>
+                </div>
+            <div id="dupa-form-view" class="hidden">
+                <header class="page-header">
+                    <div>
+                        <button id="back-to-dupa-quantities" class="btn btn-secondary">&larr; Back to Quantities</button>
+                        <h2 id="dupa-quantity-name"></h2>
+                    </div>
+                </header>
+                <form id="dupa-form">
+                    <input type="hidden" id="dupaQuantityId">
+                    <input type="hidden" id="dupaId">
+                    <div class="form-group">
+                        <label for="dupaDuration">Duration (Days)</label>
+                        <input type="number" id="dupaDuration" step="1" min="0" required>
+                    </div>
+                    <div class="dupa-section">
+                        <h3 style="display: flex; justify-content: space-between;">
+                            <span>Direct Costs</span>
+                            <span id="total-direct-cost-summary" class="cost-summary"></span>
+                        </h3>
+
+                        <h4 style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Labor</span>
+                            <span id="labor-subtotal" class="cost-summary"></span>
+                        </h4>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                            <button type="button" id="add-labor-btn" class="btn-add" title="Add Blank Row">+</button>
+                            <button type="button" id="add-labor-from-library-btn" class="btn btn-secondary btn-sm">Add Labor from Library</button>
+                            <button type="button" id="add-crew-from-library-btn" class="btn btn-secondary btn-sm">Add Crew from Library</button>
+                        </div>
+                        <table class="dupa-table"><thead><tr><th>Labor Type</th><th>Mandays</th><th>Rate (PHP)</th><th>Total</th><th></th></tr></thead><tbody id="labor-tbody"></tbody></table>
+
+                        <h4 style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Materials</span>
+                            <span id="material-subtotal" class="cost-summary"></span>
+                        </h4>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                            <button type="button" id="add-material-btn" class="btn-add" title="Add Blank Row">+</button>
+                            <button type="button" id="add-material-from-library-btn" class="btn btn-secondary btn-sm">Add Material from Library</button>
+                        </div>
+                        <table class="dupa-table"><thead><tr><th>Material Name</th><th>Qty</th><th>Unit</th><th>Unit Price (PHP)</th><th>Total</th><th></th></tr></thead><tbody id="material-tbody"></tbody></table>
+
+                        <h4 style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Equipment</span>
+                            <span id="equipment-subtotal" class="cost-summary"></span>
+                        </h4>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                            <button type="button" id="add-equipment-btn" class="btn-add" title="Add Blank Row">+</button>
+                            <button type="button" id="add-equipment-from-library-btn" class="btn btn-secondary btn-sm">Add Equipment from Library</button>
+                        </div>
+                        <table class="dupa-table"><thead><tr><th>Equipment Name</th><th>Hours</th><th>Rate (PHP)</th><th>Total</th><th></th></tr></thead><tbody id="equipment-tbody"></tbody></table>
+                    </div>
+                    <div class="dupa-section">
+                        <h3 style="display: flex; justify-content: space-between;">
+                            <span>Indirect Costs</span>
+                            <span id="total-indirect-cost-summary" class="cost-summary"></span>
+                        </h3>
+                        <div class="indirect-grid" style="grid-template-columns: auto 150px 1fr; gap: 1rem 2rem;">
+                            <label for="ocmPercent">OCM (%)</label>
+                            <input type="number" id="ocmPercent" step="0.01" min="0" placeholder="e.g., 15">
+                            <span id="ocm-amount" class="cost-summary"></span>
+                            
+                            <label for="profitPercent">Contractor's Profit (%)</label>
+                            <input type="number" id="profitPercent" step="0.01" min="0" placeholder="e.g., 10">
+                            <span id="profit-amount" class="cost-summary"></span>
+
+                            <label for="taxesPercent">Taxes (%)</label>
+                            <input type="number" id="taxesPercent" step="0.01" min="0" placeholder="e.g., 5">
+                            <span id="tax-amount" class="cost-summary"></span>
+                        </div>
+                    </div>
+
+                    <div class="dupa-section">
+                        <h3>Summary</h3>
+                        <div class="indirect-grid" style="grid-template-columns: auto 1fr;">
+                            <strong>Grand Total</strong> <span id="summary-grand-total" class="cost-summary"></span>
+                            <strong>Quantity</strong> <span id="summary-quantity" class="cost-summary" style="text-align: right;"></span>
+                            <strong>Final Unit Price</strong> <span id="summary-unit-price" class="cost-summary"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save DUPA</button>
+                </form>
+            </div>
+            </div>
+
+            <div id="sequencing-view" class="hidden">
+                <div id="sequencing-project-list-view">
+                    <header class="page-header">
+                        <h1>Task Sequencing - Select a Project</h1>
+                    </header>
+                    <div id="sequencing-projects-list" class="list-container"></div>
+                </div>
+                <div id="sequencing-tasks-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-sequencing-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="sequencing-project-name"></h1>
+                        </div>
+                        <div class="report-controls" style="padding: 0; background: none;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select id="sequence-group" class="btn btn-secondary">
+                                    <option value="none">Group by: None</option>
+                                    <option value="category">Group by: Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select id="sequence-sort" class="btn btn-secondary">
+                                    <option value="schedule">Sort by: Schedule</option>
+                                    <option value="name">Sort by: Name (A-Z)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="sequencing-layout">
+                        <div class="sequencing-main-panel">
+                            <div class="sequencing-section">
+                                <h3>Project Sequence Overview</h3>
+                                <div class="table-container">
+                                    <table id="sequences-overview-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Predecessors</th>
+                                                <th>Task</th>
+                                                <th>Successors</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sequences-overview-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="sequencing-side-panel">
+                            <div class="sequencing-section">
+                                <h4>Unsequenced Tasks</h4>
+                                <ul id="unsequenced-tasks-list"></ul>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reports-view" class="hidden">
+                <div id="boq-project-list-view">
+                    <header class="page-header">
+                        <h1>Reports - Select a Project for BOQ</h1>
+                    </header>
+                    <div id="boq-projects-list" class="list-container"></div>
+                </div>
+                <div id="boq-display-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-boq-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="boq-project-name"></h1>
+                            <p id="boq-status-message" class="status-message"></p>
+                        </div>
+                        <div>
+                            <button id="view-pert-cpm-btn" class="btn btn-primary hidden">View PERT-CPM</button>
+                            <button id="delete-boq-btn" class="btn btn-danger hidden">Delete BOQ & Unlock Data</button>
+                        </div>
+                    </header>
+                    <div class="table-container">
+                        <table id="boq-table">
+                            <thead>
+                                <tr>
+                                    <th>Scope of Work</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="boq-tbody"></tbody>
+                            <tfoot id="boq-tfoot"></tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div id="pert-cpm-display-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-boq-view" class="btn btn-secondary">&larr; Back to BOQ</button>
+                            <h1 id="pert-cpm-project-name"></h1>
+                        </div>
+                        <div>
+                            <button id="view-gantt-chart-btn" class="btn btn-primary">View Gantt Chart</button>
+                            <button id="view-s-curve-btn" class="btn btn-primary">View S-Curve</button>
+                            <button id="view-network-diagram-btn" class="btn btn-primary">View Network Diagram</button>
+                            <button id="view-resource-schedule-btn" class="btn btn-primary">Resource Schedule</button>
+                        </div>
+                    </header>
+                    <div class="table-container">
+                        <table id="pert-cpm-table">
+                            <thead>
+                                <tr>
+                                    <th>Task (Scope of Work)</th>
+                                    <th>Duration</th>
+                                    <th>Early Start (ES)</th>
+                                    <th>Early Finish (EF)</th>
+                                    <th>Late Start (LS)</th>
+                                    <th>Late Finish (LF)</th>
+                                    <th>Slack</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pert-cpm-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="gantt-chart-display-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-pert-cpm-view" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <h1 id="gantt-chart-project-name"></h1>
+                        </div>
+                        <div class="gantt-controls">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select id="reports-gantt-sort" class="btn btn-secondary">
+                                    <option value="start_date">Sort by Start Date</option>
+                                    <option value="name">Sort by Name</option>
+                                    <option value="duration">Sort by Duration</option>
+                                </select>
+                            </div>
+                            <span>View Mode:</span>
+                            <button id="gantt-view-day" class="btn btn-secondary">Day</button>
+                            <button id="gantt-view-week" class="btn btn-secondary">Week</button>
+                            <button id="gantt-view-month" class="btn btn-secondary">Month</button>
+                        </div>
+                    </header>
+                    <div class="gantt-chart-container" id="gantt-chart-target"></div>
+                </div>
+                <div id="s-curve-display-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-pert-cpm-view-from-s-curve" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <h1 id="s-curve-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="chart-container">
+                        <canvas id="s-curve-chart"></canvas>
+                    </div>
+                </div>
+                <div id="pert-cpm-network-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-pert-cpm-from-network-btn" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <h1 id="network-diagram-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="mermaid-container">
+                        <div class="mermaid"></div>
+                    </div>
+                </div> 
+                <div id="resource-schedule-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-pert-cpm-from-resource-btn" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <h1 id="resource-schedule-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="table-container" id="resource-schedule-container"></div>
+                </div>
+            </div>
+
+            <div id="change-orders-view" class="hidden">
+                <div id="co-project-list-view">
+                    <header class="page-header">
+                        <h1>Change Orders - Select a Project</h1>
+                    </header>
+                    <div id="co-projects-list" class="list-container"></div>
+                </div>
+                <div id="co-list-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-co-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="co-project-name"></h1>
+                        </div>
+                        <button id="add-co-btn" class="btn btn-primary">Add Change Order</button>
+                    </header>
+                    <div class="table-container">
+                        <table id="co-table">
+                            <thead><tr><th>Order #</th><th>Description</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="revised-reports-view" class="hidden">
+                <div id="revised-boq-project-list-view">
+                    <header class="page-header">
+                        <h1>Revised Reports - Select a Project</h1>
+                    </header>
+                    <div id="revised-boq-projects-list" class="list-container"></div>
+                </div>
+                <div id="revised-boq-display-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-revised-boq-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="revised-boq-project-name"></h1>
+                        </div>
+                        <div>
+                            <button id="view-revised-pert-cpm-btn" class="btn btn-primary">View Revised PERT-CPM</button>
+                        </div>
+                    </header>
+                    <div class="table-container" id="revised-boq-table-container"></div>
+                </div>
+                <div id="revised-pert-cpm-display-view" class="hidden">
+                     <header class="page-header">
+                        <div>
+                            <button id="back-to-revised-boq-view" class="btn btn-secondary">&larr; Back to Revised BOQ</button>
+                            <h1 id="revised-pert-cpm-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="table-container" id="revised-pert-cpm-table-container"></div>
+                </div>
+            </div>
+            <div id="lookahead-view" class="hidden">
+                <div id="lookahead-project-list-view">
+                    <header class="page-header">
+                        <h1>Look-Ahead Report - Select a Project</h1>
+                    </header>
+                    <div id="lookahead-projects-list" class="list-container"></div>
+                </div>
+
+                <div id="lookahead-report-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-lookahead-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="lookahead-project-name"></h1>
+                        </div>
+                    </header>
+
+                    <div class="report-controls">
+                        <div class="form-group">
+                            <label for="lookahead-start-date">Report Start Date</label>
+                            <input type="date" id="lookahead-start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="lookahead-duration">Look-Ahead Period</label>
+                            <select id="lookahead-duration">
+                                <option value="2">2 Weeks</option>
+                                <option value="3" selected>3 Weeks</option>
+                                <option value="4">4 Weeks</option>
+                            </select>
+                        </div>
+                        <button id="generate-lookahead-btn" class="btn btn-primary">Generate Report</button>
+                    </div>
+
+                    <div id="lookahead-kpi-container"></div>
+                    <div id="lookahead-report-content">
+                        <p class="placeholder-text">Please select a start date and click "Generate Report" to see the look-ahead schedule.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="materials-library-view" class="hidden">
+                <header class="page-header">
+                    <h1>Materials Library</h1>
+                    <button id="add-new-material-btn" class="btn btn-primary">Add New Material</button>
+                </header>
+                <div class="library-controls">
+                    <input type="search" id="material-search-input" placeholder="Search materials...">
+                </div>
+                <div class="table-container">
+                    <table id="materials-table">
+                        <thead>
+                            <tr>
+                                <th>Material Name</th>
+                                <th>Unit</th>
+                                <th>Unit Price (PHP)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="dupa-library-view" class="hidden">
+                <header class="page-header">
+                    <h1>DUPA Labor & Equipment Library</h1>
+                </header>
+                
+                <div class="library-section">
+                    <div class="page-header">
+                        <h2>Resources (Individual Labor & Equipment)</h2>
+                        <button id="add-new-resource-btn" class="btn btn-primary">Add New Resource</button>
+                    </div>
+                    <div class="library-controls">
+                        <input type="search" id="resource-search-input" placeholder="Search resources...">
+                    </div>
+                    <div class="table-container">
+                        <table id="resources-table">
+                            <thead>
+                                <tr>
+                                    <th>Resource Name</th>
+                                    <th>Type</th>
+                                    <th>Rate (PHP)</th>
+                                    <th>Unit</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="library-section">
+                    <div class="page-header">
+                        <h2>Crews (Pre-defined Teams)</h2>
+                        <button id="add-new-crew-btn" class="btn btn-primary">Add New Crew</button>
+                    </div>
+                    <div class="library-controls">
+                        <input type="search" id="crew-search-input" placeholder="Search crews...">
+                    </div>
+                    <div class="table-container">
+                        <table id="crews-table">
+                            <thead>
+                                <tr>
+                                    <th>Crew Name</th>
+                                    <th>Productivity</th>
+                                    <th style="width: 280px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="library-management-view" class="hidden">
+                <header class="page-header">
+                    <h1>Import/Export Library</h1>
+                </header>
+
+                <div class="library-section">
+                    <h2>Export Library</h2>
+                    <p>This will save your entire Materials, Resources, and Crews library to a single JSON file.</p>
+                    <button id="export-library-btn" class="btn btn-primary">Export Full Library</button>
+                </div>
+
+                <div class="library-section">
+                    <h2>Import Library</h2>
+                    <p><strong>Warning:</strong> Importing a library file will completely erase and replace your existing library data. This action cannot be undone.</p>
+                    <input type="file" id="import-library-input" class="hidden" accept=".json">
+                    <button id="import-library-btn" class="btn btn-secondary">Import from File</button>
+                </div>
+            </div>
+
+            <div id="material-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button material-modal-close">&times;</span>
+                    <h2 id="material-modal-title">Add New Material</h2>
+                    <form id="material-form">
+                        <input type="hidden" id="material-id">
+                        <div class="form-group"><label for="material-name">Material Name</label><input type="text" id="material-name" required></div>
+                        <div class="form-group"><label for="material-unit">Unit (e.g., kg, pcs, cu.m)</label><input type="text" id="material-unit" required></div>
+                        <div class="form-group"><label for="material-price">Unit Price (PHP)</label><input type="number" step="any" id="material-price" required></div>
+                        <button type="submit" class="btn btn-primary">Save Material</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="resource-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button resource-modal-close">&times;</span>
+                    <h2 id="resource-modal-title">Add New Resource</h2>
+                    <form id="resource-form">
+                        <input type="hidden" id="resource-id">
+                        <div class="form-group"><label for="resource-name">Resource Name (e.g., Mason, Excavator)</label><input type="text" id="resource-name" required></div>
+                        <div class="form-group">
+                            <label for="resource-type">Type</label>
+                            <select id="resource-type" required>
+                                <option value="labor">Labor</option>
+                                <option value="equipment">Equipment</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label for="resource-rate">Rate (PHP)</label><input type="number" step="any" id="resource-rate" required></div>
+                        <div class="form-group"><label for="resource-unit">Unit (e.g., manday, hour)</label><input type="text" id="resource-unit" required></div>
+                        <button type="submit" class="btn btn-primary">Save Resource</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="crew-modal" class="modal">
+                <div class="modal-content" style="max-width: 800px;">
+                    <span class="close-button crew-modal-close">&times;</span>
+                    <h2 id="crew-modal-title">Add New Crew</h2>
+                    <form id="crew-form">
+                        <input type="hidden" id="crew-id">
+                        <div class="form-group"><label for="crew-name">Crew Name (e.g., Concrete Pouring Team)</label><input type="text" id="crew-name" required></div>
+                        <div class="form-group"><label for="crew-productivity-rate">Productivity Rate (e.g., 10)</label><input type="number" step="any" id="crew-productivity-rate" required></div>
+                        <div class="form-group"><label for="crew-productivity-unit">Productivity Unit (e.g., cu.m/day)</label><input type="text" id="crew-productivity-unit" required></div>
+                        
+                        <hr style="margin: 2rem 0;">
+
+                        <div class="composition-editor">
+                        <div class="resource-list-panel">
+                            <h4>Available Resources</h4>
+                            <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="search" class="composition-search" id="available-resource-search" placeholder="Search all..." style="flex-grow: 1; margin-bottom: 0;">
+                                <button type="button" id="crew-modal-add-labor-btn" class="btn btn-secondary btn-sm" title="Show only Labor resources">Add Labor</button>
+                            </div>
+                            <ul id="available-resources-list"></ul>
+                        </div>
+                            <div class="resource-list-panel">
+                                <h4>Resources in this Crew</h4>
+                                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                                    <table id="crew-composition-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Resource</th>
+                                                <th>Quantity</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">Save Crew</button>
+                    </form>
+                </div>
+            </div>
+            <div id="accomplishment-view" class="hidden">
+                <div id="accomplishment-project-list-view">
+                    <header class="page-header">
+                        <h1>Accomplishment Reports - Select a Project</h1>
+                    </header>
+                    <div id="accomplishment-projects-list" class="list-container"></div>
+                </div>
+                <div id="accomplishment-entry-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-accomplishment-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="accomplishment-project-name"></h1>
+                        </div>
+                        <div class="report-controls" style="padding: 0; background: none;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="accomplishment-group" style="display: none;">Group By</label>
+                                <select id="accomplishment-group" class="btn btn-secondary">
+                                    <option value="none">Group by: None</option>
+                                    <option value="category">Group by: Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="accomplishment-sort" style="display: none;">Sort By</label>
+                                <select id="accomplishment-sort" class="btn btn-secondary">
+                                    <option value="schedule">Sort by: Schedule</option>
+                                    <option value="name">Sort by: Name (A-Z)</option>
+                                    <option value="progress">Sort by: Progress (Lowest)</option>
+                                </select>
+                            </div>
+                            <button id="view-past-reports-btn" class="btn btn-primary">View Past Reports</button>
+                        </div>
+                    </header>
+                    <form id="accomplishment-form" class="form-group">
+                        <label for="accomplishment-date">Accomplishment Date:</label>
+                        <input type="date" id="accomplishment-date" required>
+                        <div class="table-container" style="margin-top: 1.5rem;">
+                            <table id="accomplishment-table">
+                                <thead>
+                                    <tr>
+                                        <th>Scope of Work</th>
+                                        <th>Overall Progress (%)</th>
+                                        <th>Progress Today (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">Save Report</button>
+                    </form>
+                </div>
+            </div>
+            <div id="accomplishment-list-view" class="hidden">
+                <header class="page-header">
+                    <div>
+                        <button id="back-to-accomplishment-entry" class="btn btn-secondary">&larr; Back to Report Entry</button>
+                        <h1 id="accomplishment-list-project-name"></h1>
+                    </div>
+                </header>
+                <div class="table-container">
+                    <table id="accomplishment-history-table">
+                        <thead>
+                            <tr>
+                                <th>Report Date</th>
+                                <th>Progress Reported This Day</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+<div id="accomplishment-detail-view" class="hidden">
+    <header class="page-header">
+        <div>
+            <button id="back-to-accomplishment-list" class="btn btn-secondary">&larr; Back to Report List</button>
+            <h1 id="accomplishment-detail-title"></h1>
+        </div>
+        <button id="edit-accomplishment-btn" class="btn btn-warning">Edit This Report</button>
+    </header>
+    <div class="table-container">
+        <table id="accomplishment-detail-table">
+            <thead>
+                <tr>
+                    <th>Scope of Work</th>
+                    <th>Progress Recorded on this Date (%)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+            <div id="tracking-gantt-view" class="hidden">
+                 <div id="tracking-gantt-project-list-view">
+                    <header class="page-header">
+                        <h1>Tracking Gantt Chart - Select a Project</h1>
+                    </header>
+                    <div id="tracking-gantt-projects-list" class="list-container"></div>
+                </div>
+                <div id="tracking-gantt-chart-view" class="hidden">
+                     <header class="page-header">
+                        <div>
+                            <button id="back-to-tracking-gantt-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="tracking-gantt-project-name"></h1>
+                        </div>
+                        <div class="gantt-controls">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <select id="tracking-gantt-sort" class="btn btn-secondary">
+                                    <option value="start_date">Sort by Start Date</option>
+                                    <option value="name">Sort by Name</option>
+                                    <option value="progress">Sort by Progress</option>
+                                </select>
+                            </div>
+                            <span>View Mode:</span>
+                            <button id="tracking-gantt-view-day" class="btn btn-secondary">Day</button>
+                            <button id="tracking-gantt-view-week" class="btn btn-secondary">Week</button>
+                            <button id="tracking-gantt-view-month" class="btn btn-secondary">Month</button>
+                        </div>
+                    </header>
+                    <div class="gantt-chart-container" id="tracking-gantt-chart-target"></div>
+                </div>
+            </div>
+
+            <div id="tracking-s-curve-view" class="hidden">
+                <div id="tracking-s-curve-project-list-view">
+                    <header class="page-header">
+                        <h1>Tracking S-Curve - Select a Project</h1>
+                    </header>
+                    <div id="tracking-s-curve-projects-list" class="list-container"></div>
+                </div>
+                <div id="tracking-s-curve-chart-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-tracking-s-curve-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <h1 id="tracking-s-curve-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="chart-container">
+                        <canvas id="tracking-s-curve-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="app-footer">
+            <p>© 2025 Momentum alpha 1.0 | Daniel Pollentes. All Rights Reserved.</p>
+        </footer>
+
+        <div id="project-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button project-modal-close">&times;</span>
+                <h2 id="modal-title">Add Project</h2>
+                <form id="project-form">
+    <input type="hidden" id="projectId">
+    <div class="form-group"><label for="projectName">Project Name</label><input type="text" id="projectName" required></div>
+    <div class="form-group"><label for="projectAddress">Address</label><input type="text" id="projectAddress" required></div>
+    <div class="form-group"><label for="clientName">Client Name</label><input type="text" id="clientName" required></div>
+    <div class="form-group"><label for="projectDescription">Project Description</label><textarea id="projectDescription" rows="4"></textarea></div>
+    
+    <div class="details-grid">
+        <div class="form-group"><label for="lotArea">Lot Area (m²)</label><input type="number" step="any" id="lotArea"></div>
+        <div class="form-group"><label for="floorArea">Total Floor Area (m²)</label><input type="number" step="any" id="floorArea"></div>
+        <div class="form-group"><label for="numFloors">Number of Floors</label><input type="number" step="1" id="numFloors"></div>
+        <div class="form-group"><label for="contractAmount">Contract Amount (PHP)</label><input type="number" step="any" id="contractAmount"></div>
+        <div class="form-group"><label for="targetStartDate">Target Start Date</label><input type="date" id="targetStartDate"></div>
+        <div class="form-group"><label for="contractDuration">Contract Duration (Days)</label><input type="number" step="1" id="contractDuration"></div>
+        <div class="form-group"><label for="contractDate">Contract Date</label><input type="date" id="contractDate"></div>
+        <div class="form-group"><label for="projectManager">Project Manager</label><input type="text" id="projectManager"></div>
+        <div class="form-group"><label for="clientContact">Client Contact</label><input type="text" id="clientContact"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="projectStatus">Project Status</label>
+        <select id="projectStatus">
+            <option value="On-Going">On-Going</option>
+            <option value="Bidding">Bidding</option>
+            <option value="On-Hold">On-Hold</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Project</button>
+</form>
+            </div>
+        </div>
+        <div id="quantity-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button quantity-modal-close">&times;</span>
+                <h2 id="quantity-modal-title">Add Quantity</h2>
+                <form id="quantity-form">
+    <input type="hidden" id="quantityId">
+    <div class="form-group"><label for="category">Category</label><input type="text" id="category" list="category-list" placeholder="e.g., Concrete, Framing, Finishes" required><datalist id="category-list"></datalist></div>
+    <div class="form-group"><label for="scopeOfWork">Scope of Work (Main Item)</label><input type="text" id="scopeOfWork" required></div>
+    <div class="form-group"><label for="unit">Unit (e.g., m², ft, pcs)</label><input type="text" id="unit" required></div>
+    <div class="form-group"><label for="quantity">Total Quantity</label><input type="number" step="any" id="quantity" required></div>
+    
+    <hr>
+    
+    <div class="sub-items-section">
+        <div class="page-header" style="margin-bottom: 1rem;">
+            <h4 style="margin: 0;">Sub-Quantities (Optional Breakdown)</h4>
+            <button type="button" id="add-subquantity-btn" class="btn btn-secondary">Add Sub-Item</button>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--grey-color); margin-top: -1rem; margin-bottom: 1rem;">If you add sub-items here, the "Total Quantity" above will be automatically calculated from their sum.</p>
+        <div class="table-container">
+            <table id="subquantities-table">
+                <thead>
+                    <tr>
+                        <th>Sub-Item Name</th>
+                        <th>Quantity</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <hr>
+    <button type="submit" class="btn btn-primary">Save Quantity</button>
+</form>
+            </div>
+        </div>
+        <div id="sequence-edit-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button sequence-modal-close">&times;</span>
+                <h2 id="sequence-modal-title">Edit Sequence</h2>
+                <form id="sequence-edit-form">
+                    <input type="hidden" id="editingTaskId">
+                    <div class="sequencing-section">
+                        <p>Select one or more tasks that must happen <strong>before</strong> or <strong>after</strong> this task.</p>
+                        <div class="sequence-links-grid">
+                            <div>
+                                <label for="modal-predecessors-multiselect">Precedents (come before)</label>
+                                <select id="modal-predecessors-multiselect" multiple></select>
+                            </div>
+                            <div>
+                                <label for="modal-successors-multiselect">Successors (come after)</label>
+                                <select id="modal-successors-multiselect" multiple></select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Links</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="copy-project-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button copy-project-modal-close">&times;</span>
+                <h2>Copy Project</h2>
+                <form id="copy-project-form">
+                    <div class="form-group">
+                        <label for="source-project-select">Source Project</label>
+                        <select id="source-project-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-project-name-copy">New Project Name</label>
+                        <input type="text" id="new-project-name-copy" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Copy Project</button>
+                </form>
+            </div>
+        </div>
+        <div id="dupa-details-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button dupa-details-modal-close">&times;</span>
+                <h2 id="dupa-details-title">DUPA Breakdown</h2>
+                <div id="dupa-details-content"></div>
+            </div>
+        </div>
+        <div id="co-modal" class="modal">
+            <div class="modal-content" style="max-width: 800px;">
+                <span class="close-button co-modal-close">&times;</span>
+                <h2 id="co-modal-title">New Change Order</h2>
+                <form id="co-form">
+                    <input type="hidden" id="co-id">
+                    <div class="form-group"><label for="co-description">Description</label><input type="text" id="co-description" required></div>
+                    <div class="form-group"><label for="co-date">Date</label><input type="date" id="co-date" required></div>
+                    <div class="form-group"><label for="co-status">Status</label><select id="co-status"><option value="Pending">Pending</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option></select></div>
+                    
+                    <h4 style="margin-top:2rem; border-top:1px solid #ccc; padding-top:1rem;">Line Items</h4>
+                    <div class="table-container">
+                        <table id="co-items-table">
+                            <thead><tr><th>Scope of Work</th><th>Qty</th><th>Unit</th><th>Amount</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <button type="button" id="add-co-item-btn" class="btn btn-secondary" style="margin-top:1rem;">Add Item</button>
+                    <hr>
+                    <button type="submit" class="btn btn-primary">Save Change Order</button>
+                </form>
+            </div>
+        </div>
+        <div id="co-item-dupa-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button co-item-dupa-modal-close">&times;</span>
+                <h2 id="co-item-dupa-title">Cost Breakdown for Item</h2>
+                <form id="co-item-dupa-form">
+                     <input type="hidden" id="co-item-id">
+                     <input type="hidden" id="co-original-quantity-id">
+                     <div class="form-group"><label for="co-item-scope">Scope of Work</label><input type="text" id="co-item-scope" required></div>
+                     <div class="form-group"><label for="co-item-quantity">Quantity</label><input type="number" step="any" id="co-item-quantity" required></div>
+                     <div class="form-group"><label for="co-item-unit">Unit</label><input type="text" id="co-item-unit" required></div>
+                     <hr>
+                     <div class="form-group"><label for="co-item-dupa-duration">Duration (Days)</label><input type="number" id="co-item-dupa-duration" step="1" min="0" required></div>
+                     <div class="dupa-section">
+                        <h4 style="margin-top: 0;">Direct Costs</h4>
+                        <h5>Labor <button type="button" id="co-add-labor-btn" class="btn-add">+</button></h5>
+                        <table class="dupa-table"><thead><tr><th>Labor Type</th><th>Mandays</th><th>Rate (PHP)</th><th></th></tr></thead><tbody id="co-labor-tbody"></tbody></table>
+                        <h5>Materials <button type="button" id="co-add-material-btn" class="btn-add">+</button></h5>
+                        <table class="dupa-table"><thead><tr><th>Material Name</th><th>Qty</th><th>Unit</th><th>Unit Price (PHP)</th><th></th></tr></thead><tbody id="co-material-tbody"></tbody></table>
+                        <h5>Equipment <button type="button" id="co-add-equipment-btn" class="btn-add">+</button></h5>
+                        <table class="dupa-table"><thead><tr><th>Equipment Name</th><th>Hours</th><th>Rate (PHP)</th><th></th></tr></thead><tbody id="co-equipment-tbody"></tbody></table>
+                    </div>
+                     <div class="form-group"><label for="co-item-dupa-ocm">OCM (%)</label><input type="number" step="any" id="co-item-dupa-ocm" value="10"></div>
+                     <div class="form-group"><label for="co-item-dupa-profit">Profit (%)</label><input type="number" step="any" id="co-item-dupa-profit" value="15"></div>
+                     <div class="form-group"><label for="co-item-dupa-taxes">Taxes (%)</label><input type="number" step="any" id="co-item-dupa-taxes" value="5"></div>
+                     <button type="submit" class="btn btn-primary">Save Item Details</button>
+                </form>
+            </div>
+        </div>
+        <div id="co-item-type-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button co-item-type-modal-close">&times;</span>
+                <h2>Select Item Type</h2>
+                <p>Is this a new scope of work, or are you modifying an existing item from the original contract?</p>
+                <div style="display: flex; justify-content: space-around; margin-top: 2rem;">
+                    <button type="button" id="co-select-new-item-btn" class="btn btn-primary">New Scope Item</button>
+                    <button type="button" id="co-select-existing-item-btn" class="btn btn-secondary">Modify Existing Item</button>
+                </div>
+            </div>
+        </div>
+        <div id="co-existing-item-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button co-existing-item-modal-close">&times;</span>
+                <h2>Modify Existing Scope Item</h2>
+                <form id="co-existing-item-form">
+                    <div class="form-group">
+                        <label for="co-original-item-select">Original Scope Item</label>
+                        <select id="co-original-item-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="co-item-quantity-change">Quantity Change (use a negative number for deduction)</label>
+                        <input type="number" step="any" id="co-item-quantity-change" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Modification</button>
+                </form>
+            </div>
+        </div>
+        
+    
+
+        <div id="delete-boq-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="close-delete-boq-modal">&times;</span>
+                <h2>Confirm Deletion</h2>
+                <p><strong>Warning:</strong> Are you sure you want to permanently delete this locked BOQ?</p>
+                <p>This will unlock all pre-construction data (Quantities, DUPAs) and permanently delete all construction progress (Accomplishment Reports) for this project. <strong>This action cannot be undone.</strong></p>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button id="cancel-delete-boq-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="confirm-delete-boq-btn" class="btn btn-danger">Confirm & Delete</button>
+                </div>
+            </div>
+        </div>
+        <div id="generate-boq-modal" class="modal">
+        <div class="modal-content">
+                <span class="close-button" id="close-generate-boq-modal">&times;</span>
+                <h2>Generate Bill of Quantities?</h2>
+                <p>No locked BOQ was found for this project.</p>
+                <p><strong>Warning:</strong> Generating a BOQ will lock all pre-construction data (Quantities and DUPAs) for this project. You will NOT be able to edit them after this point unless you delete the BOQ.</p>
+                <p>Are you sure you want to proceed?</p>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button id="cancel-generate-boq-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="confirm-generate-boq-btn" class="btn btn-primary">Generate & Lock BOQ</button>
+                </div>
+            </div>
+        </div>
+        <div id="start-date-modal" class="modal">
+            <div class="modal-content">
+                <h2>Project Start Date Required</h2>
+                <p>This is the first accomplishment report for this project. Please set the project's official start date to continue.</p>
+                <div class="form-group">
+                    <label for="modal-start-date-input">Project Start Date</label>
+                    <input type="date" id="modal-start-date-input" required>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                    <button id="set-start-date-btn" class="btn btn-primary">Set Date & Continue</button>
+                </div>
+            </div>
+            </div>
+
+        <div id="import-preview-modal" class="modal">
+            <div class="modal-content" style="max-width: 700px;">
+                <span class="close-button import-preview-modal-close">&times;</span>
+                <h2>Import Preview</h2>
+                <p>The following items were found in the file. Duplicates are items with a name (or name + type) that already exists in your library.</p>
+                <div id="import-preview-content" style="max-height: 40vh; overflow-y: auto; border: 1px solid #eee; padding: 15px; border-radius: 6px;">
+                    </div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button id="import-cancel-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="import-proceed-duplicates-btn" class="btn btn-warning">Import All (Overwrite Duplicates)</button>
+                    <button id="import-proceed-new-btn" class="btn btn-primary">Import New Items Only</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="library-picker-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="library-picker-modal-close">&times;</span>
+                <h2 id="library-picker-title">Select from Library</h2>
+                <div class="form-group">
+                    <input type="search" id="library-picker-search" placeholder="Search...">
+                </div>
+                <div id="library-picker-crew-multiplier" class="form-group hidden">
+                    <label for="library-picker-crew-count">Number of Crews to Add</label>
+                    <input type="number" id="library-picker-crew-count" value="1" min="1" step="1">
+                </div>
+                <ul id="library-picker-list" class="list-container" style="max-height: 40vh; overflow-y: auto;">
+                    </ul>
+            </div>
+        </div>
+        
+        <script src="js/dexie.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="js/db.js"></script>
+        <script src="js/views.js"></script>
+        <script src="js/dashboard.js"></script>
+        <script src="js/materials.js"></script>
+        <script src="js/dupa_library.js"></script>
+        <script src="js/library_management.js"></script>
+        <script src="js/projects.js"></script>
+        <script src="js/takeoff.js"></script>
+        <script src="js/dupa.js"></script>
+        <script src="js/sequencing.js"></script>
+        <script src="js/construction.js"></script>
+        <script src="js/reports.js"></script>
+        <script src="js/change_orders.js"></script>
+        <script src="js/app.js"></script>
+
+    </body>
+</html>

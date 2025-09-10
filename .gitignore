@@ -1,0 +1,9 @@
+# System files created by Windows and macOS
+desktop.ini
+.DS_Store
+
+# Folder for Node.js dependencies (if you ever use npm)
+/node_modules
+
+# Build output folder
+/.dist

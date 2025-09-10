@@ -1,0 +1,202 @@
+{
+  "materials": [
+    {
+      "name": "Tubular Steel 1″ x 1″ x 1.0 mm",
+      "unit": "pc",
+      "unitPrice": 360
+    },
+    {
+      "name": "Tubular Steel 1″ x 1″ x 1.2 mm",
+      "unit": "pc",
+      "unitPrice": 420
+    },
+    {
+      "name": "Tubular Steel 1″ x 1″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 520
+    },
+    {
+      "name": "Tubular Steel 1″ x 2″ x 1.2 mm",
+      "unit": "pc",
+      "unitPrice": 620
+    },
+    {
+      "name": "Tubular Steel 1″ x 2″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 770
+    },
+    {
+      "name": "Tubular Steel 1″ x 2″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 920
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 1.2 mm",
+      "unit": "pc",
+      "unitPrice": 830
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 1030
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 1230
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 2.8 mm",
+      "unit": "pc",
+      "unitPrice": 1890
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 1550
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 1850
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 2.5 mm",
+      "unit": "pc",
+      "unitPrice": 2550
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 2.8 mm",
+      "unit": "pc",
+      "unitPrice": 2850
+    },
+    {
+      "name": "Tubular Steel 2″ x 6″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 2480
+    },
+    {
+      "name": "Tubular Steel 2″ x 6″ x 2.8 mm",
+      "unit": "pc",
+      "unitPrice": 3810
+    },
+    {
+      "name": "Round Bar 10 mm",
+      "unit": "pc",
+      "unitPrice": 195
+    },
+    {
+      "name": "Round Bar 12 mm",
+      "unit": "pc",
+      "unitPrice": 280
+    },
+    {
+      "name": "Round Bar 16 mm",
+      "unit": "pc",
+      "unitPrice": 500
+    },
+    {
+      "name": "Round Bar 20 mm",
+      "unit": "pc",
+      "unitPrice": 780
+    },
+    {
+      "name": "Round Bar 25 mm",
+      "unit": "pc",
+      "unitPrice": 1210
+    },
+    {
+      "name": "C-Channel 2″ x 4″",
+      "unit": "pc",
+      "unitPrice": 1500
+    },
+    {
+      "name": "C-Channel 2″ x 5″",
+      "unit": "pc",
+      "unitPrice": 1850
+    },
+    {
+      "name": "C-Channel 2″ x 6″",
+      "unit": "pc",
+      "unitPrice": 2080
+    },
+    {
+      "name": "Deformed Rebar 10 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 200
+    },
+    {
+      "name": "Deformed Rebar 10 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 250
+    },
+    {
+      "name": "Deformed Rebar 10 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 300
+    },
+    {
+      "name": "Deformed Rebar 12 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 288
+    },
+    {
+      "name": "Deformed Rebar 12 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 360
+    },
+    {
+      "name": "Deformed Rebar 12 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 432
+    },
+    {
+      "name": "Deformed Rebar 16 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 512
+    },
+    {
+      "name": "Deformed Rebar 16 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 640
+    },
+    {
+      "name": "Deformed Rebar 16 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 768
+    },
+    {
+      "name": "Deformed Rebar 20 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 800
+    },
+    {
+      "name": "Deformed Rebar 20 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 1000
+    },
+    {
+      "name": "Deformed Rebar 20 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 1200
+    },
+    {
+      "name": "Deformed Rebar 25 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 1250
+    },
+    {
+      "name": "Deformed Rebar 25 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 1560
+    },
+    {
+      "name": "Deformed Rebar 25 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 1870
+    }
+  ],
+  "resources": [],
+  "crews": [],
+  "crewComposition": []
+}

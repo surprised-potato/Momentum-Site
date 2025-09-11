@@ -13,7 +13,7 @@ Momentum 🏗️
 <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
 </p>
 
-Momentum is a comprehensive Single Page Application (SPA) designed for construction managers, project engineers, and contractors. It leverages the power of your browser's IndexedDB to provide a complete, offline-capable suite of tools to manage a project's lifecycle—from initial quantity takeoff to final progress monitoring.
+Momentum is a comprehensive Single Page Application (SPA) designed for construction managers, project engineers, and contractors. It leverages the power of your browser's IndexedDB to provide a complete, offline-capable suite of tools to manage a project's lifecycle—from initial quantity takeoff to final progress monitoring. <a href = "https://surprised-potato.github.io/Momentum-Site/"> DEMO </a>
 
 ✨ Key Features
 

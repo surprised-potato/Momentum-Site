@@ -6,10 +6,11 @@ let dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequ
 let allViews = [];
 
 let takeoffProjectListView, takeoffQuantitiesView, dupaProjectListView, dupaQuantityListView, dupaFormView, sequencingProjectListView, sequencingTasksView, boqProjectListView, boqDisplayView, pertCpmDisplayView, ganttChartDisplayView, sCurveDisplayView, pertCpmNetworkView, resourceScheduleView;
-let revisedBoqProjectListView, revisedBoqDisplayView, revisedPertCpmDisplayView;
+let revisedBoqProjectListView, revisedBoqDisplayView, revisedPertCpmDisplayView, revisedPertCpmNetworkView, revisedResourceScheduleView;
 let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, coItemTypeModal, coItemTypeModalClose, coExistingItemModal, coExistingItemModalClose, importPreviewModal, importPreviewModalClose, libraryPickerModal, libraryPickerModalClose, libraryPickerTitle, libraryPickerSearch, libraryPickerList, libraryPickerCrewMultiplier, libraryPickerCrewCount;
 let navDashboard, navProjects, navTakeoff, navDupa, navSequencing, navReports, navChangeOrders, navAccomplishment, navTrackingGantt, navTrackingSCurve, navRevisedReports, navLookahead, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
 let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
+let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
 
 const openDupaReportModal = () => dupaReportModal.style.display = 'block';
 const closeDupaReportModal = () => dupaReportModal.style.display = 'none';
@@ -203,7 +204,11 @@ function initializeViewsModule() {
     libraryManagementView = document.getElementById('library-management-view');
     documentationView = document.getElementById('documentation-view');
     
-    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView];
+    // ADD REFERENCES TO NEW VIEWS
+    revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
+    revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
+
+    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView, revisedPertCpmNetworkView, revisedResourceScheduleView];
 
     takeoffProjectListView = document.getElementById('takeoff-project-list-view');
     takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
@@ -295,6 +300,11 @@ function initializeViewsModule() {
     backToRevisedBoqProjectsBtn = document.getElementById('back-to-revised-boq-projects');
     backToRevisedBoqViewBtn = document.getElementById('back-to-revised-boq-view');
     
+    // GET REFERENCES TO NEW BUTTONS
+    backToRevisedPertCpmBtn = document.getElementById('back-to-revised-boq-view');
+    backToRevisedPertCpmFromNetworkBtn = document.getElementById('back-to-revised-pert-cpm-from-network-btn');
+    backToRevisedPertCpmFromResourceBtn = document.getElementById('back-to-revised-pert-cpm-from-resource-btn');
+    
     backToTakeoffListBtn.addEventListener('click', showTakeOff);
     backToDupaProjectsBtn.addEventListener('click', showDupa);
     backToDupaQuantitiesBtn.addEventListener('click', () => showDupaQuantitiesForProject(currentDupaProjectId, dupaProjectName.textContent));
@@ -328,4 +338,17 @@ function initializeViewsModule() {
         revisedPertCpmDisplayView.classList.add('hidden');
         revisedBoqDisplayView.classList.remove('hidden');
     });
+
+    // ADD LISTENERS FOR NEW "BACK" BUTTONS
+    const goBackToRevisedPertCpm = () => {
+        revisedPertCpmNetworkView.classList.add('hidden');
+        revisedResourceScheduleView.classList.add('hidden');
+        revisedPertCpmDisplayView.classList.remove('hidden');
+    };
+    if (backToRevisedPertCpmBtn) backToRevisedPertCpmBtn.addEventListener('click', () => {
+        revisedPertCpmDisplayView.classList.add('hidden');
+        revisedBoqDisplayView.classList.remove('hidden');
+    });
+    if (backToRevisedPertCpmFromNetworkBtn) backToRevisedPertCpmFromNetworkBtn.addEventListener('click', goBackToRevisedPertCpm);
+    if (backToRevisedPertCpmFromResourceBtn) backToRevisedPertCpmFromResourceBtn.addEventListener('click', goBackToRevisedPertCpm);
 }

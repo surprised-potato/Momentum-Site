@@ -357,7 +357,16 @@ const showGanttChartForProject = async () => {
             </div>`;
         }
     });
+    setTimeout(() => {
+    document.querySelectorAll(`#gantt-chart-target .bar-wrapper.bar-critical`).forEach(wrapper => {
+        const taskId = wrapper.dataset.id;
+        document.querySelectorAll(`#gantt-chart-target .arrow-line.dep-${taskId}`).forEach(arrow => {
+            arrow.classList.add('arrow-critical');
+        });
+    });
+}, 100);
 };
+
 
 const showSCurveForProject = async () => {
     pertCpmDisplayView.classList.add('hidden');
@@ -766,6 +775,173 @@ const displayRevisedBoqProjects = async () => {
     });
 };
 
+const showRevisedNetworkDiagram = async () => {
+    revisedPertCpmDisplayView.classList.add('hidden');
+    revisedPertCpmNetworkView.classList.remove('hidden');
+    document.getElementById('revised-network-diagram-project-name').textContent = `Revised Network Diagram: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
+    const diagramContainer = revisedPertCpmNetworkView.querySelector('.mermaid');
+    diagramContainer.innerHTML = 'Loading diagram...';
+
+    const data = await getPertCpmData(currentBoqProjectId, true);
+    if (!data || !data.tasks) {
+        diagramContainer.innerHTML = 'No data to display.';
+        return;
+    }
+
+    let mermaidSyntax = 'graph TD;\n';
+    data.quantities.forEach(q => {
+        const task = data.tasks.get(q.uniqueId);
+        if (!task) return;
+        const slack = task.ls - task.es;
+        const isCritical = slack <= 0;
+        const nodeId = q.uniqueId.replace(/-/g, '_');
+        const nodeText = `"${task.name}<br/>D:${task.duration} ES:${task.es} EF:${task.ef}<br/>LS:${task.ls} LF:${task.lf} S:${slack}"`;
+        mermaidSyntax += `    ${nodeId}[${nodeText}];\n`;
+        if (isCritical) {
+            mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
+        }
+    });
+
+    mermaidSyntax += '    PRJ_START((Start));\n    PRJ_END((End));\n';
+    mermaidSyntax += '    style PRJ_START fill:#d1e7dd,stroke:#333,stroke-width:2px;\n';
+    mermaidSyntax += '    style PRJ_END fill:#d1e7dd,stroke:#333,stroke-width:2px;\n';
+
+    data.tasks.forEach((task, taskId) => {
+        const predecessorNodeId = (taskId === 'PROJECT_START') ? 'PRJ_START' : taskId.replace(/-/g, '_');
+        task.successors.forEach(successorId => {
+            const successorNodeId = (successorId === 'PROJECT_END') ? 'PRJ_END' : successorId.replace(/-/g, '_');
+            if (data.tasks.has(taskId) && data.tasks.has(successorId)) {
+                mermaidSyntax += `    ${predecessorNodeId} --> ${successorNodeId};\n`;
+            }
+        });
+    });
+
+    try {
+        // Use a unique ID for rendering to avoid conflicts with the other diagram
+        const { svg } = await mermaid.render('mermaid-graph-render-revised', mermaidSyntax);
+        diagramContainer.innerHTML = svg;
+    } catch (e) {
+        diagramContainer.innerHTML = 'Error rendering diagram.';
+        console.error("Mermaid rendering error:", e);
+    }
+};
+
+// Add this new function to js/reports.js
+const showRevisedResourceSchedule = async () => {
+    revisedPertCpmDisplayView.classList.add('hidden');
+    revisedResourceScheduleView.classList.remove('hidden');
+    document.getElementById('revised-resource-schedule-project-name').textContent = `Revised Resource Schedule: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
+    const scheduleContainer = document.getElementById('revised-resource-schedule-container');
+    scheduleContainer.innerHTML = 'Loading schedule...';
+
+    const pertData = await getPertCpmData(currentBoqProjectId, true);
+    if (!pertData || pertData.projectDuration === 0) {
+        scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
+        return;
+    }
+
+    const { tasks, projectDuration } = pertData;
+    const { allDupas } = await getAllTasksForReport(currentBoqProjectId, true);
+    const dupaMap = new Map();
+    allDupas.forEach(d => {
+        const key = d.quantityId || d.changeOrderItemId;
+        dupaMap.set(key, d);
+    });
+
+    const dailyResources = {};
+
+    for (const [taskId, task] of tasks.entries()) {
+        if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
+
+        const numericId = parseInt(taskId.split('-')[1]);
+        const dupa = dupaMap.get(numericId);
+        if (!dupa) continue;
+
+        const totalTaskCost = calculateDupaTotalCost(dupa);
+        if (totalTaskCost > 0) {
+            const costPerDay = totalTaskCost / task.duration;
+            const resourceName = "Cash Flow (Daily Cost)";
+            if (!dailyResources[resourceName]) {
+                dailyResources[resourceName] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
+            }
+            for (let day = task.es; day < task.ef; day++) {
+                if (day < projectDuration) {
+                    dailyResources[resourceName].schedule[day] += costPerDay;
+                }
+            }
+        }
+        
+        if (!dupa.directCosts) continue;
+
+        dupa.directCosts.forEach(dc => {
+            let resourceName = '';
+            let dailyAmount = 0;
+            let unit = '';
+            if (dc.type === 'labor') {
+                resourceName = dc.laborType;
+                dailyAmount = dc.mandays / task.duration;
+                unit = 'md';
+            } else if (dc.type === 'equipment') {
+                resourceName = dc.name;
+                dailyAmount = dc.hours / task.duration;
+                unit = 'hrs';
+            }
+            if (resourceName) {
+                if (!dailyResources[resourceName]) {
+                    dailyResources[resourceName] = { unit: unit, schedule: new Array(projectDuration).fill(0) };
+                }
+                for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) {
+                        dailyResources[resourceName].schedule[day] += dailyAmount;
+                    }
+                }
+            }
+        });
+    }
+
+    if (Object.keys(dailyResources).length === 0) {
+        scheduleContainer.innerHTML = '<p>No labor or equipment resources found in DUPAs.</p>';
+        return;
+    }
+
+    let tableHtml = '<table id="revised-resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
+    for (let i = 1; i <= projectDuration; i++) {
+        tableHtml += `<th>${i}</th>`;
+    }
+    tableHtml += '</tr></thead><tbody>';
+
+    const groupedResources = { 'Labor': [], 'Equipment': [], 'Financials': [] };
+    Object.keys(dailyResources).sort().forEach(name => {
+        const unit = dailyResources[name].unit;
+        if (unit === 'md') groupedResources['Labor'].push(name);
+        else if (unit === 'hrs') groupedResources['Equipment'].push(name);
+        else if (unit === 'PHP') groupedResources['Financials'].push(name);
+    });
+
+    for (const group in groupedResources) {
+        if (groupedResources[group].length > 0) {
+            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${group}</td></tr>`;
+            groupedResources[group].forEach(resourceName => {
+                const data = dailyResources[resourceName];
+                tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
+                data.schedule.forEach(amount => {
+                    let displayAmount = '-';
+                    if (amount > 0) {
+                        displayAmount = (data.unit === 'PHP')
+                            ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                            : amount.toFixed(2);
+                    }
+                    tableHtml += `<td>${displayAmount}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+        }
+    }
+
+    tableHtml += '</tbody></table>';
+    scheduleContainer.innerHTML = tableHtml;
+};
+
 const showRevisedBoqForProject = async (projectId, projectName) => {
     currentBoqProjectId = projectId;
     revisedBoqProjectName.textContent = `Revised BOQ: ${projectName}`;
@@ -872,7 +1048,9 @@ const showRevisedPertCpmForProject = async () => {
         const taskA = data.tasks.get(a.uniqueId);
         const taskB = data.tasks.get(b.uniqueId);
         if (!taskA || !taskB) return 0;
+        // If Early Start times are the same, sort by name
         if (taskA.es === taskB.es) return taskA.name.localeCompare(taskB.name);
+        // Primary sort is by Early Start time
         return taskA.es - taskB.es;
     });
 
@@ -899,6 +1077,7 @@ function initializeReportsModule() {
     viewPertCpmBtn.addEventListener('click', showPertCpmForProject);
     viewSCurveBtn.addEventListener('click', showSCurveForProject);
     viewGanttChartBtn.addEventListener('click', showGanttChartForProject);
+
     document.getElementById('gantt-view-day').addEventListener('click', () => {
         if (ganttChart) ganttChart.change_view_mode('Day');
     });
@@ -938,7 +1117,15 @@ function initializeReportsModule() {
             showRevisedBoqForProject(parseInt(e.target.dataset.id), e.target.dataset.name);
         }
     });
+    
     viewRevisedPertCpmBtn.addEventListener('click', showRevisedPertCpmForProject);
+    
+    // ADD LISTENERS FOR THE NEW BUTTONS
+    const viewRevisedNetworkDiagramBtn = document.getElementById('view-revised-network-diagram-btn');
+    const viewRevisedResourceScheduleBtn = document.getElementById('view-revised-resource-schedule-btn');
+
+    if (viewRevisedNetworkDiagramBtn) viewRevisedNetworkDiagramBtn.addEventListener('click', showRevisedNetworkDiagram);
+    if (viewRevisedResourceScheduleBtn) viewRevisedResourceScheduleBtn.addEventListener('click', showRevisedResourceSchedule);
 }
 
 // --- End of reports.js ---

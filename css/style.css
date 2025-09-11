@@ -544,7 +544,8 @@ body {
     color: var(--danger-color);
     font-weight: bold;
 }
-#pert-cpm-table tr.critical-path td {
+#pert-cpm-table tr.critical-path td,
+#revised-pert-cpm-table tr.critical-path td {
     background-color: #f8d7da; /* A light red to indicate criticality */
     font-weight: bold;
 }
@@ -934,7 +935,29 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-/* --- Gantt Chart Critical Path --- */
-.gantt .bar-wrapper.bar-critical .bar {
+/* --- Gantt Chart Critical Path & Status Colors --- */
+/* By targeting both .bar and .bar-progress, we ensure the entire task element reflects the status color. */
+
+.gantt .bar-wrapper.bar-critical .bar,
+.gantt .bar-wrapper.bar-critical .bar-progress {
     fill: var(--danger-color);
+}
+
+.gantt .bar-wrapper.bar-on-track .bar,
+.gantt .bar-wrapper.bar-on-track .bar-progress {
+    fill: var(--primary-color);
+}
+
+.gantt .bar-wrapper.bar-behind .bar,
+.gantt .bar-wrapper.bar-behind .bar-progress {
+    fill: var(--warning-color);
+}
+
+.gantt .bar-wrapper.bar-done .bar,
+.gantt .bar-wrapper.bar-done .bar-progress {
+    fill: #198754; /* A green color for completion */
+}
+.gantt .arrow-line.arrow-critical {
+    stroke: var(--danger-color);
+    stroke-width: 2px;
 }

@@ -790,31 +790,39 @@ const showTrackingGanttChart = async (projectId, projectName) => {
     projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
 
     let tasksForGantt = data.quantities.map(q => {
-        const task = data.tasks.get(q.id);
+        const task = data.tasks.get(q.uniqueId); // FIX 1: Use uniqueId
         if (!task) return null;
+
         const progress = q.percentComplete || 0;
         const startDate = new Date(projectStartDate);
         startDate.setDate(startDate.getDate() + task.es);
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + task.duration);
-        let status_class = '';
-        if (progress >= 100) status_class = 'bar-done';
-        else if (today > endDate) status_class = 'bar-behind';
-        else if (today >= startDate && today <= endDate) {
+        const isCritical = (task.ls - task.es) <= 0;
+        let status_class = isCritical ? 'bar-critical' : '';
+        if (progress >= 100) {
+            status_class += ' bar-done';
+        } else if (today > endDate) {
+            status_class += ' bar-behind';
+        } else if (today >= startDate && today <= endDate) {
             const duration = Math.max(1, task.duration);
             const daysElapsed = (today - startDate) / (1000 * 60 * 60 * 24) + 1;
             const plannedProgress = (daysElapsed / duration) * 100;
-            status_class = (progress >= plannedProgress) ? 'bar-on-track' : 'bar-behind';
+            status_class += (progress >= plannedProgress) ? ' bar-on-track' : ' bar-behind';
         }
+        
+        // FIX 2: Use consistent uniqueIds for dependencies
         const dependencies = Array.from(task.predecessors)
-            .filter(pId => data.tasks.has(pId))
-            .map(pId => `task_${pId}`)
+            .filter(pId => typeof pId !== 'string' || !pId.startsWith('PROJECT'))
             .join(', ');
+            
         return {
-            id: `task_${q.id}`, name: task.name,
+            id: q.uniqueId, // FIX 3: Use uniqueId for the task ID
+            name: task.name,
             start: startDate.toISOString().split('T')[0],
             end: endDate.toISOString().split('T')[0],
-            progress: progress, dependencies: dependencies,
+            progress: progress,
+            dependencies: dependencies,
             custom_class: status_class
         };
     }).filter(Boolean);
@@ -839,6 +847,14 @@ const showTrackingGanttChart = async (projectId, projectName) => {
             </div>`;
         }
     });
+    setTimeout(() => {
+    document.querySelectorAll(`#tracking-gantt-chart-target .bar-wrapper.bar-critical`).forEach(wrapper => {
+        const taskId = wrapper.dataset.id;
+        document.querySelectorAll(`#tracking-gantt-chart-target .arrow-line.dep-${taskId}`).forEach(arrow => {
+            arrow.classList.add('arrow-critical');
+        });
+    });
+}, 100);
 };
 
 const renderTrackingSCurve = async (projectId, projectName) => {

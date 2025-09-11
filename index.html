@@ -563,13 +563,37 @@
                     <div class="table-container" id="revised-boq-table-container"></div>
                 </div>
                 <div id="revised-pert-cpm-display-view" class="hidden">
-                     <header class="page-header">
+                    <header class="page-header">
                         <div>
-                            <button id="back-to-revised-boq-view" class="btn btn-secondary">&larr; Back to Revised BOQ</button>
-                            <h1 id="revised-pert-cpm-project-name"></h1>
+                           <button id="back-to-revised-boq-view" class="btn btn-secondary">&larr; Back to Revised BOQ</button>
+                           <h1 id="revised-pert-cpm-project-name"></h1>
+                        </div>
+                        <div>
+                           <button id="view-revised-network-diagram-btn" class="btn btn-primary">View Network Diagram</button>
+                           <button id="view-revised-resource-schedule-btn" class="btn btn-primary">Resource Schedule</button>
                         </div>
                     </header>
                     <div class="table-container" id="revised-pert-cpm-table-container"></div>
+                </div>
+                <div id="revised-pert-cpm-network-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-revised-pert-cpm-from-network-btn" class="btn btn-secondary">&larr; Back to Revised PERT-CPM</button>
+                            <h1 id="revised-network-diagram-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="mermaid-container">
+                        <div class="mermaid"></div>
+                    </div>
+                </div>
+                <div id="revised-resource-schedule-view" class="hidden">
+                    <header class="page-header">
+                        <div>
+                            <button id="back-to-revised-pert-cpm-from-resource-btn" class="btn btn-secondary">&larr; Back to Revised PERT-CPM</button>
+                            <h1 id="revised-resource-schedule-project-name"></h1>
+                        </div>
+                    </header>
+                    <div class="table-container" id="revised-resource-schedule-container"></div>
                 </div>
             </div>
             <div id="lookahead-view" class="hidden">

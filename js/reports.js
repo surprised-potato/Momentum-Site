@@ -267,9 +267,18 @@ const showPertCpmForProject = async () => {
         pertCpmTbody.innerHTML = '<tr><td colspan="7">No tasks found for this project.</td></tr>';
         return;
     }
+
+    data.quantities.sort((a,b) => {
+        const taskA = data.tasks.get(a.uniqueId);
+        const taskB = data.tasks.get(b.uniqueId);
+        if (!taskA || !taskB) return 0;
+        return taskA.es - taskB.es;
+    });
+
     pertCpmTbody.innerHTML = '';
-    data.quantities.sort((a,b) => data.tasks.get(a.id).es - data.tasks.get(b.id).es).forEach(q => {
-        const task = data.tasks.get(q.id);
+    data.quantities.forEach(q => {
+        const task = data.tasks.get(q.uniqueId);
+        if (!task) return;
         const slack = task.ls - task.es;
         const isCritical = slack <= 0;
         const row = pertCpmTbody.insertRow();
@@ -297,31 +306,35 @@ const showGanttChartForProject = async () => {
         return;
     }
 
-    const projectStartDate = project.startDate ? new Date(project.startDate) : new Date();
+    // For a pre-construction planning Gantt, always use today as the relative start date.
+    // The actual project.startDate is only relevant for the Tracking Gantt.
+    const projectStartDate = new Date();
     projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
 
     let tasksForGantt = data.quantities.map(q => {
-        const task = data.tasks.get(q.id);
+        const task = data.tasks.get(q.uniqueId); // FIX 1: Use the correct uniqueId for lookup
         if (!task) return null;
+
         const isCritical = (task.ls - task.es) <= 0;
         const startDate = new Date(projectStartDate);
         startDate.setDate(startDate.getDate() + task.es);
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + task.duration);
+        
+        // FIX 2: Use the uniqueIds for dependencies, which are now consistent
         const dependencies = Array.from(task.predecessors)
-            .filter(pId => typeof pId === 'number' && data.tasks.has(pId))
-            .map(pId => `task_${pId}`)
+            .filter(pId => typeof pId !== 'string' || !pId.startsWith('PROJECT'))
             .join(', ');
 
         return {
-            id: `task_${q.id}`,
+            id: q.uniqueId, // FIX 3: Use the uniqueId as the Gantt task ID
             name: task.name,
             start: startDate.toISOString().split('T')[0],
             end: endDate.toISOString().split('T')[0],
             progress: 0,
             dependencies: dependencies,
             custom_class: isCritical ? 'bar-critical' : '',
-            duration: task.duration // Add duration property for sorting
+            duration: task.duration
         };
     }).filter(Boolean);
 
@@ -823,18 +836,17 @@ const showRevisedPertCpmForProject = async () => {
         return;
     }
 
-    // Sort the tasks array by the calculated Early Start time
     data.quantities.sort((a, b) => {
-        const taskA = data.tasks.get(a.id);
-        const taskB = data.tasks.get(b.id);
+        const taskA = data.tasks.get(a.uniqueId);
+        const taskB = data.tasks.get(b.uniqueId);
         if (!taskA || !taskB) return 0;
-        if (taskA.es === taskB.es) return taskA.name.localeCompare(taskB.name); // Secondary sort by name
+        if (taskA.es === taskB.es) return taskA.name.localeCompare(taskB.name);
         return taskA.es - taskB.es;
     });
 
     let tableHtml = '<table id="revised-pert-cpm-table"><thead><tr><th>Task</th><th>Duration</th><th>ES</th><th>EF</th><th>LS</th><th>LF</th><th>Slack</th></tr></thead><tbody>';
     data.quantities.forEach(q => {
-        const task = data.tasks.get(q.id);
+        const task = data.tasks.get(q.uniqueId);
         if(!task) return;
         const slack = task.ls - task.es;
         const isCritical = slack <= 0;
@@ -864,6 +876,8 @@ function initializeReportsModule() {
     document.getElementById('gantt-view-month').addEventListener('click', () => {
         if (ganttChart) ganttChart.change_view_mode('Month');
     });
+    document.getElementById('reports-gantt-sort').addEventListener('change', showGanttChartForProject);
+
     viewNetworkDiagramBtn.addEventListener('click', showNetworkDiagram);
     viewResourceScheduleBtn.addEventListener('click', showManpowerEquipmentSchedule);
 

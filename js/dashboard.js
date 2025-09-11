@@ -250,6 +250,7 @@ function initializeDashboardModule() {
     document.getElementById('dashboard-gantt-view-month').addEventListener('click', () => {
         if (projectsGanttChart) projectsGanttChart.change_view_mode('Month');
     });
+    document.getElementById('dashboard-gantt-sort').addEventListener('change', updateDashboard);
 }
 
 // --- End of dashboard.js ---

@@ -934,3 +934,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+/* --- Gantt Chart Critical Path --- */
+.gantt .bar-wrapper.bar-critical .bar {
+    fill: var(--danger-color);
+}

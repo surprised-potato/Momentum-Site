@@ -9,29 +9,7 @@ let currentDupaQuantityId = null;
 let currentSequencingProjectId = null;
 let currentBoqProjectId = null;
 
-// --- Application Initialization ---
-// Replace the entire document.addEventListener('DOMContentLoaded',...) block with this:
-window.addEventListener('load', () => {
-    db.open().then(() => {
-        console.log("Database opened successfully.");
-        // This is now safe because the 'load' event guarantees the mermaid script is ready
-        mermaid.initialize({ startOnLoad: false });
-        
-        // Initialize all modules
-        initializeViewsModule();
-        initializeProjectsModule();
-        initializeTakeoffModule();
-        initializeDupaModule();
-        initializeSequencingModule();
-        initializeConstructionModule();
-        initializeReportsModule();
-        initializeChangeOrdersModule();
-        initializeDashboardModule();
-        initializeMaterialsLibraryModule();
-        initializeDupaLibraryModule();
-        initializeLibraryManagementModule();
-
-        // This function checks if the database is empty and loads sample data if it is.
+// This function checks if the database is empty and loads sample data if it is.
 const populateInitialDataIfNeeded = async () => {
     try {
         const projectCount = await db.projects.count();
@@ -43,7 +21,7 @@ const populateInitialDataIfNeeded = async () => {
         console.log('First-time setup: Populating database with sample data...');
 
         // --- 1. Populate the Libraries ---
-        const libraryResponse = await fetch('./import samples/Sample Libraries/bat-os Materials.json');
+        const libraryResponse = await fetch('import samples\Sample Libraries\bat-os Materials.json');
         const libraryData = await libraryResponse.json();
         
         await db.transaction('rw', db.materials, db.resources, db.crews, db.crewComposition, async () => {
@@ -57,7 +35,7 @@ const populateInitialDataIfNeeded = async () => {
         });
 
         // --- 2. Populate the Default Project ---
-        const projectResponse = await fetch('./import samples/sample projects/default multistory.json');
+        const projectResponse = await fetch('import samples\sample projects\default multistory.json');
         const projectData = await projectResponse.json();
 
         // Use the existing import function to handle all the complex ID re-linking
@@ -73,8 +51,8 @@ const populateInitialDataIfNeeded = async () => {
     }
 };
 
-        // Universal modal closing listener
-// Universal modal closing listener (handles both background and 'X' clicks)
+// --- Application Initialization ---
+// Replace the entire document.addEventListener('DOMContentLoaded',...) block with this:
 window.addEventListener('load', () => {
     db.open().then(async () => { // Make the function async
         console.log("Database opened successfully.");

@@ -460,14 +460,18 @@ const showNetworkDiagram = async () => {
 
     let mermaidSyntax = 'graph TD;\n';
 
+    // 1. Define all nodes with correct details and consistent IDs
     data.quantities.forEach(q => {
-        const task = data.tasks.get(q.id);
+        const task = data.tasks.get(q.uniqueId); // FIX: Use uniqueId for lookup
         if (!task) return;
+
         const slack = task.ls - task.es;
         const isCritical = slack <= 0;
-        const nodeId = `T${q.id}`;
-        const nodeText = `"${task.name} (D:${task.duration})<br/>ES:${task.es} EF:${task.ef}<br/>LS:${task.ls} LF:${task.lf}<br/>Slack:${slack}"`;
-        mermaidSyntax += `    ${nodeId}(${nodeText});\n`;
+        // FIX: Create a safe, consistent nodeId from the uniqueId
+        const nodeId = q.uniqueId.replace(/-/g, '_'); 
+        const nodeText = `"${task.name}<br/>D:${task.duration} ES:${task.es} EF:${task.ef}<br/>LS:${task.ls} LF:${task.lf} S:${slack}"`;
+        
+        mermaidSyntax += `    ${nodeId}[${nodeText}];\n`; // Use [] for rectangle shape
         if (isCritical) {
             mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
         }
@@ -478,20 +482,20 @@ const showNetworkDiagram = async () => {
     mermaidSyntax += '    style PRJ_START fill:#d1e7dd,stroke:#333,stroke-width:2px;\n';
     mermaidSyntax += '    style PRJ_END fill:#d1e7dd,stroke:#333,stroke-width:2px;\n';
 
+    // 2. Define all links using the same consistent ID format
     data.tasks.forEach((task, taskId) => {
-        const predecessorNodeId = taskId === 'PROJECT_START' ? 'PRJ_START' : `T${taskId}`;
+        // FIX: Sanitize the predecessor ID to match the node definition
+        const predecessorNodeId = (taskId === 'PROJECT_START') ? 'PRJ_START' : taskId.replace(/-/g, '_');
 
         task.successors.forEach(successorId => {
-            const successorNodeId = successorId === 'PROJECT_END'
-                ? 'PRJ_END'
-                : `T${successorId}`;
-
+            // FIX: Sanitize the successor ID to match the node definition
+            const successorNodeId = (successorId === 'PROJECT_END') ? 'PRJ_END' : successorId.replace(/-/g, '_');
+            
             if (data.tasks.has(taskId) && data.tasks.has(successorId)) {
                 mermaidSyntax += `    ${predecessorNodeId} --> ${successorNodeId};\n`;
             }
         });
     });
-
     try {
         const { svg } = await mermaid.render('mermaid-graph-render', mermaidSyntax);
         diagramContainer.innerHTML = svg;
@@ -531,10 +535,29 @@ const showManpowerEquipmentSchedule = async () => {
     const dailyResources = {};
 
     for (const [taskId, task] of tasks.entries()) {
-        if (typeof taskId !== 'number' || task.duration <= 0) continue;
+        if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
 
-        const dupa = dupaMap.get(taskId);
-        if (!dupa || !dupa.directCosts) continue;
+        const numericId = parseInt(taskId.split('-')[1]);
+        const dupa = dupaMap.get(numericId);
+        if (!dupa) continue;
+
+        // --- START: Added Logic for Daily Cost Calculation ---
+        const totalTaskCost = calculateDupaTotalCost(dupa);
+        if (totalTaskCost > 0) {
+            const costPerDay = totalTaskCost / task.duration;
+            const resourceName = "Cash Flow (Daily Cost)";
+            if (!dailyResources[resourceName]) {
+                dailyResources[resourceName] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
+            }
+            for (let day = task.es; day < task.ef; day++) {
+                if (day < projectDuration) {
+                    dailyResources[resourceName].schedule[day] += costPerDay;
+                }
+            }
+        }
+        // --- END: Added Logic ---
+        
+        if (!dupa.directCosts) continue; // Keep this check for the direct costs loop below
 
         dupa.directCosts.forEach(dc => {
             let resourceName = '';
@@ -578,13 +601,13 @@ const showManpowerEquipmentSchedule = async () => {
     }
     tableHtml += '</tr></thead><tbody>';
 
-    const groupedResources = { 'Labor': [], 'Equipment': [] };
+    // FIX 1: Add a "Financials" group
+    const groupedResources = { 'Labor': [], 'Equipment': [], 'Financials': [] };
     Object.keys(dailyResources).sort().forEach(name => {
-        if (dailyResources[name].unit === 'md') {
-            groupedResources['Labor'].push(name);
-        } else {
-            groupedResources['Equipment'].push(name);
-        }
+        const unit = dailyResources[name].unit;
+        if (unit === 'md') groupedResources['Labor'].push(name);
+        else if (unit === 'hrs') groupedResources['Equipment'].push(name);
+        else if (unit === 'PHP') groupedResources['Financials'].push(name);
     });
 
     for (const group in groupedResources) {
@@ -594,7 +617,14 @@ const showManpowerEquipmentSchedule = async () => {
                 const data = dailyResources[resourceName];
                 tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
                 data.schedule.forEach(amount => {
-                    tableHtml += `<td>${amount > 0 ? amount.toFixed(2) : '-'}</td>`;
+                    // FIX 2: Format cash as currency, others as numbers
+                    let displayAmount = '-';
+                    if (amount > 0) {
+                        displayAmount = (data.unit === 'PHP')
+                            ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                            : amount.toFixed(2);
+                    }
+                    tableHtml += `<td>${displayAmount}</td>`;
                 });
                 tableHtml += '</tr>';
             });

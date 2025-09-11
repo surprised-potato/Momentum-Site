@@ -349,7 +349,6 @@ const getSCurveData = async (projectId, isRevised = false) => {
         projectDuration: projectDuration
     };
 };
-
 const displayAccomplishmentProjects = async () => {
     const allProjects = await db.projects.orderBy('projectName').toArray();
     accomplishmentProjectsListDiv.innerHTML = '';

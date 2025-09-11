@@ -183,48 +183,83 @@ const getAllAccomplishmentTasks = async (projectId) => {
 
 const getPertCpmData = async (projectId, isRevised = false) => {
     const { allTasks, allDupas } = await getAllTasksForReport(projectId, isRevised);
-    const links = await db.tasks.where('projectId').equals(projectId).toArray();
+    const links = await db.tasks.where({ projectId }).equals(projectId).toArray();
     if (allTasks.length === 0) return null;
 
     const dupaMap = new Map();
     allDupas.forEach(d => {
         const key = d.quantityId || d.changeOrderItemId;
-        const parentId = allTasks.find(t => t.id === key || (t.parentQuantityId === key))?.parentQuantityId || key;
-        dupaMap.set(key, allDupas.find(dupa => dupa.quantityId === parentId));
+        dupaMap.set(key, d);
     });
+
+    const parentQuantityMap = new Map((await db.quantities.where({ projectId }).toArray()).map(q => [q.id, q]));
 
     const tasks = new Map(allTasks.map(t => {
-        const dupa = dupaMap.get(t.parentQuantityId || t.id);
-        let duration = dupa?.duration || 0;
-
-        if (t.parentQuantityId && t.totalParentQuantity > 0 && dupa) {
-            const proportion = t.quantity / t.totalParentQuantity;
-            duration = Math.round(dupa.duration * proportion);
+        let duration = 0;
+        if (t.type === 'subquantity') {
+            const parentDupa = dupaMap.get(t.quantityId);
+            const parentQuantity = parentQuantityMap.get(t.quantityId);
+            const parentTotalDuration = parentDupa?.duration || 0;
+            if (parentQuantity && parentTotalDuration > 0) {
+                const totalParentQuantity = parentQuantity.subquantities.reduce((sum, sub) => sum + sub.quantity, 0);
+                const proportion = t.quantity / totalParentQuantity;
+                duration = Math.round(parentTotalDuration * proportion);
+            }
+        } else {
+            const dupa = dupaMap.get(t.id);
+            duration = dupa?.duration || 0;
         }
-
-        return [t.id, { id: t.id, name: t.displayName, duration: duration, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() }]
+        return [t.uniqueId, { id: t.uniqueId, name: t.displayName, duration, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() }];
     }));
-    tasks.set('PROJECT_START', { id: 'PROJECT_START', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
-    tasks.set('PROJECT_END', { id: 'PROJECT_END', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
-    
-    links.forEach(link => {
-        if (tasks.has(link.predecessorId) && tasks.has(link.successorId)) {
-            tasks.get(link.successorId).predecessors.add(link.predecessorId);
-            tasks.get(link.predecessorId).successors.add(link.successorId);
+
+    tasks.set('PROJECT_START', { id: 'PROJECT_START', name: 'Start', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
+    tasks.set('PROJECT_END', { id: 'PROJECT_END', name: 'End', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
+
+    const subTaskMap = new Map();
+    allTasks.forEach(t => {
+        if (t.type === 'subquantity') {
+            if (!subTaskMap.has(t.quantityId)) {
+                subTaskMap.set(t.quantityId, []);
+            }
+            subTaskMap.get(t.quantityId).push(t.uniqueId);
         }
     });
 
+    // Link sub-tasks sequentially
+    for (const subTaskIds of subTaskMap.values()) {
+        for (let i = 0; i < subTaskIds.length - 1; i++) {
+            tasks.get(subTaskIds[i + 1]).predecessors.add(subTaskIds[i]);
+            tasks.get(subTaskIds[i]).successors.add(subTaskIds[i + 1]);
+        }
+    }
+
+    // Re-wire main dependency links to point to sub-tasks
+    links.forEach(link => {
+        const predParentId = link.predecessorId;
+        const succParentId = link.successorId;
+
+        const predSubTasks = subTaskMap.get(predParentId);
+        const succSubTasks = subTaskMap.get(succParentId);
+
+        const finalPredId = predSubTasks ? predSubTasks[predSubTasks.length - 1] : (predParentId === 'PROJECT_START' ? 'PROJECT_START' : `qty-${predParentId}` || `co-${predParentId}`);
+        const finalSuccId = succSubTasks ? succSubTasks[0] : (succParentId === 'PROJECT_END' ? 'PROJECT_END' : `qty-${succParentId}` || `co-${succParentId}`);
+
+        if (tasks.has(finalPredId) && tasks.has(finalSuccId)) {
+            tasks.get(finalSuccId).predecessors.add(finalPredId);
+            tasks.get(finalPredId).successors.add(finalSuccId);
+        }
+    });
+
+    // Forward Pass (Topological Sort + ES/EF Calculation)
     const sortedNodes = [];
     const queue = new Map();
     tasks.forEach((task, id) => {
         queue.set(id, task.predecessors.size);
-        if (task.predecessors.size === 0) {
-            sortedNodes.push(id);
-        }
+        if (task.predecessors.size === 0) sortedNodes.push(id);
     });
-    
+
     let head = 0;
-    while(head < sortedNodes.length) {
+    while (head < sortedNodes.length) {
         const currentId = sortedNodes[head++];
         const currentNode = tasks.get(currentId);
         if (!currentNode) continue;
@@ -233,19 +268,19 @@ const getPertCpmData = async (projectId, isRevised = false) => {
 
         currentNode.successors.forEach(succId => {
             const succNode = tasks.get(succId);
-            if(succNode) {
+            if (succNode) {
                 succNode.es = Math.max(succNode.es, currentNode.ef);
                 const newPredCount = queue.get(succId) - 1;
                 queue.set(succId, newPredCount);
-                if (newPredCount === 0) {
-                    sortedNodes.push(succId);
-                }
+                if (newPredCount === 0) sortedNodes.push(succId);
             }
         });
     }
 
+    // Backward Pass (LS/LF Calculation)
     const projectDuration = tasks.get('PROJECT_END').ef;
     tasks.forEach(task => task.lf = projectDuration);
+
     for (let i = sortedNodes.length - 1; i >= 0; i--) {
         const currentId = sortedNodes[i];
         const currentNode = tasks.get(currentId);
@@ -255,11 +290,12 @@ const getPertCpmData = async (projectId, isRevised = false) => {
         currentNode.ls = currentNode.lf - currentNode.duration;
         currentNode.predecessors.forEach(predId => {
             const predNode = tasks.get(predId);
-            if(predNode) {
+            if (predNode) {
                 predNode.lf = Math.min(predNode.lf, currentNode.ls);
             }
         });
     }
+
     return { tasks, quantities: allTasks, projectDuration, links, allDupas };
 };
 

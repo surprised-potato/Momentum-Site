@@ -25,12 +25,27 @@ const populateInitialDataIfNeeded = async () => {
         const libraryData = await libraryResponse.json();
         
         await db.transaction('rw', db.materials, db.resources, db.crews, db.crewComposition, async () => {
-            // We use bulkPut to add the items. Dexie will handle the auto-incrementing IDs.
-            await db.materials.bulkPut(libraryData.materials);
-            await db.resources.bulkPut(libraryData.resources);
+            // --- FIX: De-duplicate data before putting it into the database ---
             
-            // For crews, we need to re-link compositions, but since this is a fresh DB, we can add them directly.
-            await db.crews.bulkPut(libraryData.crews);
+            // De-duplicate materials by their unique 'name'
+            const uniqueMaterials = Array.from(
+                new Map(libraryData.materials.map(m => [m.name, m])).values()
+            );
+            await db.materials.bulkPut(uniqueMaterials);
+        
+            // De-duplicate resources by their unique 'name' and 'type' combination
+            const uniqueResources = Array.from(
+                new Map(libraryData.resources.map(r => [`${r.name}|${r.type}`, r])).values()
+            );
+            await db.resources.bulkPut(uniqueResources);
+            
+            // De-duplicate crews by their unique 'name'
+            const uniqueCrews = Array.from(
+                new Map(libraryData.crews.map(c => [c.name, c])).values()
+            );
+            await db.crews.bulkPut(uniqueCrews);
+        
+            // Crew composition does not have a unique constraint, so it can be added directly
             await db.crewComposition.bulkPut(libraryData.crewComposition);
         });
 

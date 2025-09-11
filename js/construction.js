@@ -1032,27 +1032,20 @@ const generateLookAheadReport = async () => {
     const reportStartDay = Math.floor((reportStartDate - projectStartDate) / dayInMillis);
     const reportEndDay = reportStartDay + (durationWeeks * 7);
 
-    const parentTasksInWindow = Array.from(pertTasks.values()).filter(task =>
-        (typeof task.id === 'number' || (typeof task.id === 'string' && task.id.includes('co-'))) &&
-        task.ls < reportEndDay &&
-        task.ef > reportStartDay
-    );
-
-    // New logic: Expand parent tasks into their sub-tasks
-    const finalTasksForReport = [];
-    for (const parentTask of parentTasksInWindow) {
-        const subTasks = allTasksWithProgress.filter(t => t.type === 'subquantity' && t.quantityId === parentTask.id);
-        if (subTasks.length > 0) {
-            subTasks.forEach(sub => {
-                finalTasksForReport.push({ ...sub, ...parentTask, id: sub.id, name: sub.displayName, originalParent: parentTask });
-            });
-        } else {
-            const originalTask = allTasksWithProgress.find(t => t.id === parentTask.id);
-            if(originalTask) {
-                 finalTasksForReport.push({ ...originalTask, ...parentTask, name: originalTask.displayName, originalParent: parentTask });
-            }
-        }
-    }
+    const finalTasksForReport = allTasksWithProgress
+        .map(task => {
+            // Merge the main task data with its corresponding schedule data from PERT-CPM
+            const scheduleData = pertTasks.get(task.uniqueId);
+            if (!scheduleData) return null;
+            return { ...task, ...scheduleData }; // Creates a single, complete task object
+        })
+        .filter(task => {
+            if (!task) return false;
+            // The core filtering logic: does the task's schedule overlap with the report window?
+            // A task is relevant if it must start before the window ends (ls < reportEndDay)
+            // AND it can't finish before the window starts (ef > reportStartDay).
+            return task.ls < reportEndDay && task.ef > reportStartDay;
+        });
 
     if (finalTasksForReport.length === 0) {
         contentDiv.innerHTML = `<p class="placeholder-text">No tasks scheduled for this period.</p>`;
@@ -1063,15 +1056,16 @@ const generateLookAheadReport = async () => {
 
     let reportHtml = '';
     for (const task of finalTasksForReport) {
-        const taskMaster = taskProgressMap.get(task.uniqueId);
-        
         let isAtRisk = false;
         let predecessorHtml = '<ul>';
-        if (task.originalParent.predecessors.size === 0) {
+        
+        // FIX: Access predecessors directly from the merged task object
+        if (task.predecessors.size === 0) {
             predecessorHtml += '<li>None (Project Start)</li>';
         } else {
-            for (const predId of task.originalParent.predecessors) {
-                const predMaster = allTasksWithProgress.find(t => t.id === predId);
+            for (const predId of task.predecessors) {
+                // Use the reliable taskProgressMap to get predecessor details
+                const predMaster = taskProgressMap.get(predId);
                 if (predMaster) {
                     const predProgress = predMaster.percentComplete || 0;
                     if (predProgress < 100) isAtRisk = true;
@@ -1081,14 +1075,13 @@ const generateLookAheadReport = async () => {
         }
         predecessorHtml += '</ul>';
         
-        const dupaId = task.type === 'subquantity' ? task.quantityId : task.id;
-        const dupa = dupaMap.get(dupaId);
+        const dupa = dupaMap.get(parseInt(task.uniqueId.split('-')[1]));
         let resourceHtml = '<ul>';
         if (dupa && dupa.directCosts) {
              const items = dupa.directCosts.map(dc => {
                 switch(dc.type) {
-                    case 'labor': return `<li>${dc.laborType} (${dc.mandays} mandays)</li>`;
-                    case 'equipment': return `<li>${dc.name} (${dc.hours} hours)</li>`;
+                    case 'labor': return `<li>${dc.laborType} (${dc.mandays.toFixed(2)} mandays)</li>`;
+                    case 'equipment': return `<li>${dc.name} (${dc.hours.toFixed(2)} hours)</li>`;
                     case 'material': return `<li>${dc.name} (${dc.quantity} ${dc.unit})</li>`;
                     default: return '';
                 }
@@ -1108,7 +1101,7 @@ const generateLookAheadReport = async () => {
             <div class="lookahead-task ${isAtRisk ? 'at-risk' : ''}">
                 <div class="lookahead-task-header">
                     <h3>
-                        <span>${task.name}</span>
+                        <span>${task.displayName}</span>
                         <span class="status ${isAtRisk ? 'at-risk' : 'on-track'}">${isAtRisk ? 'At Risk' : 'On Track'}</span>
                     </h3>
                     <small>Scheduled Window: ${earlyStartDate.toLocaleDateString()} - ${lateFinishDate.toLocaleDateString()}</small>

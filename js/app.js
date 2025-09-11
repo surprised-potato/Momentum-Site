@@ -21,7 +21,7 @@ const populateInitialDataIfNeeded = async () => {
         console.log('First-time setup: Populating database with sample data...');
 
         // --- 1. Populate the Libraries ---
-        const libraryResponse = await fetch('import samples\Sample Libraries\bat-os Materials.json');
+        const libraryResponse = await fetch('import samples/Sample Libraries/bat-os Materials.json');
         const libraryData = await libraryResponse.json();
         
         await db.transaction('rw', db.materials, db.resources, db.crews, db.crewComposition, async () => {
@@ -35,7 +35,7 @@ const populateInitialDataIfNeeded = async () => {
         });
 
         // --- 2. Populate the Default Project ---
-        const projectResponse = await fetch('import samples\sample projects\default multistory.json');
+        const projectResponse = await fetch('import samples/sample projects/default multistory.json');
         const projectData = await projectResponse.json();
 
         // Use the existing import function to handle all the complex ID re-linking

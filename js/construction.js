@@ -316,24 +316,17 @@ const getSCurveData = async (projectId, isRevised = false) => {
 
     if (grandTotalCost === 0) return null;
 
-    const dailyCosts = new Array(projectDuration + 1).fill(0);
+const dailyCosts = new Array(projectDuration + 1).fill(0);
     quantities.forEach(q => {
-        const task = tasks.get(q.id);
-        if (!task) return;
-        let totalTaskCost = 0;
-        if (q.type === 'subquantity') {
-            const parentDupa = dupaMap.get(q.quantityId);
-            const parentQuantity = parentQuantityMap.get(q.quantityId);
-            const parentTotalCost = calculateDupaTotalCost(parentDupa);
-            const numSubtasks = parentQuantity?.subquantities?.length || 1;
-            totalTaskCost = parentTotalCost / numSubtasks;
-        } else {
-            totalTaskCost = calculateDupaTotalCost(dupaMap.get(q.id));
-        }
-        if (task.duration > 0) {
-            const costPerDay = totalTaskCost / task.duration;
-            for (let day = task.es; day < task.ef; day++) {
-                if (day < dailyCosts.length) dailyCosts[day] += costPerDay;
+        const task = tasks.get(q.uniqueId); // Use the correct uniqueId for lookup
+        if (!task || !task.duration) return; // Skip tasks with no duration
+
+        const totalTaskCost = q.cost || 0; // Use the reliable pre-calculated cost
+        const costPerDay = totalTaskCost / task.duration;
+
+        for (let day = task.es; day < task.ef; day++) {
+            if (day < dailyCosts.length) {
+                dailyCosts[day] += costPerDay;
             }
         }
     });
@@ -365,6 +358,7 @@ const getSCurveData = async (projectId, isRevised = false) => {
     return {
         labels: labels,
         plannedPercentage: plannedPercentage,
+        cumulativeCosts: cumulativeCosts, // Add cumulative costs for the tooltip
         grandTotalCost: grandTotalCost,
         projectDuration: projectDuration
     };

@@ -421,19 +421,21 @@ const showSCurveForProject = async () => {
                     text: `Planned S-Curve (Total Project Cost: PHP ${data.grandTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`
                 },
                 tooltip: {
-                     callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
+                        callbacks: {
+                            label: function(context) {
+                                const y_percent = context.parsed.y;
+                                if (y_percent === null) return '';
+
+                                // Get the corresponding cumulative cost from the data object
+                                const y_cost = data.cumulativeCosts[context.dataIndex];
+
+                                const percentString = y_percent.toFixed(2) + '%';
+                                const costString = y_cost.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+
+                                return `${context.dataset.label}: ${percentString} (${costString})`;
                             }
-                            if (context.parsed.y !== null) {
-                                label += context.parsed.y.toFixed(2) + '%';
-                            }
-                            return label;
                         }
                     }
-                }
             }
         }
     });

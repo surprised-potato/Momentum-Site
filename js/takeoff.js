@@ -79,7 +79,7 @@ const showQuantitiesForProject = async (projectId, projectName) => {
     takeoffQuantitiesView.classList.remove('hidden');
 
     const lockedBoq = await db.boqs.get({ projectId: projectId });
-    addQuantityBtn.disabled = !!lockedBoq;
+    addQuantityBtn.classList.toggle('hidden', !!lockedBoq);
 
     await displayQuantities();
 };

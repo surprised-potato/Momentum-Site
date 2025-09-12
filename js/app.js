@@ -9,55 +9,55 @@ let currentDupaQuantityId = null;
 let currentSequencingProjectId = null;
 let currentBoqProjectId = null;
 
-// This function checks if the database is empty and loads sample data if it is.
+// --- End of app.js ---
+
 const populateInitialDataIfNeeded = async () => {
     try {
         const projectCount = await db.projects.count();
-        // If there's already data, do nothing.
         if (projectCount > 0) {
             return;
         }
 
         console.log('First-time setup: Populating database with sample data...');
 
-        // --- 1. Populate the Libraries ---
         const libraryResponse = await fetch('import samples/Sample Libraries/bat-os Materials.json');
         const libraryData = await libraryResponse.json();
         
         await db.transaction('rw', db.materials, db.resources, db.crews, db.crewComposition, async () => {
-            // --- FIX: De-duplicate data before putting it into the database ---
-            
-            // De-duplicate materials by their unique 'name'
             const uniqueMaterials = Array.from(
                 new Map(libraryData.materials.map(m => [m.name, m])).values()
             );
             await db.materials.bulkPut(uniqueMaterials);
         
-            // De-duplicate resources by their unique 'name' and 'type' combination
             const uniqueResources = Array.from(
                 new Map(libraryData.resources.map(r => [`${r.name}|${r.type}`, r])).values()
             );
             await db.resources.bulkPut(uniqueResources);
             
-            // De-duplicate crews by their unique 'name'
             const uniqueCrews = Array.from(
                 new Map(libraryData.crews.map(c => [c.name, c])).values()
             );
             await db.crews.bulkPut(uniqueCrews);
         
-            // Crew composition does not have a unique constraint, so it can be added directly
             await db.crewComposition.bulkPut(libraryData.crewComposition);
         });
 
-        // --- 2. Populate the Default Project ---
-        const projectResponse = await fetch('import samples/sample projects/default multistory.json');
-        const projectData = await projectResponse.json();
+        // --- 2. Populate the Sample Projects ---
+        // Use Promise.all to fetch both project files concurrently
+        const [projectResponse1, projectResponse2] = await Promise.all([
+            fetch('import samples/sample projects/default multistory.json'),
+            fetch('import samples/sample projects/commercial_cafe.json') // New file
+        ]);
 
-        // Use the existing import function to handle all the complex ID re-linking
-        await importProjectData(projectData);
+        const projectData1 = await projectResponse1.json();
+        const projectData2 = await projectResponse2.json(); // New data
 
-        // --- 3. Refresh the page to show the new data ---
-        alert('Welcome! Sample project and library data have been loaded.');
+        // Import both projects one after the other
+        await importProjectData(projectData1);
+        await importProjectData(projectData2); // New import call
+
+        // Update the alert message
+        alert('Welcome! Two sample projects and library data have been loaded.');
         window.location.reload();
 
     } catch (error) {
@@ -66,18 +66,14 @@ const populateInitialDataIfNeeded = async () => {
     }
 };
 
-// --- Application Initialization ---
-// Replace the entire document.addEventListener('DOMContentLoaded',...) block with this:
 window.addEventListener('load', () => {
-    db.open().then(async () => { // Make the function async
+    db.open().then(async () => {
         console.log("Database opened successfully.");
         
-        // NEW: Check for and populate initial data if needed.
         await populateInitialDataIfNeeded();
         
         mermaid.initialize({ startOnLoad: false });
         
-        // Initialize all modules
         initializeViewsModule();
         initializeProjectsModule();
         initializeTakeoffModule();
@@ -91,14 +87,11 @@ window.addEventListener('load', () => {
         initializeDupaLibraryModule();
         initializeLibraryManagementModule();
 
-        // Universal modal closing listener (handles both background and 'X' clicks)
         window.addEventListener('click', (event) => {
-            // If the dark modal background is clicked, hide the modal
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
                 return;
             }
-            // If an 'X' close button (or anything inside it) is clicked, find the parent modal and hide it
             const closeButton = event.target.closest('.close-button');
             if (closeButton) {
                 const modal = closeButton.closest('.modal');
@@ -108,7 +101,6 @@ window.addEventListener('load', () => {
             }
         });
 
-        // Show the initial view
         showDashboard();
 
     }).catch(err => {

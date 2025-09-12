@@ -1,0 +1,70 @@
+{
+  "project": {
+    "projectName": "Boutique Cafe & Roastery Showcase",
+    "address": "Lacson St., Bacolod City",
+    "clientName": "The Daily Grind Co.",
+    "projectDescription": "A commercial project for a boutique cafe, designed to showcase detailed DUPA with multiple resource types.",
+    "startDate": "2025-10-01",
+    "lotArea": 150,
+    "floorArea": 120,
+    "numFloors": 1,
+    "contractAmount": 3500000,
+    "contractDate": "2025-09-15",
+    "projectStatus": "On-Going",
+    "targetStartDate": "2025-09-25",
+    "contractDuration": 90,
+    "projectManager": "Engr. Alex Chen",
+    "clientContact": "contact@dailygrind.com"
+  },
+  "quantities": [
+    { "id": 1, "scopeOfWork": "Site Preparation", "quantity": 1, "unit": "lot", "category": "A. General & Site Works" },
+    { "id": 2, "scopeOfWork": "Structural Excavation for Foundations", "quantity": 35, "unit": "cu.m", "category": "B. Structural Works" },
+    { "id": 3, "scopeOfWork": "Foundation Rebar Installation", "quantity": 850, "unit": "kg", "category": "B. Structural Works" },
+    { "id": 4, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 18, "unit": "cu.m", "category": "B. Structural Works" },
+    { "id": 5, "scopeOfWork": "CHB Wall Masonry (Exterior & Interior)", "quantity": 150, "unit": "sq.m", "category": "C. Architectural Works" },
+    { "id": 6, "scopeOfWork": "Roof Framing and Installation", "quantity": 130, "unit": "sq.m", "category": "C. Architectural Works" },
+    { "id": 7, "scopeOfWork": "Window & Door Installation", "quantity": 1, "unit": "lot", "category": "C. Architectural Works" },
+    { "id": 8, "scopeOfWork": "MEPF Rough-ins (Commercial)", "quantity": 1, "unit": "lot", "category": "D. MEPF Works" },
+    { "id": 9, "scopeOfWork": "Interior & Exterior Wall Finishes", "quantity": 300, "unit": "sq.m", "category": "E. Finishes" },
+    { "id": 10, "scopeOfWork": "Floor Tiling (Main & Kitchen)", "quantity": 110, "unit": "sq.m", "category": "E. Finishes" },
+    { "id": 11, "scopeOfWork": "Fabricate & Install Service Counter", "quantity": 1, "unit": "lot", "category": "C. Architectural Works" },
+    { "id": 12, "scopeOfWork": "Final Fixture Installation & Commissioning", "quantity": 1, "unit": "lot", "category": "D. MEPF Works" }
+  ],
+  "dupas": [
+    { "id": 1, "quantityId": 1, "duration": 2, "directCosts": [{ "type": "labor", "laborType": "Laborer", "mandays": 6, "rate": 480 }], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 2, "quantityId": 2, "duration": 3, "directCosts": [{ "type": "labor", "laborType": "Laborer", "mandays": 12, "rate": 480 }], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 3, "quantityId": 3, "duration": 6, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 6, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Steelman)", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480}, {"type": "material", "name": "Deformed Rebar 16mm", "quantity": 500, "unit": "kg", "unitPrice": 52}, {"type": "material", "name": "Deformed Rebar 10mm", "quantity": 350, "unit": "kg", "unitPrice": 48}, {"type": "material", "name": "G.I. Tie Wire #16", "quantity": 13, "unit": "kg", "unitPrice": 85}, {"type": "equipment", "name": "Bar Cutter", "hours": 24, "rate": 250}, {"type": "equipment", "name": "Bar Bender", "hours": 24, "rate": 250} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 4, "quantityId": 4, "duration": 2, "directCosts": [ { "type": "labor", "laborType": "Construction Foreman", "mandays": 2, "rate": 850 }, { "type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 4, "rate": 650 }, { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 8, "rate": 480 }, { "type": "material", "name": "Portland Cement (40kg)", "quantity": 162, "unit": "bag", "unitPrice": 255 }, { "type": "material", "name": "Washed Sand", "quantity": 9, "unit": "cu.m", "unitPrice": 1350 }, { "type": "material", "name": "Gravel 3/4\"", "quantity": 18, "unit": "cu.m", "unitPrice": 1450 }, { "type": "material", "name": "Phenolic Plywood 1/2\"", "quantity": 10, "unit": "sheet", "unitPrice": 950 }, { "type": "material", "name": "Common Wire Nails", "quantity": 5, "unit": "kg", "unitPrice": 120 }, { "type": "equipment", "name": "Concrete Mixer (1-Bagger)", "hours": 16, "rate": 190 }, { "type": "equipment", "name": "Concrete Vibrator", "hours": 16, "rate": 150 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 5, "quantityId": 5, "duration": 10, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 10, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 30, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}, {"type": "material", "name": "4\" Concrete Hollow Blocks", "quantity": 1875, "unit": "Pcs", "unitPrice": 16}, {"type": "material", "name": "Portland Cement", "quantity": 40, "unit": "Bags", "unitPrice": 190}, {"type": "material", "name": "Mixing Sand", "quantity": 3.5, "unit": "Cu.M", "unitPrice": 1000}, {"type": "material", "name": "10mm dia. Deformed Bars x 6m length", "quantity": 75, "unit": "Kilos", "unitPrice": 43} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 6, "quantityId": 6, "duration": 8, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Roofer", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 8, "rate": 480}, {"type": "material", "name": "Rib Type Long Span Roofing", "quantity": 130, "unit": "Ln.M", "unitPrice": 350}, {"type": "material", "name": "Fascia", "quantity": 45, "unit": "Ln.M", "unitPrice": 400}, {"type": "material", "name": "Wall Cap", "quantity": 20, "unit": "Ln.M", "unitPrice": 400}, {"type": "material", "name": "Tek screw", "quantity": 800, "unit": "Pcs", "unitPrice": 1.5}, {"type": "material", "name": "Sealant", "quantity": 3, "unit": "Qrt", "unitPrice": 220} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 7, "quantityId": 7, "duration": 5, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 10, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 5, "rate": 480}, {"type": "material", "name": "Panel Door", "quantity": 3, "unit": "Pcs", "unitPrice": 9000}, {"type": "material", "name": "Door Jamb", "quantity": 3, "unit": "Pcs", "unitPrice": 2500}, {"type": "material", "name": "Hinges & Door Accessories", "quantity": 1, "unit": "Lots", "unitPrice": 1100}, {"type": "material", "name": "Door Knob", "quantity": 3, "unit": "Pcs", "unitPrice": 350}, {"type": "material", "name": "Door Painting", "quantity": 1, "unit": "Lots", "unitPrice": 1000}, {"type": "material", "name": "Window Set", "quantity": 1, "unit": "Lot", "unitPrice": 11000}, {"type": "material", "name": "2x2x8 Coco Lumber", "quantity": 10, "unit": "Lengths", "unitPrice": 130}, {"type": "material", "name": "C.W. Nails 4\"", "quantity": 2, "unit": "kilos", "unitPrice": 90} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 8, "quantityId": 8, "duration": 12, "directCosts": [ {"type": "labor", "laborType": "Master Electrician", "mandays": 12, "rate": 750 }, {"type": "labor", "laborType":"Master Plumber", "mandays": 12, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 24, "rate": 480}, {"type": "material", "name": "#12 Wires", "quantity": 1, "unit": "Box", "unitPrice": 4385}, {"type": "material", "name": "#14 Wires", "quantity": 1, "unit": "Box", "unitPrice": 2650}, {"type": "material", "name": "1/2\" PVC w/ junction boxes", "quantity": 30, "unit": "Lengths", "unitPrice": 155}, {"type": "material", "name": "Water Line 1/2\"", "quantity": 50, "unit": "m", "unitPrice": 50}, {"type": "material", "name": "Drainage Line", "quantity": 30, "unit": "m", "unitPrice": 240}, {"type": "material", "name": "PVC Elbow 1/2\" 90deg", "quantity": 20, "unit": "pc", "unitPrice": 15}, {"type": "material", "name": "PVC Clamp 1/2\"", "quantity": 50, "unit": "pc", "unitPrice": 5} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 9, "quantityId": 9, "duration": 8, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Painter", "mandays": 20, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Skim Coat", "quantity": 15, "unit": "Bags", "unitPrice": 475}, {"type": "material", "name": "Flat White Primer", "quantity": 8, "unit": "Gals", "unitPrice": 577.5}, {"type": "material", "name": "Latex Color", "quantity": 10, "unit": "Gals", "unitPrice": 750}, {"type": "material", "name": "Painting Consumables", "quantity": 1, "unit": "Lot", "unitPrice": 5244.19} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 10, "quantityId": 10, "duration": 7, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 15, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 7, "rate": 480}, {"type": "material", "name": "30x30 cm Ceramic Floor Tiles", "quantity": 1250, "unit": "Pcs", "unitPrice": 75}, {"type": "material", "name": "Tile Adhesive", "quantity": 22, "unit": "bag", "unitPrice": 250}, {"type": "material", "name": "Portland Cement", "quantity": 25, "unit": "Bags", "unitPrice": 190}, {"type": "material", "name": "Mixing Sand", "quantity": 3, "unit": "Cu.M", "unitPrice": 1000}, {"type": "material", "name": "Tile Grout (Beige)", "quantity": 5, "unit": "Bags", "unitPrice": 45} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 11, "quantityId": 11, "duration": 4, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 8, "rate": 650 }, {"type": "material", "name": "Tubular 2x2\"", "quantity": 4, "unit": "Lengths", "unitPrice": 550}, {"type": "material", "name": "Welding Rod", "quantity": 2, "unit": "Kilos", "unitPrice": 130}, {"type": "material", "name": "Marine Plywood 3/4\"", "quantity": 5, "unit": "sheet", "unitPrice": 1200}, {"type": "material", "name": "Laminate Sheets", "quantity": 5, "unit": "sheet", "unitPrice": 1500} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 12, "quantityId": 12, "duration": 6, "directCosts": [ {"type": "labor", "laborType": "Master Electrician", "mandays": 5, "rate": 750 }, {"type": "labor", "laborType": "Master Plumber", "mandays": 5, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Water Closet", "quantity": 1, "unit": "Pcs", "unitPrice": 6500}, {"type": "material", "name": "Lavatory", "quantity": 1, "unit": "Pcs", "unitPrice": 3500}, {"type": "material", "name": "Industrial Kitchen Sink", "quantity": 1, "unit": "Pcs", "unitPrice": 5000}, {"type": "material", "name": "Floor Drain", "quantity": 2, "unit": "Pcs", "unitPrice": 850}, {"type": "material", "name": "Panel Board", "quantity": 1, "unit": "Pcs", "unitPrice": 3000}, {"type": "material", "name": "60A 2p Breaker", "quantity": 1, "unit": "Pcs", "unitPrice": 750}, {"type": "material", "name": "30A 2p Breaker", "quantity": 3, "unit": "Pcs", "unitPrice": 500}, {"type": "material", "name": "15A 2p Breaker", "quantity": 4, "unit": "Pcs", "unitPrice": 400}, {"type": "material", "name": "Lighting Fixtures", "quantity": 10, "unit": "Pcs", "unitPrice": 800}, {"type": "material", "name": "Convenience Outlets", "quantity": 15, "unit": "Pcs", "unitPrice": 600} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
+  ],
+  "tasks": [
+    { "predecessorId": "PROJECT_START", "successorId": 1 },
+    { "predecessorId": 1, "successorId": 2 },
+    { "predecessorId": 2, "successorId": 3 },
+    { "predecessorId": 3, "successorId": 4 },
+    { "predecessorId": 4, "successorId": 5 },
+    { "predecessorId": 5, "successorId": 6 },
+    { "predecessorId": 5, "successorId": 8 },
+    { "predecessorId": 6, "successorId": 7 },
+    { "predecessorId": 7, "successorId": 9 },
+    { "predecessorId": 8, "successorId": 9 },
+    { "predecessorId": 9, "successorId": 10 },
+    { "predecessorId": 9, "successorId": 11 },
+    { "predecessorId": 10, "successorId": 12 },
+    { "predecessorId": 11, "successorId": 12 },
+    { "predecessorId": 12, "successorId": "PROJECT_END" }
+  ],
+  "accomplishments": [
+    { "type": "quantity", "taskId": 1, "subIndex": null, "date": "2025-10-02", "percentComplete": 100 },
+    { "type": "quantity", "taskId": 2, "subIndex": null, "date": "2025-10-03", "percentComplete": 50 },
+    { "type": "quantity", "taskId": 2, "subIndex": null, "date": "2025-10-04", "percentComplete": 50 },
+    { "type": "quantity", "taskId": 3, "subIndex": null, "date": "2025-10-07", "percentComplete": 100 }
+  ]
+}

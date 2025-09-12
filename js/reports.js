@@ -1,7 +1,6 @@
 // Author: Gemini
 // OS support: Cross-platform
 // Description: Logic for the Reports module (BOQ, PERT-CPM, and Gantt Chart).
-
 const boqProjectsListDiv = document.getElementById('boq-projects-list');
 const boqProjectName = document.getElementById('boq-project-name');
 const boqStatusMessage = document.getElementById('boq-status-message');
@@ -306,13 +305,11 @@ const showGanttChartForProject = async () => {
         return;
     }
 
-    // For a pre-construction planning Gantt, always use today as the relative start date.
-    // The actual project.startDate is only relevant for the Tracking Gantt.
     const projectStartDate = new Date();
     projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
 
     let tasksForGantt = data.quantities.map(q => {
-        const task = data.tasks.get(q.uniqueId); // FIX 1: Use the correct uniqueId for lookup
+        const task = data.tasks.get(q.uniqueId);
         if (!task) return null;
 
         const isCritical = (task.ls - task.es) <= 0;
@@ -321,13 +318,12 @@ const showGanttChartForProject = async () => {
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + task.duration);
         
-        // FIX 2: Use the uniqueIds for dependencies, which are now consistent
         const dependencies = Array.from(task.predecessors)
             .filter(pId => typeof pId !== 'string' || !pId.startsWith('PROJECT'))
             .join(', ');
 
         return {
-            id: q.uniqueId, // FIX 3: Use the uniqueId as the Gantt task ID
+            id: q.uniqueId,
             name: task.name,
             start: startDate.toISOString().split('T')[0],
             end: endDate.toISOString().split('T')[0],
@@ -338,19 +334,17 @@ const showGanttChartForProject = async () => {
         };
     }).filter(Boolean);
 
-    // **NEW**: Sort tasks based on the dropdown value
     const sortBy = document.getElementById('reports-gantt-sort').value;
     tasksForGantt.sort((a, b) => {
         if (sortBy === 'name') return a.name.localeCompare(b.name);
         if (sortBy === 'duration') return a.duration - b.duration;
-        return new Date(a.start) - new Date(b.start); // Default to sorting by start date
+        return new Date(a.start) - new Date(b.start);
     });
 
     ganttContainer.innerHTML = '';
     ganttChart = new Gantt("#gantt-chart-target", tasksForGantt, {
         view_mode: 'Week',
         custom_popup_html: function(task) {
-            // Use the duration property we just added
             return `<div class="gantt-popup-wrapper">
                 <strong>${task.name}</strong>
                 <p>Duration: ${task.duration} days</p>
@@ -435,7 +429,6 @@ const showSCurveForProject = async () => {
                                 const y_percent = context.parsed.y;
                                 if (y_percent === null) return '';
 
-                                // Get the corresponding cumulative cost from the data object
                                 const y_cost = data.cumulativeCosts[context.dataIndex];
 
                                 const percentString = y_percent.toFixed(2) + '%';
@@ -469,18 +462,16 @@ const showNetworkDiagram = async () => {
 
     let mermaidSyntax = 'graph TD;\n';
 
-    // 1. Define all nodes with correct details and consistent IDs
     data.quantities.forEach(q => {
-        const task = data.tasks.get(q.uniqueId); // FIX: Use uniqueId for lookup
+        const task = data.tasks.get(q.uniqueId);
         if (!task) return;
 
         const slack = task.ls - task.es;
         const isCritical = slack <= 0;
-        // FIX: Create a safe, consistent nodeId from the uniqueId
         const nodeId = q.uniqueId.replace(/-/g, '_'); 
         const nodeText = `"${task.name}<br/>D:${task.duration} ES:${task.es} EF:${task.ef}<br/>LS:${task.ls} LF:${task.lf} S:${slack}"`;
         
-        mermaidSyntax += `    ${nodeId}[${nodeText}];\n`; // Use [] for rectangle shape
+        mermaidSyntax += `    ${nodeId}[${nodeText}];\n`;
         if (isCritical) {
             mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
         }
@@ -491,13 +482,10 @@ const showNetworkDiagram = async () => {
     mermaidSyntax += '    style PRJ_START fill:#d1e7dd,stroke:#333,stroke-width:2px;\n';
     mermaidSyntax += '    style PRJ_END fill:#d1e7dd,stroke:#333,stroke-width:2px;\n';
 
-    // 2. Define all links using the same consistent ID format
     data.tasks.forEach((task, taskId) => {
-        // FIX: Sanitize the predecessor ID to match the node definition
         const predecessorNodeId = (taskId === 'PROJECT_START') ? 'PRJ_START' : taskId.replace(/-/g, '_');
 
         task.successors.forEach(successorId => {
-            // FIX: Sanitize the successor ID to match the node definition
             const successorNodeId = (successorId === 'PROJECT_END') ? 'PRJ_END' : successorId.replace(/-/g, '_');
             
             if (data.tasks.has(taskId) && data.tasks.has(successorId)) {
@@ -550,7 +538,6 @@ const showManpowerEquipmentSchedule = async () => {
         const dupa = dupaMap.get(numericId);
         if (!dupa) continue;
 
-        // --- START: Added Logic for Daily Cost Calculation ---
         const totalTaskCost = calculateDupaTotalCost(dupa);
         if (totalTaskCost > 0) {
             const costPerDay = totalTaskCost / task.duration;
@@ -564,9 +551,8 @@ const showManpowerEquipmentSchedule = async () => {
                 }
             }
         }
-        // --- END: Added Logic ---
         
-        if (!dupa.directCosts) continue; // Keep this check for the direct costs loop below
+        if (!dupa.directCosts) continue;
 
         dupa.directCosts.forEach(dc => {
             let resourceName = '';
@@ -610,23 +596,24 @@ const showManpowerEquipmentSchedule = async () => {
     }
     tableHtml += '</tr></thead><tbody>';
 
-    // FIX 1: Add a "Financials" group
-    const groupedResources = { 'Labor': [], 'Equipment': [], 'Financials': [] };
+    const laborResources = [];
+    const equipmentResources = [];
+    const financialResources = [];
+
     Object.keys(dailyResources).sort().forEach(name => {
         const unit = dailyResources[name].unit;
-        if (unit === 'md') groupedResources['Labor'].push(name);
-        else if (unit === 'hrs') groupedResources['Equipment'].push(name);
-        else if (unit === 'PHP') groupedResources['Financials'].push(name);
+        if (unit === 'md') laborResources.push(name);
+        else if (unit === 'hrs') equipmentResources.push(name);
+        else if (unit === 'PHP') financialResources.push(name);
     });
 
-    for (const group in groupedResources) {
-        if (groupedResources[group].length > 0) {
-            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${group}</td></tr>`;
-            groupedResources[group].forEach(resourceName => {
+    const renderGroup = (groupName, resources) => {
+        if (resources.length > 0) {
+            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${groupName}</td></tr>`;
+            resources.forEach(resourceName => {
                 const data = dailyResources[resourceName];
                 tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
                 data.schedule.forEach(amount => {
-                    // FIX 2: Format cash as currency, others as numbers
                     let displayAmount = '-';
                     if (amount > 0) {
                         displayAmount = (data.unit === 'PHP')
@@ -638,7 +625,11 @@ const showManpowerEquipmentSchedule = async () => {
                 tableHtml += '</tr>';
             });
         }
-    }
+    };
+
+    renderGroup('Labor', laborResources);
+    renderGroup('Equipment', equipmentResources);
+    renderGroup('Financials', financialResources);
 
     tableHtml += '</tbody></table>';
     scheduleContainer.innerHTML = tableHtml;
@@ -652,28 +643,47 @@ const showDupaDetails = async (quantityId) => {
         return;
     }
     let content = '';
-    let directCostTotal = 0;
+    
+    const laborCosts = dupa.directCosts.filter(dc => dc.type === 'labor');
+    const materialCosts = dupa.directCosts.filter(dc => dc.type === 'material');
+    const equipmentCosts = dupa.directCosts.filter(dc => dc.type === 'equipment');
+
     content += '<h5 class="dupa-category-header">Direct Costs</h5><table class="dupa-table"><thead><tr><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody>';
-    dupa.directCosts.forEach(item => {
-        let itemTotal = 0;
-        let description = '';
-        switch (item.type) {
-            case 'labor':
-                itemTotal = item.mandays * item.rate;
-                description = `${item.laborType} (${item.mandays} md @ ${item.rate.toFixed(2)})`;
-                break;
-            case 'material':
-                itemTotal = item.quantity * item.unitPrice;
-                description = `${item.name} (${item.quantity} ${item.unit} @ ${item.unitPrice.toFixed(2)})`;
-                break;
-            case 'equipment':
-                itemTotal = item.hours * item.rate;
-                description = `${item.name} (${item.hours} hrs @ ${item.rate.toFixed(2)})`;
-                break;
-        }
-        directCostTotal += itemTotal;
-        content += `<tr><td>${description}</td><td style="text-align:right;">${itemTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
-    });
+
+    let laborSubtotal = 0;
+    if (laborCosts.length > 0) {
+        laborSubtotal = laborCosts.reduce((sum, item) => sum + (item.mandays * item.rate), 0);
+        content += `<tr class="category-header-row"><td style="font-weight:bold;">Labor</td><td style="text-align:right; font-weight:bold;">${laborSubtotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
+        laborCosts.forEach(item => {
+            const itemTotal = item.mandays * item.rate;
+            const description = `${item.laborType} (${item.mandays} md @ ${item.rate.toFixed(2)})`;
+            content += `<tr><td>${description}</td><td style="text-align:right;">${itemTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
+        });
+    }
+
+    let materialSubtotal = 0;
+    if (materialCosts.length > 0) {
+        materialSubtotal = materialCosts.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+        content += `<tr class="category-header-row"><td style="font-weight:bold;">Materials</td><td style="text-align:right; font-weight:bold;">${materialSubtotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
+        materialCosts.forEach(item => {
+            const itemTotal = item.quantity * item.unitPrice;
+            const description = `${item.name} (${item.quantity} ${item.unit} @ ${item.unitPrice.toFixed(2)})`;
+            content += `<tr><td>${description}</td><td style="text-align:right;">${itemTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
+        });
+    }
+    
+    let equipmentSubtotal = 0;
+    if (equipmentCosts.length > 0) {
+        equipmentSubtotal = equipmentCosts.reduce((sum, item) => sum + (item.hours * item.rate), 0);
+        content += `<tr class="category-header-row"><td style="font-weight:bold;">Equipment</td><td style="text-align:right; font-weight:bold;">${equipmentSubtotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
+        equipmentCosts.forEach(item => {
+            const itemTotal = item.hours * item.rate;
+            const description = `${item.name} (${item.hours} hrs @ ${item.rate.toFixed(2)})`;
+            content += `<tr><td>${description}</td><td style="text-align:right;">${itemTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
+        });
+    }
+
+    const directCostTotal = laborSubtotal + materialSubtotal + equipmentSubtotal;
     content += `<tr><td style="text-align:right; font-weight:bold;">Total Direct Cost</td><td style="text-align:right; font-weight:bold;">${directCostTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
     content += '</tbody></table>';
 
@@ -698,7 +708,7 @@ const showDupaDetails = async (quantityId) => {
     content += '</tbody></table>';
 
     dupaReportContent.innerHTML = content;
-    dupaReportTitle.textContent = `DUPA Breakdown`;
+    dupaReportTitle.textContent = `DUPA Breakdown: ${quantity.scopeOfWork}`;
     openDupaReportModal();
 };
 
@@ -817,7 +827,6 @@ const showRevisedNetworkDiagram = async () => {
     });
 
     try {
-        // Use a unique ID for rendering to avoid conflicts with the other diagram
         const { svg } = await mermaid.render('mermaid-graph-render-revised', mermaidSyntax);
         diagramContainer.innerHTML = svg;
     } catch (e) {
@@ -826,7 +835,6 @@ const showRevisedNetworkDiagram = async () => {
     }
 };
 
-// Add this new function to js/reports.js
 const showRevisedResourceSchedule = async () => {
     revisedPertCpmDisplayView.classList.add('hidden');
     revisedResourceScheduleView.classList.remove('hidden');
@@ -910,18 +918,21 @@ const showRevisedResourceSchedule = async () => {
     }
     tableHtml += '</tr></thead><tbody>';
 
-    const groupedResources = { 'Labor': [], 'Equipment': [], 'Financials': [] };
+    const laborResources = [];
+    const equipmentResources = [];
+    const financialResources = [];
+
     Object.keys(dailyResources).sort().forEach(name => {
         const unit = dailyResources[name].unit;
-        if (unit === 'md') groupedResources['Labor'].push(name);
-        else if (unit === 'hrs') groupedResources['Equipment'].push(name);
-        else if (unit === 'PHP') groupedResources['Financials'].push(name);
+        if (unit === 'md') laborResources.push(name);
+        else if (unit === 'hrs') equipmentResources.push(name);
+        else if (unit === 'PHP') financialResources.push(name);
     });
 
-    for (const group in groupedResources) {
-        if (groupedResources[group].length > 0) {
-            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${group}</td></tr>`;
-            groupedResources[group].forEach(resourceName => {
+    const renderGroup = (groupName, resources) => {
+        if (resources.length > 0) {
+            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${groupName}</td></tr>`;
+            resources.forEach(resourceName => {
                 const data = dailyResources[resourceName];
                 tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
                 data.schedule.forEach(amount => {
@@ -936,7 +947,11 @@ const showRevisedResourceSchedule = async () => {
                 tableHtml += '</tr>';
             });
         }
-    }
+    };
+
+    renderGroup('Labor', laborResources);
+    renderGroup('Equipment', equipmentResources);
+    renderGroup('Financials', financialResources);
 
     tableHtml += '</tbody></table>';
     scheduleContainer.innerHTML = tableHtml;
@@ -1048,9 +1063,7 @@ const showRevisedPertCpmForProject = async () => {
         const taskA = data.tasks.get(a.uniqueId);
         const taskB = data.tasks.get(b.uniqueId);
         if (!taskA || !taskB) return 0;
-        // If Early Start times are the same, sort by name
         if (taskA.es === taskB.es) return taskA.name.localeCompare(taskB.name);
-        // Primary sort is by Early Start time
         return taskA.es - taskB.es;
     });
 
@@ -1120,12 +1133,10 @@ function initializeReportsModule() {
     
     viewRevisedPertCpmBtn.addEventListener('click', showRevisedPertCpmForProject);
     
-    // ADD LISTENERS FOR THE NEW BUTTONS
     const viewRevisedNetworkDiagramBtn = document.getElementById('view-revised-network-diagram-btn');
     const viewRevisedResourceScheduleBtn = document.getElementById('view-revised-resource-schedule-btn');
 
     if (viewRevisedNetworkDiagramBtn) viewRevisedNetworkDiagramBtn.addEventListener('click', showRevisedNetworkDiagram);
     if (viewRevisedResourceScheduleBtn) viewRevisedResourceScheduleBtn.addEventListener('click', showRevisedResourceSchedule);
 }
-
-// --- End of reports.js ---
+// --- End of js/reports.js ---

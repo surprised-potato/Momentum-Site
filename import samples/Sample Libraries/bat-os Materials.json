@@ -1,309 +1,9 @@
 {
   "materials": [
     {
-      "name": "2x2x8 Coco Lumber",
-      "unit": "Lengths",
-      "unitPrice": 130
-    },
-    {
-      "name": "C.W. Nails 4\"",
-      "unit": "kilos",
-      "unitPrice": 90
-    },
-    {
-      "name": "Nylon",
-      "unit": "Rolls",
-      "unitPrice": 70
-    },
-    {
-      "name": "Portland Cement",
-      "unit": "Bags",
-      "unitPrice": 190
-    },
-    {
-      "name": "Mixing Sand",
-      "unit": "Cu.M",
-      "unitPrice": 1000
-    },
-    {
-      "name": "3/4\" Crushed Gravel",
-      "unit": "Cu.M",
-      "unitPrice": 1650
-    },
-    {
-      "name": "16 mm dia. Deformed Bars x 6m length",
-      "unit": "Kilos",
-      "unitPrice": 43
-    },
-    {
-      "name": "#16 GI Tie wire",
-      "unit": "Kilos",
-      "unitPrice": 60
-    },
-    {
-      "name": "12 mm dia. Deformed Bars x 6m length",
-      "unit": "Kilos",
-      "unitPrice": 43
-    },
-    {
-      "name": "10mm dia. Deformed Bars x 6m length",
-      "unit": "Kilos",
-      "unitPrice": 43
-    },
-    {
-      "name": "4\" Concrete Hollow Blocks",
-      "unit": "Pcs",
-      "unitPrice": 16
-    },
-    {
-      "name": "Masonry Cement",
-      "unit": "Bags",
-      "unitPrice": 190
-    },
-    {
-      "name": "GA16 2x6 C-Purlins",
-      "unit": "Lengths",
-      "unitPrice": 703
-    },
-    {
-      "name": "Ga16 2x4 C-Purlins",
-      "unit": "Lengths",
-      "unitPrice": 559
-    },
-    {
-      "name": "8mm DRB (Webbing)",
-      "unit": "Lengths",
-      "unitPrice": 95
-    },
-    {
-      "name": "Welding Rod E 6013 (1/8)",
-      "unit": "Kilos",
-      "unitPrice": 135
-    },
-    {
-      "name": "Red Lead Primer/Metal Primer",
-      "unit": "Gals",
-      "unitPrice": 465
-    },
-    {
-      "name": "Paint thinner",
-      "unit": "Qrts",
-      "unitPrice": 99
-    },
-    {
-      "name": "Rib Type Long Span Roofing",
-      "unit": "Ln.M",
-      "unitPrice": 350
-    },
-    {
-      "name": "Wall Cap",
-      "unit": "Ln.M",
-      "unitPrice": 400
-    },
-    {
-      "name": "Fascia",
-      "unit": "Ln.M",
-      "unitPrice": 400
-    },
-    {
-      "name": "False Gutter",
-      "unit": "Ln.M",
-      "unitPrice": 400
-    },
-    {
-      "name": "Tek screw",
-      "unit": "Pcs",
-      "unitPrice": 1.5
-    },
-    {
-      "name": "Blind rivets",
+      "name": "#10 Wires",
       "unit": "Box",
-      "unitPrice": 500
-    },
-    {
-      "name": "Touch up Paint",
-      "unit": "Qrt",
-      "unitPrice": 250
-    },
-    {
-      "name": "Sealant",
-      "unit": "Qrt",
-      "unitPrice": 220
-    },
-    {
-      "name": "Cladding",
-      "unit": "Sq.M",
-      "unitPrice": 350
-    },
-    {
-      "name": "Cladding Edge",
-      "unit": "Lengths",
-      "unitPrice": 100
-    },
-    {
-      "name": "Tubular 2x2\"",
-      "unit": "Lengths",
-      "unitPrice": 550
-    },
-    {
-      "name": "3.5mm Hardiflex Lite",
-      "unit": "Sheets",
-      "unitPrice": 585
-    },
-    {
-      "name": "Metal Furring (25mm X 50 X 20 X 5m)",
-      "unit": "Lengths",
-      "unitPrice": 115
-    },
-    {
-      "name": "Metal screw(Hardie drive Screw)n0.12 x 1/2\"",
-      "unit": "Pcs",
-      "unitPrice": 1.1
-    },
-    {
-      "name": "1/8 x 1/2 Blind rivets",
-      "unit": "Box",
-      "unitPrice": 250
-    },
-    {
-      "name": "Roll-Up Door",
-      "unit": "Pcs",
-      "unitPrice": 15000
-    },
-    {
-      "name": "Panel Door",
-      "unit": "Pcs",
-      "unitPrice": 9000
-    },
-    {
-      "name": "Door Jamb",
-      "unit": "Pcs",
-      "unitPrice": 2500
-    },
-    {
-      "name": "Hinges & Door Accessories",
-      "unit": "Lots",
-      "unitPrice": 1100
-    },
-    {
-      "name": "Door Painting",
-      "unit": "Lots",
-      "unitPrice": 1000
-    },
-    {
-      "name": "PVC Door",
-      "unit": "Pcs",
-      "unitPrice": 2000
-    },
-    {
-      "name": "Door Knob",
-      "unit": "Pcs",
-      "unitPrice": 350
-    },
-    {
-      "name": "Window Set",
-      "unit": "Lot",
-      "unitPrice": 11000
-    },
-    {
-      "name": "Outdoor Concrete Counter",
-      "unit": "Pcs",
-      "unitPrice": 1000
-    },
-    {
-      "name": "20x20 cm Ceramic tiles (White)",
-      "unit": "Pcs",
-      "unitPrice": 45
-    },
-    {
-      "name": "Clinic Counter (Granite top)",
-      "unit": "Pcs",
-      "unitPrice": 15000
-    },
-    {
-      "name": "Concrete Counter",
-      "unit": "Lot",
-      "unitPrice": 1500
-    },
-    {
-      "name": "Tile Grout (White)",
-      "unit": "Bags",
-      "unitPrice": 45
-    },
-    {
-      "name": "Tile Trim (White)",
-      "unit": "Lengths",
-      "unitPrice": 115
-    },
-    {
-      "name": "30x30 cm Ceramic Floor Tiles",
-      "unit": "Pcs",
-      "unitPrice": 75
-    },
-    {
-      "name": "30x30 cm Ceramic wall tiles",
-      "unit": "Pcs",
-      "unitPrice": 75
-    },
-    {
-      "name": "Tile Grout (Beige)",
-      "unit": "Bags",
-      "unitPrice": 45
-    },
-    {
-      "name": "Skim Coat",
-      "unit": "Bags",
-      "unitPrice": 475
-    },
-    {
-      "name": "Flat White Primer",
-      "unit": "Gals",
-      "unitPrice": 577.5
-    },
-    {
-      "name": "Latex Color",
-      "unit": "Gals",
-      "unitPrice": 750
-    },
-    {
-      "name": "Painting Consumables",
-      "unit": "Lot",
-      "unitPrice": 5244.19
-    },
-    {
-      "name": "Submeter",
-      "unit": "Pcs",
-      "unitPrice": 1500
-    },
-    {
-      "name": "Panel Board",
-      "unit": "Pcs",
-      "unitPrice": 3000
-    },
-    {
-      "name": "60A 2p Breaker",
-      "unit": "Pcs",
-      "unitPrice": 750
-    },
-    {
-      "name": "30A 2p Breaker",
-      "unit": "Pcs",
-      "unitPrice": 500
-    },
-    {
-      "name": "15A 2p Breaker",
-      "unit": "Pcs",
-      "unitPrice": 400
-    },
-    {
-      "name": "Lighting Fixtures",
-      "unit": "Pcs",
-      "unitPrice": 800
-    },
-    {
-      "name": "Convenience Outlets",
-      "unit": "Pcs",
-      "unitPrice": 600
+      "unitPrice": 6442
     },
     {
       "name": "#12 Wires",
@@ -316,9 +16,9 @@
       "unitPrice": 2650
     },
     {
-      "name": "#10 Wires",
-      "unit": "Box",
-      "unitPrice": 6442
+      "name": "#16 GI Tie wire",
+      "unit": "Kilos",
+      "unitPrice": 60
     },
     {
       "name": "1/2\" PVC w/ junction boxes",
@@ -326,74 +26,9 @@
       "unitPrice": 155
     },
     {
-      "name": "Main Valve",
-      "unit": "Pcs",
-      "unitPrice": 225
-    },
-    {
-      "name": "Outdoor Sink W/ Accessories",
-      "unit": "Pcs",
-      "unitPrice": 2500
-    },
-    {
-      "name": "Lavatory",
-      "unit": "Pcs",
-      "unitPrice": 3500
-    },
-    {
-      "name": "Water Closet",
-      "unit": "Pcs",
-      "unitPrice": 6500
-    },
-    {
-      "name": "Floor Drain",
-      "unit": "Pcs",
-      "unitPrice": 850
-    },
-    {
-      "name": "Catch Basin",
-      "unit": "Pcs",
-      "unitPrice": 3000
-    },
-    {
-      "name": "Water Line 1/2\"",
-      "unit": "m",
-      "unitPrice": 50
-    },
-    {
-      "name": "Drainage Line",
-      "unit": "m",
-      "unitPrice": 240
-    },
-    {
-      "name": "HDPE Septic Vault",
-      "unit": "Pcs",
-      "unitPrice": 11000
-    },
-    {
-      "name": "Gate Accessories",
-      "unit": "Lot",
-      "unitPrice": 1000
-    },
-    {
-      "name": "Frame 2\" Round Pipe",
-      "unit": "Lengths",
-      "unitPrice": 460
-    },
-    {
-      "name": "Mesh Wire",
-      "unit": "Sheets",
-      "unitPrice": 315
-    },
-    {
-      "name": "Plain Sheet",
-      "unit": "Sheets",
-      "unitPrice": 465
-    },
-    {
-      "name": "Gate Accessories (Type 2)",
-      "unit": "Lots",
-      "unitPrice": 2000
+      "name": "1/8 x 1/2 Blind rivets",
+      "unit": "Box",
+      "unitPrice": 250
     },
     {
       "name": "1\" Round Pipe",
@@ -401,9 +36,264 @@
       "unitPrice": 460
     },
     {
-      "name": "Gate Accessories (Type 3)",
-      "unit": "lots",
+      "name": "10mm dia. Deformed Bars x 6m length",
+      "unit": "Kilos",
+      "unitPrice": 43
+    },
+    {
+      "name": "12 mm dia. Deformed Bars x 6m length",
+      "unit": "Kilos",
+      "unitPrice": 43
+    },
+    {
+      "name": "15A 2p Breaker",
+      "unit": "Pcs",
+      "unitPrice": 400
+    },
+    {
+      "name": "16 mm dia. Deformed Bars x 6m length",
+      "unit": "Kilos",
+      "unitPrice": 43
+    },
+    {
+      "name": "20x20 cm Ceramic tiles (White)",
+      "unit": "Pcs",
+      "unitPrice": 45
+    },
+    {
+      "name": "2x2x8 Coco Lumber",
+      "unit": "Lengths",
+      "unitPrice": 130
+    },
+    {
+      "name": "3/4\" Crushed Gravel",
+      "unit": "Cu.M",
+      "unitPrice": 1650
+    },
+    {
+      "name": "3.5mm Hardiflex Lite",
+      "unit": "Sheets",
+      "unitPrice": 585
+    },
+    {
+      "name": "30A 2p Breaker",
+      "unit": "Pcs",
       "unitPrice": 500
+    },
+    {
+      "name": "30x30 cm Ceramic Floor Tiles",
+      "unit": "Pcs",
+      "unitPrice": 75
+    },
+    {
+      "name": "30x30 cm Ceramic wall tiles",
+      "unit": "Pcs",
+      "unitPrice": 75
+    },
+    {
+      "name": "4\" Concrete Hollow Blocks",
+      "unit": "Pcs",
+      "unitPrice": 16
+    },
+    {
+      "name": "60A 2p Breaker",
+      "unit": "Pcs",
+      "unitPrice": 750
+    },
+    {
+      "name": "8mm DRB (Webbing)",
+      "unit": "Lengths",
+      "unitPrice": 95
+    },
+    {
+      "name": "Blind rivets",
+      "unit": "Box",
+      "unitPrice": 500
+    },
+    {
+      "name": "C-Channel 2″ x 4″",
+      "unit": "pc",
+      "unitPrice": 1500
+    },
+    {
+      "name": "C-Channel 2″ x 5″",
+      "unit": "pc",
+      "unitPrice": 1850
+    },
+    {
+      "name": "C-Channel 2″ x 6″",
+      "unit": "pc",
+      "unitPrice": 2080
+    },
+    {
+      "name": "C.W. Nails 4\"",
+      "unit": "kilos",
+      "unitPrice": 90
+    },
+    {
+      "name": "Catch Basin",
+      "unit": "Pcs",
+      "unitPrice": 3000
+    },
+    {
+      "name": "CHB 4\"",
+      "unit": "pc",
+      "unitPrice": 14
+    },
+    {
+      "name": "CHB 6\"",
+      "unit": "pc",
+      "unitPrice": 18
+    },
+    {
+      "name": "Cladding",
+      "unit": "Sq.M",
+      "unitPrice": 350
+    },
+    {
+      "name": "Cladding Edge",
+      "unit": "Lengths",
+      "unitPrice": 100
+    },
+    {
+      "name": "Clinic Counter (Granite top)",
+      "unit": "Pcs",
+      "unitPrice": 15000
+    },
+    {
+      "name": "Common Wire Nails",
+      "unit": "kg",
+      "unitPrice": 120
+    },
+    {
+      "name": "Concrete Counter",
+      "unit": "Lot",
+      "unitPrice": 1500
+    },
+    {
+      "name": "Concrete Mix",
+      "unit": "cu.m",
+      "unitPrice": 5000
+    },
+    {
+      "name": "Convenience Outlets",
+      "unit": "Pcs",
+      "unitPrice": 600
+    },
+    {
+      "name": "Deformed Rebar 10 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 200
+    },
+    {
+      "name": "Deformed Rebar 10 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 250
+    },
+    {
+      "name": "Deformed Rebar 10 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 300
+    },
+    {
+      "name": "Deformed Rebar 10mm",
+      "unit": "kg",
+      "unitPrice": 48
+    },
+    {
+      "name": "Deformed Rebar 12 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 288
+    },
+    {
+      "name": "Deformed Rebar 12 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 360
+    },
+    {
+      "name": "Deformed Rebar 12 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 432
+    },
+    {
+      "name": "Deformed Rebar 16 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 512
+    },
+    {
+      "name": "Deformed Rebar 16 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 640
+    },
+    {
+      "name": "Deformed Rebar 16 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 768
+    },
+    {
+      "name": "Deformed Rebar 16mm",
+      "unit": "kg",
+      "unitPrice": 52
+    },
+    {
+      "name": "Deformed Rebar 20 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 800
+    },
+    {
+      "name": "Deformed Rebar 20 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 1000
+    },
+    {
+      "name": "Deformed Rebar 20 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 1200
+    },
+    {
+      "name": "Deformed Rebar 25 mm x 6.0 M",
+      "unit": "pc",
+      "unitPrice": 1250
+    },
+    {
+      "name": "Deformed Rebar 25 mm x 7.5 M",
+      "unit": "pc",
+      "unitPrice": 1560
+    },
+    {
+      "name": "Deformed Rebar 25 mm x 9.0 M",
+      "unit": "pc",
+      "unitPrice": 1870
+    },
+    {
+      "name": "Door Jamb",
+      "unit": "Pcs",
+      "unitPrice": 2500
+    },
+    {
+      "name": "Door Knob",
+      "unit": "Pcs",
+      "unitPrice": 350
+    },
+    {
+      "name": "Door Painting",
+      "unit": "Lots",
+      "unitPrice": 1000
+    },
+    {
+      "name": "Doors",
+      "unit": "sets",
+      "unitPrice": 5000
+    },
+    {
+      "name": "Drainage Line",
+      "unit": "m",
+      "unitPrice": 240
+    },
+    {
+      "name": "Elastomeric Paint",
+      "unit": "gal",
+      "unitPrice": 1200
     },
     {
       "name": "Epoxy Primer Black",
@@ -411,18 +301,653 @@
       "unitPrice": 875
     },
     {
+      "name": "False Gutter",
+      "unit": "Ln.M",
+      "unitPrice": 400
+    },
+    {
+      "name": "Fascia",
+      "unit": "Ln.M",
+      "unitPrice": 400
+    },
+    {
+      "name": "Flat White Primer",
+      "unit": "Gals",
+      "unitPrice": 577.5
+    },
+    {
+      "name": "Floor Drain",
+      "unit": "Pcs",
+      "unitPrice": 850
+    },
+    {
+      "name": "Floor Tiles",
+      "unit": "sq.m",
+      "unitPrice": 350
+    },
+    {
+      "name": "Frame 2\" Round Pipe",
+      "unit": "Lengths",
+      "unitPrice": 460
+    },
+    {
+      "name": "G.I. Tie Wire #16",
+      "unit": "kg",
+      "unitPrice": 85
+    },
+    {
+      "name": "GA16 2x6 C-Purlins",
+      "unit": "Lengths",
+      "unitPrice": 703
+    },
+    {
+      "name": "Ga16 2x4 C-Purlins",
+      "unit": "Lengths",
+      "unitPrice": 559
+    },
+    {
+      "name": "Gate Accessories",
+      "unit": "Lot",
+      "unitPrice": 1000
+    },
+    {
+      "name": "Gate Accessories (Type 2)",
+      "unit": "Lots",
+      "unitPrice": 2000
+    },
+    {
+      "name": "Gate Accessories (Type 3)",
+      "unit": "lots",
+      "unitPrice": 500
+    },
+    {
+      "name": "Gravel 3/4\"",
+      "unit": "cu.m",
+      "unitPrice": 1450
+    },
+    {
+      "name": "Gypsum Board",
+      "unit": "pcs",
+      "unitPrice": 400
+    },
+    {
+      "name": "HDPE Septic Vault",
+      "unit": "Pcs",
+      "unitPrice": 11000
+    },
+    {
+      "name": "Hinges & Door Accessories",
+      "unit": "Lots",
+      "unitPrice": 1100
+    },
+    {
+      "name": "Industrial Kitchen Sink",
+      "unit": "Pcs",
+      "unitPrice": 5000
+    },
+    {
+      "name": "Laminate Sheets",
+      "unit": "sheet",
+      "unitPrice": 1500
+    },
+    {
+      "name": "Latex Color",
+      "unit": "Gals",
+      "unitPrice": 750
+    },
+    {
+      "name": "Latex Paint",
+      "unit": "gal",
+      "unitPrice": 800
+    },
+    {
+      "name": "Lavatory",
+      "unit": "Pcs",
+      "unitPrice": 3500
+    },
+    {
+      "name": "Lighting and Outlets",
+      "unit": "lot",
+      "unitPrice": 40000
+    },
+    {
+      "name": "Lighting Fixtures",
+      "unit": "Pcs",
+      "unitPrice": 800
+    },
+    {
+      "name": "Main Valve",
+      "unit": "Pcs",
+      "unitPrice": 225
+    },
+    {
+      "name": "Marine Plywood 3/4\"",
+      "unit": "sheet",
+      "unitPrice": 1200
+    },
+    {
+      "name": "Masonry Cement",
+      "unit": "Bags",
+      "unitPrice": 190
+    },
+    {
+      "name": "Mesh Wire",
+      "unit": "Sheets",
+      "unitPrice": 315
+    },
+    {
+      "name": "Metal Furring (25mm X 50 X 20 X 5m)",
+      "unit": "Lengths",
+      "unitPrice": 115
+    },
+    {
+      "name": "Metal Roofing System",
+      "unit": "sq.m",
+      "unitPrice": 850
+    },
+    {
+      "name": "Metal screw(Hardie drive Screw)n0.12 x 1/2\"",
+      "unit": "Pcs",
+      "unitPrice": 1.1
+    },
+    {
+      "name": "Mixing Sand",
+      "unit": "Cu.M",
+      "unitPrice": 1000
+    },
+    {
+      "name": "Nylon",
+      "unit": "Rolls",
+      "unitPrice": 70
+    },
+    {
+      "name": "Outdoor Concrete Counter",
+      "unit": "Pcs",
+      "unitPrice": 1000
+    },
+    {
+      "name": "Outdoor Sink W/ Accessories",
+      "unit": "Pcs",
+      "unitPrice": 2500
+    },
+    {
+      "name": "Paint thinner",
+      "unit": "Qrts",
+      "unitPrice": 99
+    },
+    {
+      "name": "Painting Consumables",
+      "unit": "Lot",
+      "unitPrice": 5244.19
+    },
+    {
+      "name": "Panel Board",
+      "unit": "Pcs",
+      "unitPrice": 3000
+    },
+    {
+      "name": "Panel Door",
+      "unit": "Pcs",
+      "unitPrice": 9000
+    },
+    {
+      "name": "Phenolic Plywood 1/2\"",
+      "unit": "sheet",
+      "unitPrice": 950
+    },
+    {
+      "name": "Plain Sheet",
+      "unit": "Sheets",
+      "unitPrice": 465
+    },
+    {
+      "name": "Plaster Mix",
+      "unit": "bags",
+      "unitPrice": 220
+    },
+    {
+      "name": "Plastering Mortar",
+      "unit": "bag",
+      "unitPrice": 240
+    },
+    {
+      "name": "Portland Cement",
+      "unit": "Bags",
+      "unitPrice": 190
+    },
+    {
+      "name": "Portland Cement (40kg)",
+      "unit": "bag",
+      "unitPrice": 255
+    },
+    {
+      "name": "PPR Pipes",
+      "unit": "lot",
+      "unitPrice": 25000
+    },
+    {
+      "name": "PVC Clamp 1/2\"",
+      "unit": "pc",
+      "unitPrice": 5
+    },
+    {
+      "name": "PVC Door",
+      "unit": "Pcs",
+      "unitPrice": 2000
+    },
+    {
+      "name": "PVC Elbow 1/2\" 90deg",
+      "unit": "pc",
+      "unitPrice": 15
+    },
+    {
+      "name": "Ready-Mix Concrete",
+      "unit": "cu.m",
+      "unitPrice": 5500
+    },
+    {
+      "name": "Red Lead Primer/Metal Primer",
+      "unit": "Gals",
+      "unitPrice": 465
+    },
+    {
+      "name": "Rib Type Long Span Roofing",
+      "unit": "Ln.M",
+      "unitPrice": 350
+    },
+    {
+      "name": "Roll-Up Door",
+      "unit": "Pcs",
+      "unitPrice": 15000
+    },
+    {
+      "name": "Roof Sheets",
+      "unit": "sq.m",
+      "unitPrice": 450
+    },
+    {
+      "name": "Round Bar 10 mm",
+      "unit": "pc",
+      "unitPrice": 195
+    },
+    {
+      "name": "Round Bar 12 mm",
+      "unit": "pc",
+      "unitPrice": 280
+    },
+    {
+      "name": "Round Bar 16 mm",
+      "unit": "pc",
+      "unitPrice": 500
+    },
+    {
+      "name": "Round Bar 20 mm",
+      "unit": "pc",
+      "unitPrice": 780
+    },
+    {
+      "name": "Round Bar 25 mm",
+      "unit": "pc",
+      "unitPrice": 1210
+    },
+    {
+      "name": "Sealant",
+      "unit": "Qrt",
+      "unitPrice": 220
+    },
+    {
+      "name": "Skim Coat",
+      "unit": "Bags",
+      "unitPrice": 475
+    },
+    {
+      "name": "Soil & Plants",
+      "unit": "lot",
+      "unitPrice": 25000
+    },
+    {
+      "name": "Submeter",
+      "unit": "Pcs",
+      "unitPrice": 1500
+    },
+    {
+      "name": "Tek screw",
+      "unit": "Pcs",
+      "unitPrice": 1.5
+    },
+    {
       "name": "Thinner",
       "unit": "Quarts",
       "unitPrice": 99
     },
     {
+      "name": "Tile Adhesive",
+      "unit": "bag",
+      "unitPrice": 250
+    },
+    {
+      "name": "Tile Grout (Beige)",
+      "unit": "Bags",
+      "unitPrice": 45
+    },
+    {
+      "name": "Tile Grout (White)",
+      "unit": "Bags",
+      "unitPrice": 45
+    },
+    {
+      "name": "Tile Trim (White)",
+      "unit": "Lengths",
+      "unitPrice": 115
+    },
+    {
+      "name": "Touch up Paint",
+      "unit": "Qrt",
+      "unitPrice": 250
+    },
+    {
+      "name": "Tubular 2x2\"",
+      "unit": "Lengths",
+      "unitPrice": 550
+    },
+    {
+      "name": "Tubular Steel 1″ x 1″ x 1.0 mm",
+      "unit": "pc",
+      "unitPrice": 360
+    },
+    {
+      "name": "Tubular Steel 1″ x 1″ x 1.2 mm",
+      "unit": "pc",
+      "unitPrice": 420
+    },
+    {
+      "name": "Tubular Steel 1″ x 1″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 520
+    },
+    {
+      "name": "Tubular Steel 1″ x 2″ x 1.2 mm",
+      "unit": "pc",
+      "unitPrice": 620
+    },
+    {
+      "name": "Tubular Steel 1″ x 2″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 770
+    },
+    {
+      "name": "Tubular Steel 1″ x 2″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 920
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 1.2 mm",
+      "unit": "pc",
+      "unitPrice": 830
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 1030
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 1230
+    },
+    {
+      "name": "Tubular Steel 2″ x 2″ x 2.8 mm",
+      "unit": "pc",
+      "unitPrice": 1890
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 1.5 mm",
+      "unit": "pc",
+      "unitPrice": 1550
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 1850
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 2.5 mm",
+      "unit": "pc",
+      "unitPrice": 2550
+    },
+    {
+      "name": "Tubular Steel 2″ x 4″ x 2.8 mm",
+      "unit": "pc",
+      "unitPrice": 2850
+    },
+    {
+      "name": "Tubular Steel 2″ x 6″ x 1.8 mm",
+      "unit": "pc",
+      "unitPrice": 2480
+    },
+    {
+      "name": "Tubular Steel 2″ x 6″ x 2.8 mm",
+      "unit": "pc",
+      "unitPrice": 3810
+    },
+    {
+      "name": "Wall Cap",
+      "unit": "Ln.M",
+      "unitPrice": 400
+    },
+    {
+      "name": "Wall Tiles",
+      "unit": "sq.m",
+      "unitPrice": 380
+    },
+    {
+      "name": "Washed Sand",
+      "unit": "cu.m",
+      "unitPrice": 1350
+    },
+    {
+      "name": "Water Closet",
+      "unit": "Pcs",
+      "unitPrice": 6500
+    },
+    {
+      "name": "Water Line 1/2\"",
+      "unit": "m",
+      "unitPrice": 50
+    },
+    {
       "name": "Welding Rod",
       "unit": "Kilos",
       "unitPrice": 130
+    },
+    {
+      "name": "Welding Rod E 6013 (1/8)",
+      "unit": "Kilos",
+      "unitPrice": 135
+    },
+    {
+      "name": "Window Set",
+      "unit": "Lot",
+      "unitPrice": 11000
+    },
+    {
+      "name": "Wires and Conduits",
+      "unit": "lot",
+      "unitPrice": 35000
     }
   ],
-  "resources": [],
-  "crews": [],
-  "crewComposition": []
+  "resources": [
+    {
+      "name": "Bar Bender",
+      "type": "equipment",
+      "unit": "hour",
+      "rate": 250
+    },
+    {
+      "name": "Bar Cutter",
+      "type": "equipment",
+      "unit": "hour",
+      "rate": 250
+    },
+    {
+      "name": "Carpenter",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 550
+    },
+    {
+      "name": "Concrete Mixer (1-Bagger)",
+      "type": "equipment",
+      "unit": "hour",
+      "rate": 190
+    },
+    {
+      "name": "Concrete Vibrator",
+      "type": "equipment",
+      "unit": "hour",
+      "rate": 150
+    },
+    {
+      "name": "Construction Foreman",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 850
+    },
+    {
+      "name": "Electrician",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 650
+    },
+    {
+      "name": "Excavator",
+      "type": "equipment",
+      "unit": "hour",
+      "rate": 2500
+    },
+    {
+      "name": "Installer",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 550
+    },
+    {
+      "name": "Laborer",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 500
+    },
+    {
+      "name": "Mason",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 550
+    },
+    {
+      "name": "Master Electrician",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 750
+    },
+    {
+      "name": "Master Plumber",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 750
+    },
+    {
+      "name": "Painter",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 550
+    },
+    {
+      "name": "Plumber",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 650
+    },
+    {
+      "name": "Roofer",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 600
+    },
+    {
+      "name": "Skilled Labor (Carpenter)",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 650
+    },
+    {
+      "name": "Skilled Labor (Mason)",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 650
+    },
+    {
+      "name": "Skilled Labor (Steelman)",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 650
+    },
+    {
+      "name": "Steelman",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 650
+    },
+    {
+      "name": "Tile Setter",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 600
+    },
+    {
+      "name": "Unskilled Labor (Laborer)",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 480
+    },
+    {
+      "name": "Welder",
+      "type": "labor",
+      "unit": "manday",
+      "rate": 700
+    }
+  ],
+  "crews": [
+    {
+      "id": 51,
+      "name": "Concrete Pouring Crew (Foundations)",
+      "productivityRate": 5,
+      "productivityUnit": "cu.m/day"
+    },
+    {
+      "id": 52,
+      "name": "Rebar Installation Crew",
+      "productivityRate": 1000,
+      "productivityUnit": "kg/day"
+    },
+    {
+      "id": 53,
+      "name": "Plastering Crew",
+      "productivityRate": 80,
+      "productivityUnit": "sq.m/day"
+    }
+  ],
+  "crewComposition": [
+    { "id": 301, "crewId": 51, "resourceId": 101, "quantity": 1 },
+    { "id": 302, "crewId": 51, "resourceId": 103, "quantity": 1 },
+    { "id": 303, "crewId": 51, "resourceId": 105, "quantity": 4 },
+    { "id": 304, "crewId": 51, "resourceId": 201, "quantity": 1 },
+    { "id": 305, "crewId": 51, "resourceId": 202, "quantity": 1 },
+    { "id": 306, "crewId": 52, "resourceId": 101, "quantity": 1 },
+    { "id": 307, "crewId": 52, "resourceId": 104, "quantity": 6 },
+    { "id": 308, "crewId": 52, "resourceId": 203, "quantity": 1 },
+    { "id": 309, "crewId": 52, "resourceId": 204, "quantity": 1 },
+    { "id": 310, "crewId": 53, "resourceId": 101, "quantity": 1 },
+    { "id": 311, "crewId": 53, "resourceId": 103, "quantity": 2 },
+    { "id": 312, "crewId": 53, "resourceId": 105, "quantity": 2 }
+  ]
 }
-

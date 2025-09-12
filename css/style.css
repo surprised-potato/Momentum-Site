@@ -30,6 +30,8 @@ body {
     justify-content: space-between;
     align-items: center;
     height: 60px;
+    position: relative;
+    z-index: 1001;
 }
 
 .nav-brand {
@@ -93,7 +95,7 @@ body {
     background-color: var(--nav-background);
     min-width: 200px;
     box-shadow: var(--box-shadow);
-    z-index: 1;
+    z-index: 1000;
     border-radius: 0 0 var(--border-radius) var(--border-radius);
     overflow: hidden;
 }

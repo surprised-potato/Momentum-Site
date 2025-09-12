@@ -26,25 +26,25 @@
     { "id": 7, "scopeOfWork": "Plastering Works", "quantity": 560, "unit": "sq.m", "category": "C. Architectural Works" },
     { "id": 8, "scopeOfWork": "Roof Framing & Sheeting", "quantity": 110, "unit": "sq.m", "category": "C. Architectural Works" },
     { "id": 9, "scopeOfWork": "Ceiling Installation", "quantity": 180, "unit": "sq.m", "category": "C. Architectural Works" },
-    { "id": 10, "scopeOfWork": "Interior Painting", "quantity": 650, "unit": "sq.m", "category": "C. Architectural Works", "subquantities": [{ "name": "Ground Floor Painting", "quantity": 350 }, { "name": "Second Floor Painting", "quantity": 300 }] },
-    { "id": 11, "scopeOfWork": "Tiling Works", "quantity": 150, "unit": "sq.m", "category": "C. Architectural Works" },
+    { "id": 10, "scopeOfWork": "Interior Painting", "quantity": 650, "unit": "sq.m", "category": "E. Finishes", "subquantities": [{ "name": "Ground Floor Painting", "quantity": 350 }, { "name": "Second Floor Painting", "quantity": 300 }] },
+    { "id": 11, "scopeOfWork": "Tiling Works", "quantity": 150, "unit": "sq.m", "category": "E. Finishes" },
     { "id": 12, "scopeOfWork": "Plumbing & Electrical Rough-ins", "quantity": 1, "unit": "lot", "category": "D. MEPF Works" },
     { "id": 13, "scopeOfWork": "Landscaping & Site Finishing", "quantity": 1, "unit": "lot", "category": "A. General Requirements" }
   ],
   "dupas": [
-    { "id": 1, "quantityId": 1, "duration": 3, "directCosts": [{ "type": "labor", "laborType": "Laborer", "mandays": 10, "rate": 480 }], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 2, "quantityId": 2, "duration": 5, "directCosts": [{ "type": "labor", "laborType": "Laborer", "mandays": 20, "rate": 480 }, {"type": "equipment", "name": "Excavator", "hours": 16, "rate": 2500}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 3, "quantityId": 3, "duration": 8, "directCosts": [{"type":"labor","laborType":"Steelman","mandays":25,"rate":650},{"type":"material","name":"Deformed Rebar 10mm","quantity":1200,"unit":"kg","unitPrice":48}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 4, "quantityId": 4, "duration": 2, "directCosts": [{"type":"labor","laborType":"Mason","mandays":10,"rate":650},{"type":"material","name":"Ready-Mix Concrete","quantity":25,"unit":"cu.m","unitPrice":5500}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 5, "quantityId": 5, "duration": 1, "directCosts": [{"type":"labor","laborType":"Mason","mandays":5,"rate":650},{"type":"material","name":"Ready-Mix Concrete","quantity":10,"unit":"cu.m","unitPrice":5500}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 6, "quantityId": 6, "duration": 15, "directCosts": [{"type":"labor","laborType":"Mason","mandays":40,"rate":650},{"type":"material","name":"CHB 6\"","quantity":3500,"unit":"pc","unitPrice":18}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 7, "quantityId": 7, "duration": 12, "directCosts": [{"type":"labor","laborType":"Mason","mandays":30,"rate":650},{"type":"material","name":"Plastering Mortar","quantity":112,"unit":"bag","unitPrice":240}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 8, "quantityId": 8, "duration": 10, "directCosts": [{"type":"labor","laborType":"Roofer","mandays":20,"rate":650},{"type":"material","name":"Metal Roofing System","quantity":110,"unit":"sq.m","unitPrice":850}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 9, "quantityId": 9, "duration": 7, "directCosts": [{"type":"labor","laborType":"Installer","mandays":15,"rate":650},{"type":"material","name":"Ceiling Materials","quantity":180,"unit":"sq.m","unitPrice":450}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 10, "quantityId": 10, "duration": 14, "directCosts": [{"type":"labor","laborType":"Painter","mandays":30,"rate":650},{"type":"material","name":"Latex Paint","quantity":65,"unit":"gal","unitPrice":800}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 11, "quantityId": 11, "duration": 8, "directCosts": [{"type":"labor","laborType":"Tile Setter","mandays":20,"rate":650},{"type":"material","name":"60x60 Ceramic Tiles","quantity":150,"unit":"sq.m","unitPrice":400}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 12, "quantityId": 12, "duration": 10, "directCosts": [{"type":"labor","laborType":"Master Electrician","mandays":10,"rate":750},{"type":"labor","laborType":"Master Plumber","mandays":10,"rate":750}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 13, "quantityId": 13, "duration": 5, "directCosts": [{"type":"labor","laborType":"Laborer","mandays":10,"rate":480},{"type":"material","name":"Soil & Plants","quantity":1,"unit":"lot","unitPrice":25000}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
+    { "id": 1, "quantityId": 1, "duration": 3, "directCosts": [{"type": "labor", "laborType": "Unskilled Labor (Laborer)","mandays": 10, "rate": 480}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 2, "quantityId": 2, "duration": 5, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 5, "rate": 850}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 3, "quantityId": 3, "duration": 8, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Steelman)", "mandays": 24, "rate": 650}, {"type": "material", "name": "Deformed Rebar 16mm", "quantity": 700, "unit": "kg", "unitPrice": 52}, {"type": "material", "name": "Deformed Rebar 10mm", "quantity": 500, "unit": "kg", "unitPrice": 48}, {"type": "material", "name": "G.I. Tie Wire #16", "quantity": 18, "unit": "kg", "unitPrice": 85}, {"type": "equipment", "name": "Bar Cutter", "hours": 32, "rate": 250}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 4, "quantityId": 4, "duration": 2, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 2, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 6, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Portland Cement (40kg)", "quantity": 225, "unit": "bag", "unitPrice": 255}, {"type": "material", "name": "Washed Sand", "quantity": 12.5, "unit": "cu.m", "unitPrice": 1350}, {"type": "material", "name": "Gravel 3/4\"", "quantity": 25, "unit": "cu.m", "unitPrice": 1450}, {"type": "material", "name": "Phenolic Plywood 1/2\"", "quantity": 15, "unit": "sheet", "unitPrice": 950}, {"type": "equipment", "name": "Concrete Mixer (1-Bagger)", "hours": 16, "rate": 190}, {"type": "equipment", "name": "Concrete Vibrator", "hours": 16, "rate": 150}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 5, "quantityId": 5, "duration": 1, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 1, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 4, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 6, "rate": 480}, {"type": "material", "name": "Portland Cement (40kg)", "quantity": 90, "unit": "bag", "unitPrice": 255}, {"type": "material", "name": "Washed Sand", "quantity": 5, "unit": "cu.m", "unitPrice": 1350}, {"type": "material", "name": "Gravel 3/4\"", "quantity": 10, "unit": "cu.m", "unitPrice": 1450}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 6, "quantityId": 6, "duration": 15, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 15, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 45, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 30, "rate": 480}, {"type": "material", "name": "CHB 6\"", "quantity": 3500, "unit": "pc", "unitPrice": 18}, {"type": "material", "name": "Portland Cement (40kg)", "quantity": 98, "unit": "bag", "unitPrice": 255}, {"type": "material", "name": "Washed Sand", "quantity": 7, "unit": "cu.m", "unitPrice": 1350}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 7, "quantityId": 7, "duration": 12, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 12, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 36, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 24, "rate": 480}, {"type": "material", "name": "Portland Cement (40kg)", "quantity": 94, "unit": "bag", "unitPrice": 255}, {"type": "material", "name": "Washed Sand", "quantity": 8, "unit": "cu.m", "unitPrice": 1350}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 8, "quantityId": 8, "duration": 10, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 10, "rate": 850}, {"type": "labor", "laborType": "Roofer", "mandays": 20, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "GA16 2x6 C-Purlins", "quantity": 40, "unit": "Lengths", "unitPrice": 703}, {"type": "material", "name": "Rib Type Long Span Roofing", "quantity": 110, "unit": "Ln.M", "unitPrice": 350}, {"type": "material", "name": "Tek screw", "quantity": 700, "unit": "Pcs", "unitPrice": 1.5}, {"type": "material", "name": "Sealant", "quantity": 3, "unit": "Qrt", "unitPrice": 220}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 9, "quantityId": 9, "duration": 7, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 7, "rate": 850}, {"type": "labor", "laborType": "Installer", "mandays": 14, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 7, "rate": 480}, {"type": "material", "name": "Metal Furring (25mm X 50 X 20 X 5m)", "quantity": 100, "unit": "Lengths", "unitPrice": 115}, {"type": "material", "name": "3.5mm Hardiflex Lite", "quantity": 65, "unit": "Sheets", "unitPrice": 585}, {"type": "material", "name": "Metal screw(Hardie drive Screw)n0.12 x 1/2\"", "quantity": 2500, "unit": "Pcs", "unitPrice": 1.1}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 10, "quantityId": 10, "duration": 14, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 14, "rate": 850}, {"type": "labor", "laborType": "Painter", "mandays": 40, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}, {"type": "material", "name": "Skim Coat", "quantity": 20, "unit": "Bags", "unitPrice": 475}, {"type": "material", "name": "Flat White Primer", "quantity": 15, "unit": "Gals", "unitPrice": 577.5}, {"type": "material", "name": "Latex Color", "quantity": 20, "unit": "Gals", "unitPrice": 750}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 11, "quantityId": 11, "duration": 8, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Tile Setter", "mandays": 24, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480}, {"type": "material", "name": "30x30 cm Ceramic Floor Tiles", "quantity": 1700, "unit": "Pcs", "unitPrice": 75}, {"type": "material", "name": "Tile Adhesive", "quantity": 30, "unit": "bag", "unitPrice": 250}, {"type": "material", "name": "Tile Grout (White)", "quantity": 8, "unit": "Bags", "unitPrice": 45}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 12, "quantityId": 12, "duration": 10, "directCosts": [{"type": "labor", "laborType": "Master Electrician", "mandays": 10, "rate": 750}, {"type": "labor", "laborType": "Master Plumber", "mandays": 10, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}, {"type": "material", "name": "#12 Wires", "quantity": 2, "unit": "Box", "unitPrice": 4385}, {"type": "material", "name": "#14 Wires", "quantity": 2, "unit": "Box", "unitPrice": 2650}, {"type": "material", "name": "1/2\" PVC w/ junction boxes", "quantity": 50, "unit": "Lengths", "unitPrice": 155}, {"type": "material", "name": "Water Line 1/2\"", "quantity": 80, "unit": "m", "unitPrice": 50}, {"type": "material", "name": "Drainage Line", "quantity": 50, "unit": "m", "unitPrice": 240}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 13, "quantityId": 13, "duration": 5, "directCosts": [{"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Soil & Plants", "quantity": 1, "unit": "lot", "unitPrice": 25000}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
   ],
   "tasks": [
     { "predecessorId": "PROJECT_START", "successorId": 1 },
@@ -56,7 +56,7 @@
     { "predecessorId": 6, "successorId": 7 },
     { "predecessorId": 6, "successorId": 8 },
     { "predecessorId": 6, "successorId": 12 },
-    { "predecessorId": 7, "successorId": 10 },
+    { "predecessorId": 7, "successorId": 11 },
     { "predecessorId": 8, "successorId": 9 },
     { "predecessorId": 9, "successorId": 10 },
     { "predecessorId": 12, "successorId": 11 },
@@ -64,32 +64,6 @@
     { "predecessorId": 10, "successorId": 13 },
     { "predecessorId": 13, "successorId": "PROJECT_END" }
   ],
-  "boq": {
-    "generatedAt": "2025-07-28T10:00:00.000Z",
-    "boqData": {
-      "A. General Requirements": [
-        { "quantityId": 1, "scopeOfWork": "Site Clearing & Earthworks", "quantity": 1, "unit": "lot", "unitPrice": 5376, "totalAmount": 5376 },
-        { "quantityId": 2, "scopeOfWork": "Structural Excavation", "quantity": 60, "unit": "cu.m", "unitPrice": 828.8, "totalAmount": 49728 },
-        { "quantityId": 13, "scopeOfWork": "Landscaping & Site Finishing", "quantity": 1, "unit": "lot", "unitPrice": 33432, "totalAmount": 33432 }
-      ],
-      "B. Structural Works": [
-        { "quantityId": 3, "scopeOfWork": "Foundation Rebar Works", "quantity": 1200, "unit": "kg", "unitPrice": 94.64, "totalAmount": 113568 },
-        { "quantityId": 4, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 25, "unit": "cu.m", "unitPrice": 9212, "totalAmount": 230300 },
-        { "quantityId": 5, "scopeOfWork": "Ground Floor Slab on Fill", "quantity": 10, "unit": "cu.m", "unitPrice": 6524, "totalAmount": 65240 }
-      ],
-      "C. Architectural Works": [
-        { "quantityId": 6, "scopeOfWork": "CHB Wall Masonry", "quantity": 280, "unit": "sq.m", "unitPrice": 319.48, "totalAmount": 89454.4 },
-        { "quantityId": 7, "scopeOfWork": "Plastering Works", "quantity": 560, "unit": "sq.m", "unitPrice": 87.36, "totalAmount": 48921.6 },
-        { "quantityId": 8, "scopeOfWork": "Roof Framing & Sheeting", "quantity": 110, "unit": "sq.m", "unitPrice": 981.32, "totalAmount": 107945.2 },
-        { "quantityId": 9, "scopeOfWork": "Ceiling Installation", "quantity": 180, "unit": "sq.m", "unitPrice": 498.44, "totalAmount": 89719.2 },
-        { "quantityId": 10, "scopeOfWork": "Interior Painting", "quantity": 650, "unit": "sq.m", "unitPrice": 125.04, "totalAmount": 81276 },
-        { "quantityId": 11, "scopeOfWork": "Tiling Works", "quantity": 150, "unit": "sq.m", "unitPrice": 526.4, "totalAmount": 78960 }
-      ],
-      "D. MEPF Works": [
-        { "quantityId": 12, "scopeOfWork": "Plumbing & Electrical Rough-ins", "quantity": 1, "unit": "lot", "unitPrice": 16800, "totalAmount": 16800 }
-      ]
-    }
-  },
   "accomplishments": [
     { "type": "quantity", "taskId": 1, "subIndex": null, "date": "2025-08-01", "percentComplete": 100 },
     { "type": "quantity", "taskId": 2, "subIndex": null, "date": "2025-08-04", "percentComplete": 50 },
@@ -101,20 +75,5 @@
     { "type": "quantity", "taskId": 5, "subIndex": null, "date": "2025-08-18", "percentComplete": 100 },
     { "type": "quantity", "taskId": 6, "subIndex": null, "date": "2025-08-25", "percentComplete": 25 },
     { "type": "quantity", "taskId": 10, "subIndex": 0, "date": "2025-09-10", "percentComplete": 10 }
-  ],
-  "changeOrders": [
-    { "id": 1, "description": "Additional Carport Awning", "date": "2025-08-15", "status": "Approved" },
-    { "id": 2, "description": "Omit Landscape Works", "date": "2025-08-16", "status": "Approved" },
-    { "id": 3, "description": "Upgrade Master T&B Tiles", "date": "2025-09-05", "status": "Pending" }
-  ],
-  "changeOrderItems": [
-    { "id": 1, "changeOrderId": 1, "scopeOfWork": "Fabricate & Install Steel Awning", "quantity": 15, "unit": "sq.m" },
-    { "id": 2, "changeOrderId": 2, "scopeOfWork": "Omit Landscaping & Site Finishing", "quantity": -1, "unit": "lot", "originalQuantityId": 13 },
-    { "id": 3, "changeOrderId": 3, "scopeOfWork": "Upgrade Master T&B Tiles to Premium Granite", "quantity": 25, "unit": "sq.m" }
-  ],
-  "changeOrderDupas": [
-    { "id": 1, "changeOrderItemId": 1, "duration": 4, "directCosts": [{"type":"labor","laborType":"Welder","mandays":8,"rate":700},{"type":"material","name":"Steel Materials for Awning","quantity":1,"unit":"lot","unitPrice":18000}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 2, "changeOrderItemId": 2, "duration": 0, "directCosts": [{"type":"labor","laborType":"Laborer","mandays":-10,"rate":480},{"type":"material","name":"Soil & Plants","quantity":-1,"unit":"lot","unitPrice":25000}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 3, "changeOrderItemId": 3, "duration": 3, "directCosts": [{"type":"labor","laborType":"Tile Setter","mandays":5,"rate":650},{"type":"material","name":"Premium Granite Tiles","quantity":25,"unit":"sq.m","unitPrice":950}], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
   ]
 }

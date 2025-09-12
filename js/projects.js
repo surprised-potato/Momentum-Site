@@ -74,7 +74,6 @@ const showProjectSummary = async (projectId) => {
 
 const exportProject = async (projectId) => {
     try {
-        // Fetch all 9 data categories for the project
         const project = await db.projects.get(projectId);
         if (!project) {
             alert('Project not found.');
@@ -86,7 +85,6 @@ const exportProject = async (projectId) => {
         const dupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
         const tasks = await db.tasks.where({ projectId }).toArray();
         const boq = await db.boqs.where({ projectId }).first();
-        const accomplishments = quantityIds.length > 0 ? await db.accomplishments.where('quantityId').anyOf(quantityIds).toArray() : [];
         const changeOrders = await db.changeOrders.where({ projectId }).toArray();
         const changeOrderIds = changeOrders.map(co => co.id);
 
@@ -94,8 +92,11 @@ const exportProject = async (projectId) => {
         const changeOrderItemIds = changeOrderItems.map(item => item.id);
         
         const changeOrderDupas = changeOrderItemIds.length > 0 ? await db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray() : [];
+        
+        const qtyAccomplishments = quantityIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').toArray() : [];
+        const coAccomplishments = changeOrderItemIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(r => r.type === 'changeOrderItem').toArray() : [];
+        const accomplishments = [...qtyAccomplishments, ...coAccomplishments];
 
-        // Bundle everything into one object
         const exportData = { 
             project, 
             quantities, 

@@ -963,3 +963,21 @@ body {
     stroke: var(--danger-color);
     stroke-width: 2px;
 }
+
+.lookahead-task-body .resource-item {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 4px 0;
+}
+
+.lookahead-task-body .resource-qty {
+    color: var(--grey-color);
+    font-size: 0.9em;
+    white-space: nowrap;
+    text-align: left;
+}
+.lookahead-task-body .resource-name {
+    min-width: 250px;
+    flex-shrink: 0;
+}

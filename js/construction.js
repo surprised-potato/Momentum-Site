@@ -1078,15 +1078,35 @@ const generateLookAheadReport = async () => {
         const dupa = dupaMap.get(parseInt(task.uniqueId.split('-')[1]));
         let resourceHtml = '<ul>';
         if (dupa && dupa.directCosts) {
-             const items = dupa.directCosts.map(dc => {
-                switch(dc.type) {
-                    case 'labor': return `<li>${dc.laborType} (${dc.mandays.toFixed(2)} mandays)</li>`;
-                    case 'equipment': return `<li>${dc.name} (${dc.hours.toFixed(2)} hours)</li>`;
-                    case 'material': return `<li>${dc.name} (${dc.quantity} ${dc.unit})</li>`;
-                    default: return '';
+            const laborCosts = dupa.directCosts.filter(dc => dc.type === 'labor');
+            const materialCosts = dupa.directCosts.filter(dc => dc.type === 'material');
+            const equipmentCosts = dupa.directCosts.filter(dc => dc.type === 'equipment');
+
+            if (laborCosts.length === 0 && materialCosts.length === 0 && equipmentCosts.length === 0) {
+                resourceHtml += '<li>No resources specified in DUPA.</li>';
+            } else {
+                if (laborCosts.length > 0) {
+                    resourceHtml += '<li><strong>Labor:</strong><ul>';
+                    laborCosts.forEach(dc => {
+                        resourceHtml += `<li class="resource-item"><span class="resource-name">${dc.laborType}</span><span class="resource-qty">(${dc.mandays.toFixed(2)} mandays)</span></li>`;
+                    });
+                    resourceHtml += '</ul></li>';
                 }
-            }).join('');
-            resourceHtml += items || '<li>No resources specified in DUPA.</li>';
+                if (materialCosts.length > 0) {
+                    resourceHtml += '<li><strong>Materials:</strong><ul>';
+                    materialCosts.forEach(dc => {
+                        resourceHtml += `<li class="resource-item"><span class="resource-name">${dc.name}</span><span class="resource-qty">(${dc.quantity} ${dc.unit})</span></li>`;
+                    });
+                    resourceHtml += '</ul></li>';
+                }
+                if (equipmentCosts.length > 0) {
+                    resourceHtml += '<li><strong>Equipment:</strong><ul>';
+                    equipmentCosts.forEach(dc => {
+                        resourceHtml += `<li class="resource-item"><span class="resource-name">${dc.name}</span><span class="resource-qty">(${dc.hours.toFixed(2)} hours)</span></li>`;
+                    });
+                    resourceHtml += '</ul></li>';
+                }
+            }
         } else {
             resourceHtml += '<li>DUPA not found.</li>';
         }

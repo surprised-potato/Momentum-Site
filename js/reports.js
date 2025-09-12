@@ -766,7 +766,7 @@ const showCoItemDupaDetails = async (coItemId) => {
     content += '</tbody></table>';
 
     dupaReportContent.innerHTML = content;
-    dupaReportTitle.textContent = `DUPA Breakdown (Change Order)`;
+    dupaReportTitle.textContent = `DUPA Breakdown (CO): ${item.scopeOfWork}`;
     openDupaReportModal();
 };
 

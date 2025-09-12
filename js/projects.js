@@ -110,9 +110,10 @@ const exportProject = async (projectId) => {
 
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
+        const dateStamp = new Date().toISOString().split('T')[0];
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${project.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+        a.download = `${project.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${dateStamp}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

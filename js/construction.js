@@ -364,12 +364,12 @@ const dailyCosts = new Array(projectDuration + 1).fill(0);
     };
 };
 const displayAccomplishmentProjects = async () => {
-    const allProjects = await db.projects.orderBy('projectName').toArray();
+    const constructionReadyProjects = await getConstructionReadyProjects();
     accomplishmentProjectsListDiv.innerHTML = '';
-    if (allProjects.length === 0) {
+    if (constructionReadyProjects.length === 0) {
         accomplishmentProjectsListDiv.innerHTML = '<p>No projects with a generated BOQ found. Please generate a BOQ in the "Pre-construction Reports" module first.</p>';
     } else {
-        allProjects.forEach(p => {
+        constructionReadyProjects.forEach(p => {
             const item = document.createElement('div');
             item.className = 'list-item';
             item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-accomplishment-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
@@ -436,106 +436,122 @@ const showAccomplishmentForm = async (projectId, projectName) => {
     accomplishmentTableBody.innerHTML = '<tr><td colspan="3">Loading tasks...</td></tr>';
     
     const project = await db.projects.get(projectId);
-    if (!project.startDate) {
-        const inputDate = prompt("This is the first report for this project.\nPlease enter the Project Start Date (YYYY-MM-DD):");
-        if (inputDate && !isNaN(new Date(inputDate))) {
-            await db.projects.update(projectId, { startDate: inputDate });
-        } else {
-            alert("Invalid date. Please select the project again to set a valid start date.");
-            showAccomplishment();
+
+    const populateTable = async () => {
+        let allTasks = await getProjectTasks(projectId);
+        const pertData = await getPertCpmData(projectId, true);
+        
+        const sortBy = document.getElementById('accomplishment-sort').value;
+        if (pertData && pertData.tasks) {
+            const startTaskIds = new Set(pertData.links
+                .filter(link => link.predecessorId === 'PROJECT_START')
+                .map(link => link.successorId)
+            );
+
+            const esMap = new Map(Array.from(pertData.tasks.values()).map(task => [task.id, task.es]));
+            allTasks.sort((a, b) => {
+                if (sortBy === 'name') return a.displayName.localeCompare(b.displayName);
+                if (sortBy === 'progress') return (a.percentComplete || 0) - (b.percentComplete || 0);
+
+                const aIsStart = startTaskIds.has(a.id);
+                const bIsStart = startTaskIds.has(b.id);
+
+                if (aIsStart && !bIsStart) return -1;
+                if (!aIsStart && bIsStart) return 1;
+
+                const taskA_es = esMap.get(a.id) || Infinity;
+                const taskB_es = esMap.get(b.id) || Infinity;
+                if (taskA_es === taskB_es) return a.displayName.localeCompare(b.displayName);
+                return taskA_es - taskB_es;
+            });
+        }
+
+        accomplishmentTableBody.innerHTML = '';
+        if (allTasks.length === 0) {
+            accomplishmentTableBody.innerHTML = '<tr><td colspan="3">No tasks found for this project.</td></tr>';
             return;
         }
-    }
 
-    let allTasks = await getProjectTasks(projectId);
-    const pertData = await getPertCpmData(projectId, true);
-    
-    const sortBy = document.getElementById('accomplishment-sort').value;
-    if (pertData && pertData.tasks) {
-        const startTaskIds = new Set(pertData.links
-            .filter(link => link.predecessorId === 'PROJECT_START')
-            .map(link => link.successorId)
-        );
+        const groupBy = document.getElementById('accomplishment-group').value;
 
-        const esMap = new Map(Array.from(pertData.tasks.values()).map(task => [task.id, task.es]));
-        allTasks.sort((a, b) => {
-            if (sortBy === 'name') return a.displayName.localeCompare(b.displayName);
-            if (sortBy === 'progress') return (a.percentComplete || 0) - (b.percentComplete || 0);
+        const renderTaskRow = (task) => {
+            const row = accomplishmentTableBody.insertRow();
+            const overallProgress = task.percentComplete || 0;
+            row.dataset.uniqueId = task.uniqueId;
+            row.dataset.type = task.type;
+            if (task.type === 'subquantity') {
+                row.dataset.quantityId = task.quantityId;
+                row.dataset.subquantityIndex = task.subIndex;
+            } else {
+                row.dataset.quantityId = task.id;
+            }
+            row.innerHTML = `
+                <td>${task.displayName}</td>
+                <td><progress value="${overallProgress}" max="100"></progress> ${overallProgress.toFixed(2)}%</td>
+                <td><input type="number" class="progress-input" min="0" max="${(100 - overallProgress).toFixed(2)}" step="any" placeholder="0.00"> %</td>
+            `;
+        };
 
-            const aIsStart = startTaskIds.has(a.id);
-            const bIsStart = startTaskIds.has(b.id);
+        if (groupBy === 'category') {
+            const groupedTasks = allTasks.reduce((acc, task) => {
+                const category = task.category || (task.type === 'changeOrderItem' ? 'Change Orders' : 'Uncategorized');
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(task);
+                return acc;
+            }, {});
+            
+            Object.keys(groupedTasks).sort().forEach(category => {
+                const tasksInCategory = groupedTasks[category];
+                
+                let totalCategoryValue = 0;
+                let accomplishedCategoryValue = 0;
+                tasksInCategory.forEach(task => {
+                    const taskCost = task.cost || 0;
+                    totalCategoryValue += taskCost;
+                    accomplishedCategoryValue += taskCost * ((task.percentComplete || 0) / 100);
+                });
+                const categoryWeightedProgress = (totalCategoryValue > 0)
+                    ? (accomplishedCategoryValue / totalCategoryValue) * 100
+                    : 0;
 
-            if (aIsStart && !bIsStart) return -1;
-            if (!aIsStart && bIsStart) return 1;
-
-            const taskA_es = esMap.get(a.id) || Infinity;
-            const taskB_es = esMap.get(b.id) || Infinity;
-            if (taskA_es === taskB_es) return a.displayName.localeCompare(b.displayName);
-            return taskA_es - taskB_es;
-        });
-    }
-
-    accomplishmentTableBody.innerHTML = '';
-    if (allTasks.length === 0) {
-        accomplishmentTableBody.innerHTML = '<tr><td colspan="3">No tasks found for this project.</td></tr>';
-        return;
-    }
-
-    const groupBy = document.getElementById('accomplishment-group').value;
-
-    const renderTaskRow = (task) => {
-        const row = accomplishmentTableBody.insertRow();
-        const overallProgress = task.percentComplete || 0;
-        row.dataset.uniqueId = task.uniqueId;
-        row.dataset.type = task.type;
-        if (task.type === 'subquantity') {
-            row.dataset.quantityId = task.quantityId;
-            row.dataset.subquantityIndex = task.subIndex;
+                const headerRow = accomplishmentTableBody.insertRow();
+                headerRow.className = 'category-header-row';
+                headerRow.innerHTML = `
+                    <td colspan="2">${category}</td>
+                    <td style="font-weight: 500;">
+                        <progress value="${categoryWeightedProgress}" max="100" style="width: 70%; vertical-align: middle;"></progress> 
+                        ${categoryWeightedProgress.toFixed(2)}%
+                    </td>
+                `;
+                tasksInCategory.forEach(renderTaskRow);
+            });
         } else {
-            row.dataset.quantityId = task.id;
+            allTasks.forEach(renderTaskRow);
         }
-        row.innerHTML = `
-            <td>${task.displayName}</td>
-            <td><progress value="${overallProgress}" max="100"></progress> ${overallProgress.toFixed(2)}%</td>
-            <td><input type="number" class="progress-input" min="0" max="${(100 - overallProgress).toFixed(2)}" step="any" placeholder="0.00"> %</td>
-        `;
     };
 
-    if (groupBy === 'category') {
-        const groupedTasks = allTasks.reduce((acc, task) => {
-            const category = task.category || (task.type === 'changeOrderItem' ? 'Change Orders' : 'Uncategorized');
-            if (!acc[category]) acc[category] = [];
-            acc[category].push(task);
-            return acc;
-        }, {});
-        
-        Object.keys(groupedTasks).sort().forEach(category => {
-            const tasksInCategory = groupedTasks[category];
-            
-            let totalCategoryValue = 0;
-            let accomplishedCategoryValue = 0;
-            tasksInCategory.forEach(task => {
-                const taskCost = task.cost || 0;
-                totalCategoryValue += taskCost;
-                accomplishedCategoryValue += taskCost * ((task.percentComplete || 0) / 100);
-            });
-            const categoryWeightedProgress = (totalCategoryValue > 0)
-                ? (accomplishedCategoryValue / totalCategoryValue) * 100
-                : 0;
+    if (!project.startDate) {
+        const modal = document.getElementById('start-date-modal');
+        const dateInput = document.getElementById('modal-start-date-input');
+        const confirmBtn = document.getElementById('set-start-date-btn');
 
-            const headerRow = accomplishmentTableBody.insertRow();
-            headerRow.className = 'category-header-row';
-            headerRow.innerHTML = `
-                <td colspan="2">${category}</td>
-                <td style="font-weight: 500;">
-                    <progress value="${categoryWeightedProgress}" max="100" style="width: 70%; vertical-align: middle;"></progress> 
-                    ${categoryWeightedProgress.toFixed(2)}%
-                </td>
-            `;
-            tasksInCategory.forEach(renderTaskRow);
-        });
+        const onConfirm = async () => {
+            const selectedDate = dateInput.value;
+            if (selectedDate) {
+                await db.projects.update(projectId, { startDate: selectedDate });
+                modal.style.display = 'none';
+                confirmBtn.removeEventListener('click', onConfirm);
+                await populateTable();
+            } else {
+                alert('Please select a valid start date.');
+            }
+        };
+
+        dateInput.valueAsDate = new Date();
+        modal.style.display = 'block';
+        confirmBtn.addEventListener('click', onConfirm);
     } else {
-        allTasks.forEach(renderTaskRow);
+        await populateTable();
     }
 };
 
@@ -871,7 +887,8 @@ const renderTrackingSCurve = async (projectId, projectName) => {
         alert("Cannot generate S-Curve. Ensure the project has a start date and a locked BOQ.");
         return;
     }
-    const { grandTotalCost, projectDuration } = plannedData;
+
+    const { grandTotalCost } = plannedData;
     const projectStartDate = new Date(project.startDate);
     projectStartDate.setMinutes(projectStartDate.getMinutes() + projectStartDate.getTimezoneOffset());
 
@@ -908,40 +925,65 @@ const renderTrackingSCurve = async (projectId, projectName) => {
         }
     }
 
-    const actualPercentage = new Array(projectDuration).fill(null);
+    const today = new Date();
+    const daysElapsed = Math.floor((today - projectStartDate) / (1000 * 60 * 60 * 24));
+    const reportDays = Array.from(accomplishmentValuesByDay.keys());
+    const latestReportDay = reportDays.length > 0 ? Math.max(...reportDays) : -1;
+    const chartDuration = Math.max(plannedData.projectDuration, latestReportDay, daysElapsed) + 5;
+
+    const extendedLabels = [...plannedData.labels];
+    const extendedPlannedPercentage = [...plannedData.plannedPercentage];
+    const lastPlannedValue = extendedPlannedPercentage.length > 0 ? extendedPlannedPercentage[extendedPlannedPercentage.length - 1] : 100;
+
+    for (let i = plannedData.projectDuration; i < chartDuration; i++) {
+        const currentDate = new Date(projectStartDate);
+        currentDate.setDate(currentDate.getDate() + i);
+        extendedLabels.push(new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(currentDate));
+        extendedPlannedPercentage.push(lastPlannedValue);
+    }
+    
+    const actualPercentage = new Array(chartDuration).fill(null);
     if (accomplishmentValuesByDay.size > 0 || project.startDate) {
         let cumulativeValue = 0;
-        accomplishmentValuesByDay.set(0, accomplishmentValuesByDay.get(0) || 0);
         const sortedDays = [...accomplishmentValuesByDay.keys()].sort((a, b) => a - b);
         sortedDays.forEach(day => {
             cumulativeValue += accomplishmentValuesByDay.get(day);
-            if (day < projectDuration) actualPercentage[day] = (cumulativeValue / grandTotalCost) * 100;
+            if (day < chartDuration) actualPercentage[day] = (cumulativeValue / grandTotalCost) * 100;
         });
-        let lastDay = 0, lastValue = 0;
-        for (let i = 0; i < projectDuration; i++) {
+        
+        let lastDay = 0;
+        let lastValue = 0;
+        if (actualPercentage[0] === null) {
+            accomplishmentValuesByDay.set(0,0);
+        }
+        for (let i = 0; i < chartDuration; i++) {
             if (actualPercentage[i] !== null) {
                 const nextValue = actualPercentage[i], nextDay = i;
                 if (nextDay > lastDay) {
-                    const daysBetween = nextDay - lastDay, valueStep = (nextValue - lastValue) / daysBetween;
-                    for (let j = 1; j < daysBetween; j++) actualPercentage[lastDay + j] = lastValue + (valueStep * j);
+                    const daysBetween = nextDay - lastDay;
+                    const valueStep = (nextValue - lastValue) / daysBetween;
+                    for (let j = 1; j < daysBetween; j++) {
+                        actualPercentage[lastDay + j] = lastValue + (valueStep * j);
+                    }
                 }
                 lastDay = nextDay;
                 lastValue = nextValue;
             }
         }
-        const today = new Date(), daysElapsed = Math.floor((today - projectStartDate) / (1000 * 60 * 60 * 24));
-        if (daysElapsed > lastDay && lastDay < projectDuration) {
-             for (let i = lastDay + 1; i <= daysElapsed && i < projectDuration; i++) actualPercentage[i] = lastValue;
+        
+        if (daysElapsed > lastDay && lastDay < chartDuration) {
+             for (let i = lastDay + 1; i <= daysElapsed && i < chartDuration; i++) {
+                 actualPercentage[i] = lastValue;
+             }
         }
     }
     
-    // **NEW**: Create styling arrays for the data points
-    const pointRadii = new Array(projectDuration).fill(2); // Small default radius
-    const pointColors = new Array(projectDuration).fill('rgba(255, 99, 132, 0.5)');
+    const pointRadii = new Array(chartDuration).fill(2);
+    const pointColors = new Array(chartDuration).fill('rgba(255, 99, 132, 0.5)');
     for (const day of accomplishmentValuesByDay.keys()) {
-        if (day > 0 && day < projectDuration) {
-            pointRadii[day] = 5; // Larger radius for actual report days
-            pointColors[day] = 'rgb(255, 99, 132)'; // Solid color for actual report days
+        if (day >= 0 && day < chartDuration) {
+            pointRadii[day] = 5;
+            pointColors[day] = 'rgb(255, 99, 132)';
         }
     }
 
@@ -949,15 +991,14 @@ const renderTrackingSCurve = async (projectId, projectName) => {
     trackingSCurveChart = new Chart(trackingSCurveCanvas, {
         type: 'line',
         data: {
-            labels: plannedData.labels,
+            labels: extendedLabels,
             datasets: [
-                { label: 'Planned Cumulative %', data: plannedData.plannedPercentage, borderColor: 'rgb(75, 192, 192)', tension: 0.4, fill: false },
+                { label: 'Planned Cumulative %', data: extendedPlannedPercentage, borderColor: 'rgb(75, 192, 192)', tension: 0.4, fill: false },
                 {
                     label: 'Actual Cumulative %',
                     data: actualPercentage,
                     borderColor: 'rgb(255, 99, 132)',
                     spanGaps: true, tension: 0.1, fill: false,
-                    // **NEW**: Apply the point styling
                     pointRadius: pointRadii,
                     pointBackgroundColor: pointColors,
                     pointHoverRadius: 7

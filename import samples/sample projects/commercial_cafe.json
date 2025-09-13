@@ -61,6 +61,33 @@
     { "predecessorId": 11, "successorId": 12 },
     { "predecessorId": 12, "successorId": "PROJECT_END" }
   ],
+  "boq": {
+    "generatedAt": "2025-09-28T09:00:00.000Z",
+    "boqData": {
+      "A. General & Site Works": [
+        {"quantityId": 1, "scopeOfWork": "Site Preparation", "quantity": 1, "unit": "lot", "unitPrice": 3225.6, "totalAmount": 3225.6}
+      ],
+      "B. Structural Works": [
+        {"quantityId": 2, "scopeOfWork": "Structural Excavation for Foundations", "quantity": 35, "unit": "cu.m", "unitPrice": 182.29, "totalAmount": 6380.16},
+        {"quantityId": 3, "scopeOfWork": "Foundation Rebar Installation", "quantity": 850, "unit": "kg", "unitPrice": 120.59, "totalAmount": 102501.13},
+        {"quantityId": 4, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 18, "unit": "cu.m", "unitPrice": 5991.2, "totalAmount": 107841.6}
+      ],
+      "C. Architectural Works": [
+        {"quantityId": 5, "scopeOfWork": "CHB Wall Masonry (Exterior & Interior)", "quantity": 150, "unit": "sq.m", "unitPrice": 448.25, "totalAmount": 67237.5},
+        {"quantityId": 6, "scopeOfWork": "Roof Framing and Installation", "quantity": 130, "unit": "sq.m", "unitPrice": 526.49, "totalAmount": 68443.3},
+        {"quantityId": 7, "scopeOfWork": "Window & Door Installation", "quantity": 1, "unit": "lot", "unitPrice": 52629.6, "totalAmount": 52629.6},
+        {"quantityId": 11, "scopeOfWork": "Fabricate & Install Service Counter", "quantity": 1, "unit": "lot", "unitPrice": 17091.2, "totalAmount": 17091.2}
+      ],
+      "D. MEPF Works": [
+        {"quantityId": 8, "scopeOfWork": "MEPF Rough-ins (Commercial)", "quantity": 1, "unit": "lot", "unitPrice": 46278.4, "totalAmount": 46278.4},
+        {"quantityId": 12, "scopeOfWork": "Final Fixture Installation & Commissioning", "quantity": 1, "unit": "lot", "unitPrice": 59572.8, "totalAmount": 59572.8}
+      ],
+      "E. Finishes": [
+        {"quantityId": 9, "scopeOfWork": "Interior & Exterior Wall Finishes", "quantity": 300, "unit": "sq.m", "unitPrice": 118.06, "totalAmount": 35418.91},
+        {"quantityId": 10, "scopeOfWork": "Floor Tiling (Main & Kitchen)", "quantity": 110, "unit": "sq.m", "unitPrice": 1007.83, "totalAmount": 110861.7}
+      ]
+    }
+  },
   "accomplishments": [
     { "type": "quantity", "taskId": 1, "subIndex": null, "date": "2025-10-02", "percentComplete": 100 },
     { "type": "quantity", "taskId": 2, "subIndex": null, "date": "2025-10-03", "percentComplete": 50 },

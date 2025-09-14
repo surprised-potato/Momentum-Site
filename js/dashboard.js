@@ -207,12 +207,10 @@ const updateDashboardGanttChart = async (projects) => {
         startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset());
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + p.contractDuration);
-        const { allTasks } = await getAllTasksForReport(p.id, true);
-        let overallProgress = 0;
-        if(allTasks.length > 0) {
-            const total = allTasks.reduce((sum, task) => sum + (task.percentComplete || 0), 0);
-            overallProgress = total / allTasks.length;
-        }
+        
+        // Correctly calculate overall progress using the weighted average function
+        const overallProgress = await getProjectActualPercentComplete(p.id);
+
         tasksForGantt.push({
             id: `proj_${p.id}`,
             name: p.projectName,

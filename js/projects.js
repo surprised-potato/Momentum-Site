@@ -40,6 +40,7 @@ const openCopyProjectModal = () => copyProjectModal.style.display = 'block';
 const closeCopyProjectModal = () => copyProjectModal.style.display = 'none';
 
 const showProjectSummary = async (projectId) => {
+    currentHubProjectId = projectId;
     try {
         const project = await db.projects.get(projectId);
         if (!project) {
@@ -47,10 +48,8 @@ const showProjectSummary = async (projectId) => {
             return;
         }
 
-        // Switch to the summary view
         showView(projectSummaryView);
 
-        // Populate all the fields on the summary page
         document.getElementById('summary-project-name').textContent = project.projectName;
         document.getElementById('summary-client-name').textContent = project.clientName || 'N/A';
         document.getElementById('summary-address').textContent = project.address || 'N/A';
@@ -65,6 +64,12 @@ const showProjectSummary = async (projectId) => {
         document.getElementById('summary-floor-area').textContent = project.floorArea ? `${project.floorArea} m²` : 'N/A';
         document.getElementById('summary-floors').textContent = project.numFloors || 'N/A';
         document.getElementById('summary-description').textContent = project.projectDescription || 'No description provided.';
+
+        const hubButtons = document.querySelectorAll('.hub-buttons button');
+        hubButtons.forEach(btn => {
+            btn.dataset.id = project.id;
+            btn.dataset.name = project.projectName;
+        });
 
     } catch (error) {
         console.error('Failed to show project summary:', error);
@@ -238,14 +243,20 @@ const displayProjects = async () => {
         allProjects.forEach(p => {
             const r = projectsTableBody.insertRow();
             r.innerHTML = `
-                <td>${p.projectName}</td>
-                <td>${p.projectStatus || 'N/A'}</td>
-                <td class="actions-cell">
-                    <button class="btn btn-primary summary-btn" data-id="${p.id}">Summary</button>
-                    <button class="btn btn-warning edit-btn" data-id="${p.id}">Edit</button>
-                    <button class="btn btn-secondary export-btn" data-id="${p.id}">Export</button>
-                    <button class="btn btn-danger delete-btn" data-id="${p.id}">Delete</button>
-                </td>`;
+            <td>${p.projectName}</td>
+            <td>${p.projectStatus || 'N/A'}</td>
+            <td class="actions-cell">
+                <button class="btn btn-primary summary-btn" data-id="${p.id}">Manage Project</button>
+                <button class="btn btn-warning edit-btn" data-id="${p.id}" title="Edit Project">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>
+                </button>
+                <button class="btn btn-secondary export-btn" data-id="${p.id}" title="Export Project">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                </button>
+                <button class="btn btn-danger delete-btn" data-id="${p.id}" title="Delete Project">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                </button>
+            </td>`;
         });
     }
 };
@@ -261,7 +272,7 @@ function initializeProjectsModule() {
     });
 
     projectModalClose.addEventListener('click', closeProjectModal);
-    
+
     copyProjectBtn.addEventListener('click', async () => {
         const allProjects = await db.projects.orderBy('projectName').toArray();
         sourceProjectSelect.innerHTML = '<option value="">-- Select a Project --</option>';
@@ -273,7 +284,7 @@ function initializeProjectsModule() {
     });
 
     copyProjectModalClose.addEventListener('click', closeCopyProjectModal);
-    
+
     copyProjectForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const sourceProjectId = parseInt(sourceProjectSelect.value);
@@ -291,7 +302,7 @@ function initializeProjectsModule() {
                 const sourceProject = await db.projects.get(sourceProjectId);
                 const quantities = await db.quantities.where({ projectId: sourceProjectId }).toArray();
                 const quantityIds = quantities.map(q => q.id);
-                
+
                 const accomplishments = quantityIds.length > 0 ? await db.accomplishments.where('type').equals('quantity').and(record => quantityIds.includes(record.taskId)).toArray() : [];
                 const dupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
                 const tasks = await db.tasks.where({ projectId: sourceProjectId }).toArray();
@@ -316,7 +327,7 @@ function initializeProjectsModule() {
                 }
 
                 if (dupas.length > 0) await db.dupas.bulkAdd(dupas.map(d => ({ ...d, id: undefined, quantityId: quantityIdMap.get(d.quantityId) })));
-                
+
                 if (accomplishments.length > 0) {
                     await db.accomplishments.bulkAdd(accomplishments.map(a => ({
                         ...a,
@@ -324,7 +335,7 @@ function initializeProjectsModule() {
                         taskId: quantityIdMap.get(a.taskId)
                     })));
                 }
-                
+
                 if (tasks.length > 0) {
                     await db.tasks.bulkAdd(tasks.map(t => ({
                         ...t,
@@ -334,15 +345,15 @@ function initializeProjectsModule() {
                         successorId: typeof t.successorId === 'number' ? quantityIdMap.get(t.successorId) : t.successorId,
                     })));
                 }
-                
+
                 if (boq) await db.boqs.add({ ...boq, id: undefined, projectId: newProjectId });
-                
+
                 for (const co of changeOrders) {
                     const oldId = co.id;
                     const newId = await db.changeOrders.add({ ...co, id: undefined, projectId: newProjectId });
                     changeOrderIdMap.set(oldId, newId);
                 }
-                
+
                 for (const item of changeOrderItems) {
                     const oldId = item.id;
                     const newItemData = {
@@ -415,8 +426,8 @@ function initializeProjectsModule() {
     });
 
     projectsTableBody.addEventListener('click', async (event) => {
-    const target = event.target;
-    if (!target.dataset.id) return;
+    const target = event.target.closest('button'); // Ensure we target the button itself
+    if (!target || !target.dataset.id) return;
     const id = parseInt(target.dataset.id);
 
     if (target.classList.contains('summary-btn')) {
@@ -448,10 +459,10 @@ function initializeProjectsModule() {
                 await db.transaction('rw', db.tables.map(t => t.name), async () => {
                     const quantities = await db.quantities.where({ projectId: id }).toArray();
                     const quantityIds = quantities.map(q => q.id);
-                    
+
                     const changeOrders = await db.changeOrders.where({ projectId: id }).toArray();
                     const changeOrderIds = changeOrders.map(co => co.id);
-                    
+
                     let changeOrderItemIds = [];
                     if (changeOrderIds.length > 0) {
                         const changeOrderItems = await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray();
@@ -472,7 +483,7 @@ function initializeProjectsModule() {
                     await db.tasks.where({ projectId: id }).delete();
                     await db.boqs.where({ projectId: id }).delete();
                     await db.quantities.where({ projectId: id }).delete();
-                    
+
                     await db.projects.delete(id);
                 });
                 alert('Project and all associated data deleted successfully.');

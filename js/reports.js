@@ -1,7 +1,6 @@
 // Author: Gemini
 // OS support: Cross-platform
 // Description: Logic for the Reports module (BOQ, PERT-CPM, and Gantt Chart).
-const boqProjectsListDiv = document.getElementById('boq-projects-list');
 const boqProjectName = document.getElementById('boq-project-name');
 const boqStatusMessage = document.getElementById('boq-status-message');
 const boqTbody = document.querySelector('#boq-table tbody');
@@ -20,7 +19,6 @@ const sCurveProjectName = document.getElementById('s-curve-project-name');
 const sCurveChartCanvas = document.getElementById('s-curve-chart');
 const networkDiagramProjectName = document.getElementById('network-diagram-project-name');
 
-const revisedBoqProjectsListDiv = document.getElementById('revised-boq-projects-list');
 const revisedBoqProjectName = document.getElementById('revised-boq-project-name');
 const revisedBoqTableContainer = document.getElementById('revised-boq-table-container');
 const viewRevisedPertCpmBtn = document.getElementById('view-revised-pert-cpm-btn');
@@ -41,20 +39,6 @@ const showReportsProjectList = () => {
     displayBoqProjects();
 };
 
-const displayBoqProjects = async () => {
-    const allProjects = await db.projects.orderBy('projectName').toArray();
-    boqProjectsListDiv.innerHTML = '';
-    if (allProjects.length === 0) {
-        boqProjectsListDiv.innerHTML = '<p>No projects created yet.</p>';
-    } else {
-        allProjects.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-boq-btn" data-id="${p.id}" data-name="${p.projectName}">View BOQ</button>`;
-            boqProjectsListDiv.appendChild(item);
-        });
-    }
-};
 
 const displayBoqFromData = (boqData) => {
     boqTbody.innerHTML = '';
@@ -164,7 +148,6 @@ const promptToGenerateBoq = () => {
 const showBoqForProject = async (projectId, projectName) => {
     currentBoqProjectId = projectId;
     boqProjectName.textContent = `Bill of Quantities: ${projectName}`;
-    boqProjectListView.classList.add('hidden');
     pertCpmDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.add('hidden');
@@ -770,20 +753,6 @@ const showCoItemDupaDetails = async (coItemId) => {
     openDupaReportModal();
 };
 
-const displayRevisedBoqProjects = async () => {
-    const constructionReadyProjects = await getConstructionReadyProjects();
-    revisedBoqProjectsListDiv.innerHTML = '';
-    if (constructionReadyProjects.length === 0) {
-        revisedBoqProjectsListDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
-        return;
-    }
-    constructionReadyProjects.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-revised-boq-btn" data-id="${p.id}" data-name="${p.projectName}">View Revised BOQ</button>`;
-        revisedBoqProjectsListDiv.appendChild(item);
-    });
-};
 
 const showRevisedNetworkDiagram = async () => {
     revisedPertCpmDisplayView.classList.add('hidden');
@@ -960,7 +929,6 @@ const showRevisedResourceSchedule = async () => {
 const showRevisedBoqForProject = async (projectId, projectName) => {
     currentBoqProjectId = projectId;
     revisedBoqProjectName.textContent = `Revised BOQ: ${projectName}`;
-    revisedBoqProjectListView.classList.add('hidden');
     revisedPertCpmDisplayView.classList.add('hidden');
     revisedBoqDisplayView.classList.remove('hidden');
 
@@ -1081,11 +1049,7 @@ const showRevisedPertCpmForProject = async () => {
     revisedPertCpmTableContainer.innerHTML = tableHtml;
 };
 function initializeReportsModule() {
-    boqProjectsListDiv.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-boq-btn')) {
-            showBoqForProject(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
+
     deleteBoqBtn.addEventListener('click', handleDeleteBoq);
     viewPertCpmBtn.addEventListener('click', showPertCpmForProject);
     viewSCurveBtn.addEventListener('click', showSCurveForProject);
@@ -1125,11 +1089,6 @@ function initializeReportsModule() {
         }
     });
 
-    revisedBoqProjectsListDiv.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-revised-boq-btn')) {
-            showRevisedBoqForProject(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
     
     viewRevisedPertCpmBtn.addEventListener('click', showRevisedPertCpmForProject);
     

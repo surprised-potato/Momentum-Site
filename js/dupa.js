@@ -2,24 +2,10 @@
 // OS support: -REPLACE WITH YOUR OS SUPPORT-
 // Description: Logic for the DUPA module.
 
-let dupaProjectsListDiv, dupaQuantitiesListDiv, dupaProjectName, dupaQuantityName, dupaForm, dupaQuantityIdInput, dupaIdInput, dupaDurationInput, addLaborBtn, laborTbody, addMaterialBtn, materialTbody, addEquipmentBtn, equipmentTbody, ocmPercentInput, profitPercentInput, taxesPercentInput;
+let dupaQuantitiesListDiv, dupaProjectName, dupaQuantityName, dupaForm, dupaQuantityIdInput, dupaIdInput, dupaDurationInput, addLaborBtn, laborTbody, addMaterialBtn, materialTbody, addEquipmentBtn, equipmentTbody, ocmPercentInput, profitPercentInput, taxesPercentInput;
 let addMaterialFromLibraryBtn, addLaborFromLibraryBtn, addCrewFromLibraryBtn, addEquipmentFromLibraryBtn;
 let dupaModuleInitialized = false;
 
-const displayDupaProjects = async () => {
-    const allProjects = await db.projects.orderBy('projectName').toArray();
-    dupaProjectsListDiv.innerHTML = '';
-    if (allProjects.length === 0) {
-        dupaProjectsListDiv.innerHTML = '<p>No projects created yet. Add one in the "Projects" module first.</p>';
-    } else {
-        allProjects.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-dupa-quantities-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
-            dupaProjectsListDiv.appendChild(item);
-        });
-    }
-};
 
 const displayDupaQuantities = async () => {
     const quantities = await db.quantities.where('projectId').equals(currentDupaProjectId).toArray();
@@ -52,7 +38,6 @@ const displayDupaQuantities = async () => {
 const showDupaQuantitiesForProject = async (projectId, projectName) => {
     currentDupaProjectId = projectId;
     dupaProjectName.textContent = projectName;
-    dupaProjectListView.classList.add('hidden');
     dupaFormView.classList.add('hidden');
     dupaQuantityListView.classList.remove('hidden');
     await displayDupaQuantities();
@@ -220,8 +205,6 @@ const addCrewToDupa = async (crew, multiplier) => {
 
 function initializeDupaModule() {
     if (dupaModuleInitialized) return;
-
-    dupaProjectsListDiv = document.getElementById('dupa-projects-list');
     dupaQuantitiesListDiv = document.getElementById('dupa-quantities-list');
     dupaProjectName = document.getElementById('dupa-project-name');
     dupaQuantityName = document.getElementById('dupa-quantity-name');
@@ -301,13 +284,12 @@ function initializeDupaModule() {
     });
 
     dupaView.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-dupa-quantities-btn')) { showDupaQuantitiesForProject(parseInt(e.target.dataset.id), e.target.dataset.name); }
-        if (e.target.classList.contains('show-dupa-form-btn')) { showDupaFormForQuantity(parseInt(e.target.dataset.id), e.target.dataset.name); }
-        if (e.target.classList.contains('btn-remove')) { 
-            e.target.closest('tr').remove();
-            calculateAndDisplayDupaTotals();
-        }
-    });
+    if (e.target.classList.contains('show-dupa-form-btn')) { showDupaFormForQuantity(parseInt(e.target.dataset.id), e.target.dataset.name); }
+    if (e.target.classList.contains('btn-remove')) { 
+        e.target.closest('tr').remove();
+        calculateAndDisplayDupaTotals();
+    }
+});
     
     dupaForm.addEventListener('input', calculateAndDisplayDupaTotals);
 

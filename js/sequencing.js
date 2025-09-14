@@ -2,7 +2,6 @@
 // OS support: Cross-platform
 // Description: Logic for the Task Sequencing module.
 
-const sequencingProjectsListDiv = document.getElementById('sequencing-projects-list');
 const sequencingProjectName = document.getElementById('sequencing-project-name');
 const sequencesOverviewTbody = document.getElementById('sequences-overview-tbody');
 const unsequencedTasksList = document.getElementById('unsequenced-tasks-list');
@@ -44,20 +43,6 @@ const getAllProjectTasks = async (projectId) => {
     return allTasks;
 };
 
-const displaySequencingProjects = async () => {
-    const allProjects = await db.projects.orderBy('projectName').toArray();
-    sequencingProjectsListDiv.innerHTML = '';
-    if (allProjects.length === 0) {
-        sequencingProjectsListDiv.innerHTML = '<p>No projects created yet.</p>';
-    } else {
-        allProjects.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-sequences-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
-            sequencingProjectsListDiv.appendChild(item);
-        });
-    }
-};
 
 const displayUnsequencedTasks = async (allTasks, allLinks) => {
     const sequencedIds = new Set();
@@ -208,18 +193,11 @@ const handleEditSequenceClick = async (taskId) => {
 const showSequencesForProject = async (projectId, projectName) => {
     currentSequencingProjectId = projectId;
     sequencingProjectName.textContent = projectName;
-    sequencingProjectListView.classList.add('hidden');
     sequencingTasksView.classList.remove('hidden');
     await displaySequencesOverview();
 };
 
 function initializeSequencingModule() {
-    sequencingView.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-sequences-btn')) {
-            showSequencesForProject(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
-
     sequencesOverviewTbody.addEventListener('click', (e) => {
         if (e.target.classList.contains('edit-sequence-btn')) {
             const taskId = e.target.dataset.id;

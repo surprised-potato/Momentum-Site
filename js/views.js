@@ -5,10 +5,10 @@
 let dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, changeOrdersView, revisedReportsView, lookaheadView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView;
 let allViews = [];
 
-let takeoffProjectListView, takeoffQuantitiesView, dupaProjectListView, dupaQuantityListView, dupaFormView, sequencingProjectListView, sequencingTasksView, boqProjectListView, boqDisplayView, pertCpmDisplayView, ganttChartDisplayView, sCurveDisplayView, pertCpmNetworkView, resourceScheduleView;
+let takeoffQuantitiesView, dupaQuantityListView, dupaFormView, sequencingTasksView, boqDisplayView, pertCpmDisplayView, ganttChartDisplayView, sCurveDisplayView, pertCpmNetworkView, resourceScheduleView;
 let revisedBoqProjectListView, revisedBoqDisplayView, revisedPertCpmDisplayView, revisedPertCpmNetworkView, revisedResourceScheduleView;
 let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, coItemTypeModal, coItemTypeModalClose, coExistingItemModal, coExistingItemModalClose, importPreviewModal, importPreviewModalClose, libraryPickerModal, libraryPickerModalClose, libraryPickerTitle, libraryPickerSearch, libraryPickerList, libraryPickerCrewMultiplier, libraryPickerCrewCount;
-let navDashboard, navProjects, navTakeoff, navDupa, navSequencing, navReports, navChangeOrders, navAccomplishment, navTrackingGantt, navTrackingSCurve, navRevisedReports, navLookahead, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
+let navDashboard, navProjects, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
 let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
 let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
 
@@ -75,10 +75,9 @@ const openLibraryPicker = (config) => {
 };
 
 const setActiveNav = (activeLink) => {
-    const allNavLinks = document.querySelectorAll('.dropdown-content a, .dropbtn');
-    const allDropBtns = document.querySelectorAll('.dropbtn');
+    const allNavLinks = document.querySelectorAll('.navbar ul a');
     allNavLinks.forEach(l => l.classList.remove('active'));
-    allDropBtns.forEach(b => b.classList.remove('active'));
+
     if (activeLink) {
         activeLink.classList.add('active');
         const parentDropdown = activeLink.closest('.dropdown');
@@ -95,78 +94,16 @@ const showDocumentation = () => {
     showView(documentationView);
     setActiveNav(navDocumentation);
 };
-const showTakeOff = () => {
-    showView(takeoffView);
-    setActiveNav(navTakeoff);
-    takeoffQuantitiesView.classList.add('hidden');
-    takeoffProjectListView.classList.remove('hidden');
-    displayTakeOffProjects();
-};
-const showDupa = () => {
-    showView(dupaView);
-    setActiveNav(navDupa);
-    dupaQuantityListView.classList.add('hidden');
-    dupaFormView.classList.add('hidden');
-    dupaProjectListView.classList.remove('hidden');
-    displayDupaProjects();
-};
-const showSequencing = () => {
-    showView(sequencingView);
-    setActiveNav(navSequencing);
-    sequencingTasksView.classList.add('hidden');
-    sequencingProjectListView.classList.remove('hidden');
-    displaySequencingProjects();
-};
-const showReports = () => {
-    showView(reportsView);
-    setActiveNav(navReports);
-    showReportsProjectList();
-};
-const showChangeOrders = () => {
-    showView(changeOrdersView);
-    setActiveNav(navChangeOrders);
-    document.getElementById('co-list-view').classList.add('hidden');
-    document.getElementById('co-project-list-view').classList.remove('hidden');
-    displayCoProjects();
-};
-const showAccomplishment = () => {
-    showView(accomplishmentView);
-    setActiveNav(navAccomplishment);
-    document.getElementById('accomplishment-entry-view').classList.add('hidden');
-    document.getElementById('accomplishment-list-view').classList.add('hidden');
-    document.getElementById('accomplishment-detail-view').classList.add('hidden');
-    document.getElementById('accomplishment-project-list-view').classList.remove('hidden');
-    displayAccomplishmentProjects();
-};
-const showTrackingGantt = () => {
-    showView(trackingGanttView);
-    setActiveNav(navTrackingGantt);
-    document.getElementById('tracking-gantt-chart-view').classList.add('hidden');
-    document.getElementById('tracking-gantt-project-list-view').classList.remove('hidden');
-    displayTrackingGanttProjects();
-};
-const showTrackingSCurve = () => {
-    showView(trackingSCurveView);
-    setActiveNav(navTrackingSCurve);
-    document.getElementById('tracking-s-curve-chart-view').classList.add('hidden');
-    document.getElementById('tracking-s-curve-project-list-view').classList.remove('hidden');
-    displayTrackingSCurveProjects();
-};
-const showRevisedReports = () => {
-    showView(revisedReportsView);
-    setActiveNav(navRevisedReports);
-    revisedBoqDisplayView.classList.add('hidden');
-    revisedPertCpmDisplayView.classList.add('hidden');
-    revisedBoqProjectListView.classList.remove('hidden');
-    displayRevisedBoqProjects();
-};
-const showLookahead = () => {
-    showView(lookaheadView);
-    setActiveNav(navLookahead);
-    document.getElementById('lookahead-report-view').classList.add('hidden');
-    document.getElementById('lookahead-project-list-view').classList.remove('hidden');
-    displayLookaheadProjects();
-};
+const showTakeOff = () => showProjects();
+const showDupa = () => showProjects();
+const showSequencing = () => showProjects();
+const showReports = () => showProjects();
+const showChangeOrders = () => showProjects();
+const showAccomplishment = () => showProjects();
+const showTrackingGantt = () => showProjects();
+const showTrackingSCurve = () => showProjects();
+const showRevisedReports = () => showProjects();
+const showLookahead = () => showProjects();
 const showMaterialsLibrary = () => {
     showView(materialsLibraryView);
     setActiveNav(navMaterialsLibrary);
@@ -204,20 +141,15 @@ function initializeViewsModule() {
     libraryManagementView = document.getElementById('library-management-view');
     documentationView = document.getElementById('documentation-view');
     
-    // ADD REFERENCES TO NEW VIEWS
     revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
     revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
 
     allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView, revisedPertCpmNetworkView, revisedResourceScheduleView];
 
-    takeoffProjectListView = document.getElementById('takeoff-project-list-view');
     takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
-    dupaProjectListView = document.getElementById('dupa-project-list-view');
     dupaQuantityListView = document.getElementById('dupa-quantity-list-view');
     dupaFormView = document.getElementById('dupa-form-view');
-    sequencingProjectListView = document.getElementById('sequencing-project-list-view');
     sequencingTasksView = document.getElementById('sequencing-tasks-view');
-    boqProjectListView = document.getElementById('boq-project-list-view');
     boqDisplayView = document.getElementById('boq-display-view');
     pertCpmDisplayView = document.getElementById('pert-cpm-display-view');
     ganttChartDisplayView = document.getElementById('gantt-chart-display-view');
@@ -225,7 +157,6 @@ function initializeViewsModule() {
     pertCpmNetworkView = document.getElementById('pert-cpm-network-view');
     resourceScheduleView = document.getElementById('resource-schedule-view');
 
-    revisedBoqProjectListView = document.getElementById('revised-boq-project-list-view');
     revisedBoqDisplayView = document.getElementById('revised-boq-display-view');
     revisedPertCpmDisplayView = document.getElementById('revised-pert-cpm-display-view');
 
@@ -249,39 +180,21 @@ function initializeViewsModule() {
 
     navDashboard = document.getElementById('nav-dashboard');
     navProjects = document.getElementById('nav-projects');
-    navTakeoff = document.getElementById('nav-takeoff');
-    navDupa = document.getElementById('nav-dupa');
-    navSequencing = document.getElementById('nav-sequencing');
-    navReports = document.getElementById('nav-reports');
-    navChangeOrders = document.getElementById('nav-change-orders');
-    navAccomplishment = document.getElementById('nav-accomplishment');
-    navTrackingGantt = document.getElementById('nav-tracking-gantt');
-    navTrackingSCurve = document.getElementById('nav-tracking-s-curve');
-    navRevisedReports = document.getElementById('nav-revised-reports');
-    navLookahead = document.getElementById('nav-lookahead');
     navMaterialsLibrary = document.getElementById('nav-materials-library');
     navDupaLibrary = document.getElementById('nav-dupa-library');
     navLibraryManagement = document.getElementById('nav-library-management');
     navDocumentation = document.getElementById('nav-documentation');
-    navBrandLink = document.getElementById('nav-brand-link'); // Makes the brand clickable
+    navBrandLink = document.getElementById('nav-brand-link');
 
     navDashboard.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
     navProjects.addEventListener('click', (e) => { e.preventDefault(); showProjects(); });
-    navTakeoff.addEventListener('click', (e) => { e.preventDefault(); showTakeOff(); });
-    navDupa.addEventListener('click', (e) => { e.preventDefault(); showDupa(); });
-    navSequencing.addEventListener('click', (e) => { e.preventDefault(); showSequencing(); });
-    navReports.addEventListener('click', (e) => { e.preventDefault(); showReports(); });
-    navChangeOrders.addEventListener('click', (e) => { e.preventDefault(); showChangeOrders(); });
-    navAccomplishment.addEventListener('click', (e) => { e.preventDefault(); showAccomplishment(); });
-    navTrackingGantt.addEventListener('click', (e) => { e.preventDefault(); showTrackingGantt(); });
-    navTrackingSCurve.addEventListener('click', (e) => { e.preventDefault(); showTrackingSCurve(); });
-    navRevisedReports.addEventListener('click', (e) => { e.preventDefault(); showRevisedReports(); });
-    navLookahead.addEventListener('click', (e) => { e.preventDefault(); showLookahead(); });
     navMaterialsLibrary.addEventListener('click', (e) => { e.preventDefault(); showMaterialsLibrary(); });
     navDupaLibrary.addEventListener('click', (e) => { e.preventDefault(); showDupaLibrary(); });
     navLibraryManagement.addEventListener('click', (e) => { e.preventDefault(); showLibraryManagement(); });
     navDocumentation.addEventListener('click', (e) => { e.preventDefault(); showDocumentation(); });
-    navBrandLink.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); }); // Makes the brand clickable
+    navBrandLink.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
+
+    const backToHub = () => { if(currentHubProjectId) showProjectSummary(currentHubProjectId); };
 
     document.getElementById('back-to-projects-from-summary').addEventListener('click', showProjects);
     document.getElementById('view-past-reports-btn').addEventListener('click', () => showAccomplishmentList(currentConstructionProjectId));
@@ -300,16 +213,15 @@ function initializeViewsModule() {
     backToRevisedBoqProjectsBtn = document.getElementById('back-to-revised-boq-projects');
     backToRevisedBoqViewBtn = document.getElementById('back-to-revised-boq-view');
     
-    // GET REFERENCES TO NEW BUTTONS
     backToRevisedPertCpmBtn = document.getElementById('back-to-revised-boq-view');
     backToRevisedPertCpmFromNetworkBtn = document.getElementById('back-to-revised-pert-cpm-from-network-btn');
     backToRevisedPertCpmFromResourceBtn = document.getElementById('back-to-revised-pert-cpm-from-resource-btn');
     
-    backToTakeoffListBtn.addEventListener('click', showTakeOff);
-    backToDupaProjectsBtn.addEventListener('click', showDupa);
+    backToTakeoffListBtn.addEventListener('click', backToHub);
+    backToDupaProjectsBtn.addEventListener('click', backToHub);
     backToDupaQuantitiesBtn.addEventListener('click', () => showDupaQuantitiesForProject(currentDupaProjectId, dupaProjectName.textContent));
-    backToSequencingProjectsBtn.addEventListener('click', showSequencing);
-    backToBoqProjectsBtn.addEventListener('click', showReports);
+    backToSequencingProjectsBtn.addEventListener('click', backToHub);
+    backToBoqProjectsBtn.addEventListener('click', backToHub);
     
     backToBoqViewBtn.addEventListener('click', () => {
         pertCpmDisplayView.classList.add('hidden');
@@ -333,13 +245,12 @@ function initializeViewsModule() {
     backToPertCpmFromNetworkBtn.addEventListener('click', goBackToPertCpm);
     backToPertCpmFromResourceBtn.addEventListener('click', goBackToPertCpm);
 
-    backToRevisedBoqProjectsBtn.addEventListener('click', showRevisedReports);
+    backToRevisedBoqProjectsBtn.addEventListener('click', backToHub);
     backToRevisedBoqViewBtn.addEventListener('click', () => {
         revisedPertCpmDisplayView.classList.add('hidden');
         revisedBoqDisplayView.classList.remove('hidden');
     });
 
-    // ADD LISTENERS FOR NEW "BACK" BUTTONS
     const goBackToRevisedPertCpm = () => {
         revisedPertCpmNetworkView.classList.add('hidden');
         revisedResourceScheduleView.classList.add('hidden');
@@ -351,4 +262,73 @@ function initializeViewsModule() {
     });
     if (backToRevisedPertCpmFromNetworkBtn) backToRevisedPertCpmFromNetworkBtn.addEventListener('click', goBackToRevisedPertCpm);
     if (backToRevisedPertCpmFromResourceBtn) backToRevisedPertCpmFromResourceBtn.addEventListener('click', goBackToRevisedPertCpm);
+
+    document.getElementById('back-to-co-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-accomplishment-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-tracking-gantt-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-tracking-s-curve-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-lookahead-projects').addEventListener('click', backToHub);
+    
+    projectSummaryView.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!target.matches('.hub-buttons button')) return;
+
+        const projectId = parseInt(target.dataset.id);
+        const projectName = target.dataset.name;
+
+        if (!projectId || !projectName) return;
+
+        switch (target.id) {
+            case 'hub-btn-takeoff':
+                setActiveNav(navProjects);
+                showView(takeoffView);
+                showQuantitiesForProject(projectId, projectName);
+                break;
+            case 'hub-btn-dupa':
+                setActiveNav(navProjects);
+                showView(dupaView);
+                showDupaQuantitiesForProject(projectId, projectName);
+                break;
+            case 'hub-btn-sequencing':
+                setActiveNav(navProjects);
+                showView(sequencingView);
+                showSequencesForProject(projectId, projectName);
+                break;
+            case 'hub-btn-reports':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                showBoqForProject(projectId, projectName);
+                break;
+            case 'hub-btn-change-orders':
+                setActiveNav(navProjects);
+                showView(changeOrdersView);
+                showChangeOrdersForProject(projectId, projectName);
+                break;
+            case 'hub-btn-accomplishment':
+                setActiveNav(navProjects);
+                showView(accomplishmentView);
+                showAccomplishmentForm(projectId, projectName);
+                break;
+            case 'hub-btn-tracking-gantt':
+                setActiveNav(navProjects);
+                showView(trackingGanttView);
+                showTrackingGanttChart(projectId, projectName);
+                break;
+            case 'hub-btn-tracking-scurve':
+                setActiveNav(navProjects);
+                showView(trackingSCurveView);
+                renderTrackingSCurve(projectId, projectName);
+                break;
+            case 'hub-btn-revised-reports':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                showRevisedBoqForProject(projectId, projectName);
+                break;
+            case 'hub-btn-lookahead':
+                setActiveNav(navProjects);
+                showView(lookaheadView);
+                showLookAheadReportView(projectId, projectName);
+                break;
+        }
+    });
 }

@@ -92,16 +92,6 @@ const calculateChangeOrderDupaTotal = (dupa) => {
     return totalBeforeTax + taxCost;
 };
 
-const displayCoProjects = async () => {
-    const allProjects = await db.projects.orderBy('projectName').toArray();
-    coProjectsListDiv.innerHTML = '';
-    allProjects.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-co-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
-        coProjectsListDiv.appendChild(item);
-    });
-};
 
 const renderCoItems = async (changeOrderId) => {
     coItemsTableBody.innerHTML = '';
@@ -174,7 +164,6 @@ const renderCoItems = async (changeOrderId) => {
 const showChangeOrdersForProject = async (projectId, projectName) => {
     currentCoProjectId = projectId;
     coProjectName.textContent = `Change Orders: ${projectName}`;
-    document.getElementById('co-project-list-view').classList.add('hidden');
     coListView.classList.remove('hidden');
 
     coTableBody.innerHTML = '';
@@ -201,17 +190,6 @@ const showChangeOrdersForProject = async (projectId, projectName) => {
 };
 
 function initializeChangeOrdersModule() {
-    changeOrdersView.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-co-btn')) {
-            showChangeOrdersForProject(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
-
-    backToCoProjectsBtn.addEventListener('click', () => {
-        coListView.classList.add('hidden');
-        document.getElementById('co-project-list-view').classList.remove('hidden');
-    });
-
     addCoBtn.addEventListener('click', () => {
         currentCoId = null;
         coForm.reset();

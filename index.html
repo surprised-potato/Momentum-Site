@@ -23,39 +23,19 @@
                     <span class="brand-subtitle">Construction Management</span>
                 </div>
             </a>
-                <ul>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" id="nav-preconstruction">Pre-construction</a>
-                        <div class="dropdown-content">
-                            <a href="#" id="nav-dashboard">Dashboard</a>
-                            <a href="#" id="nav-projects">Projects</a>
-                            <a href="#" id="nav-takeoff">Take Off</a>
-                            <a href="#" id="nav-dupa">DUPA</a>
-                            <a href="#" id="nav-sequencing">Task Sequencing</a>
-                            <a href="#" id="nav-reports">Pre-construction Reports</a>
-                            <a href="#" id="nav-change-orders">Change Orders</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" id="nav-construction">Construction</a>
-                        <div class="dropdown-content">
-                            <a href="#" id="nav-accomplishment">Accomplishment Report</a>
-                            <a href="#" id="nav-tracking-gantt">Tracking Gantt Chart</a>
-                            <a href="#" id="nav-tracking-s-curve">Tracking S-Curve</a>
-                            <a href="#" id="nav-revised-reports">Revised Reports</a>
-                            <a href="#" id="nav-lookahead">Look-Ahead Report</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" id="nav-libraries">Libraries</a>
-                        <div class="dropdown-content">
-                            <a href="#" id="nav-materials-library">Materials Library</a>
-                            <a href="#" id="nav-dupa-library">DUPA Labor & Equipment</a>
-                            <a href="#" id="nav-library-management">Import/Export Library</a>
-                        </div>
-                    </li>
-                    <li><a href="#" id="nav-documentation">User Manual</a></li>
-                </ul>
+            <ul>
+                <li><a href="#" id="nav-dashboard">Dashboard</a></li>
+                <li><a href="#" id="nav-projects">Projects</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" id="nav-libraries">Libraries</a>
+                    <div class="dropdown-content">
+                        <a href="#" id="nav-materials-library">Materials Library</a>
+                        <a href="#" id="nav-dupa-library">DUPA Labor & Equipment</a>
+                        <a href="#" id="nav-library-management">Import/Export Library</a>
+                    </div>
+                </li>
+                <li><a href="#" id="nav-documentation">User Manual</a></li>
+            </ul>
         </nav>
 
         <main class="content">
@@ -183,40 +163,62 @@
                 </div>
             </div>
             <div id="project-summary-view" class="hidden">
-    <header class="page-header">
-        <div>
-            <button id="back-to-projects-from-summary" class="btn btn-secondary">&larr; Back to Projects List</button>
-            <h1 id="summary-project-name"></h1>
-        </div>
-    </header>
-    <div class="summary-container">
-        <div class="summary-grid">
-            <div class="summary-item"><strong>Client</strong> <span id="summary-client-name"></span></div>
-            <div class="summary-item"><strong>Address</strong> <span id="summary-address"></span></div>
-            <div class="summary-item"><strong>Status</strong> <span id="summary-status"></span></div>
-            <div class="summary-item"><strong>Project Manager</strong> <span id="summary-project-manager"></span></div>
-            <div class="summary-item"><strong>Client Contact</strong> <span id="summary-client-contact"></span></div>
-            <div class="summary-item"><strong>Contract Amount</strong> <span id="summary-contract-amount"></span></div>
-            <div class="summary-item"><strong>Contract Date</strong> <span id="summary-contract-date"></span></div>
-            <div class="summary-item"><strong>Target Start Date</strong> <span id="summary-target-start"></span></div>
-            <div class="summary-item"><strong>Contract Duration</strong> <span id="summary-duration"></span></div>
-            <div class="summary-item"><strong>Lot Area</strong> <span id="summary-lot-area"></span></div>
-            <div class="summary-item"><strong>Floor Area</strong> <span id="summary-floor-area"></span></div>
-            <div class="summary-item"><strong>Floors</strong> <span id="summary-floors"></span></div>
-        </div>
-        <div class="summary-description">
-            <strong>Description</strong>
-            <p id="summary-description"></p>
+
+            <header class="page-header">
+                <div>
+                    <button id="back-to-projects-from-summary" class="btn btn-secondary">&larr; Back to Projects List</button>
+                    <h1 id="summary-project-name"></h1>
+                </div>
+            </header>
+<div class="summary-container">
+    <div class="summary-grid">
+        <div class="summary-item"><strong>Client</strong> <span id="summary-client-name"></span></div>
+        <div class="summary-item"><strong>Address</strong> <span id="summary-address"></span></div>
+        <div class="summary-item"><strong>Status</strong> <span id="summary-status"></span></div>
+        <div class="summary-item"><strong>Project Manager</strong> <span id="summary-project-manager"></span></div>
+        <div class="summary-item"><strong>Client Contact</strong> <span id="summary-client-contact"></span></div>
+        <div class="summary-item"><strong>Contract Amount</strong> <span id="summary-contract-amount"></span></div>
+        <div class="summary-item"><strong>Contract Date</strong> <span id="summary-contract-date"></span></div>
+        <div class="summary-item"><strong>Target Start Date</strong> <span id="summary-target-start"></span></div>
+        <div class="summary-item"><strong>Contract Duration</strong> <span id="summary-duration"></span></div>
+        <div class="summary-item"><strong>Lot Area</strong> <span id="summary-lot-area"></span></div>
+        <div class="summary-item"><strong>Floor Area</strong> <span id="summary-floor-area"></span></div>
+        <div class="summary-item"><strong>Floors</strong> <span id="summary-floors"></span></div>
+    </div>
+    <div class="summary-description">
+        <strong>Description</strong>
+        <p id="summary-description"></p>
+    </div>
+</div>
+
+<div class="summary-container" style="margin-top: 2rem;">
+    <h2>Project Hub</h2>
+    <p>Jump directly to a module for this project.</p>
+
+    <div class="hub-section">
+        <h3>Pre-construction</h3>
+        <div class="hub-buttons">
+            <button id="hub-btn-takeoff" class="btn btn-primary">Take Off</button>
+            <button id="hub-btn-dupa" class="btn btn-primary">DUPA</button>
+            <button id="hub-btn-sequencing" class="btn btn-primary">Task Sequencing</button>
+            <button id="hub-btn-reports" class="btn btn-primary">Reports</button>
+            <button id="hub-btn-change-orders" class="btn btn-primary">Change Orders</button>
         </div>
     </div>
+
+    <div class="hub-section">
+        <h3>Construction</h3>
+        <div class="hub-buttons">
+            <button id="hub-btn-accomplishment" class="btn btn-primary">Accomplishment</button>
+            <button id="hub-btn-tracking-gantt" class="btn btn-primary">Tracking Gantt</button>
+            <button id="hub-btn-tracking-scurve" class="btn btn-primary">Tracking S-Curve</button>
+            <button id="hub-btn-revised-reports" class="btn btn-primary">Revised Reports</button>
+            <button id="hub-btn-lookahead" class="btn btn-primary">Look-Ahead</button>
+        </div>
+    </div>
+</div>
             </div>
             <div id="takeoff-view" class="hidden">
-                <div id="takeoff-project-list-view">
-                    <header class="page-header">
-                        <h1>Take Off - Select a Project</h1>
-                    </header>
-                    <div id="takeoff-projects-list" class="list-container"></div>
-                </div>
                 <div id="takeoff-quantities-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -242,12 +244,6 @@
             </div>
 
             <div id="dupa-view" class="hidden">
-                <div id="dupa-project-list-view">
-                    <header class="page-header">
-                        <h1>DUPA - Select a Project</h1>
-                    </header>
-                    <div id="dupa-projects-list" class="list-container"></div>
-                </div>
                 <div id="dupa-quantity-list-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -343,12 +339,6 @@
             </div>
 
             <div id="sequencing-view" class="hidden">
-                <div id="sequencing-project-list-view">
-                    <header class="page-header">
-                        <h1>Task Sequencing - Select a Project</h1>
-                    </header>
-                    <div id="sequencing-projects-list" class="list-container"></div>
-                </div>
                 <div id="sequencing-tasks-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -400,12 +390,6 @@
             </div>
 
             <div id="reports-view" class="hidden">
-                <div id="boq-project-list-view">
-                    <header class="page-header">
-                        <h1>Reports - Select a Project for BOQ</h1>
-                    </header>
-                    <div id="boq-projects-list" class="list-container"></div>
-                </div>
                 <div id="boq-display-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -521,12 +505,6 @@
             </div>
 
             <div id="change-orders-view" class="hidden">
-                <div id="co-project-list-view">
-                    <header class="page-header">
-                        <h1>Change Orders - Select a Project</h1>
-                    </header>
-                    <div id="co-projects-list" class="list-container"></div>
-                </div>
                 <div id="co-list-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -544,12 +522,6 @@
                 </div>
             </div>
             <div id="revised-reports-view" class="hidden">
-                <div id="revised-boq-project-list-view">
-                    <header class="page-header">
-                        <h1>Revised Reports - Select a Project</h1>
-                    </header>
-                    <div id="revised-boq-projects-list" class="list-container"></div>
-                </div>
                 <div id="revised-boq-display-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -597,13 +569,6 @@
                 </div>
             </div>
             <div id="lookahead-view" class="hidden">
-                <div id="lookahead-project-list-view">
-                    <header class="page-header">
-                        <h1>Look-Ahead Report - Select a Project</h1>
-                    </header>
-                    <div id="lookahead-projects-list" class="list-container"></div>
-                </div>
-
                 <div id="lookahead-report-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -805,12 +770,6 @@
                 </div>
             </div>
             <div id="accomplishment-view" class="hidden">
-                <div id="accomplishment-project-list-view">
-                    <header class="page-header">
-                        <h1>Accomplishment Reports - Select a Project</h1>
-                    </header>
-                    <div id="accomplishment-projects-list" class="list-container"></div>
-                </div>
                 <div id="accomplishment-entry-view" class="hidden">
                     <header class="page-header">
                         <div>
@@ -898,12 +857,6 @@
 </div>
 
             <div id="tracking-gantt-view" class="hidden">
-                 <div id="tracking-gantt-project-list-view">
-                    <header class="page-header">
-                        <h1>Tracking Gantt Chart - Select a Project</h1>
-                    </header>
-                    <div id="tracking-gantt-projects-list" class="list-container"></div>
-                </div>
                 <div id="tracking-gantt-chart-view" class="hidden">
                      <header class="page-header">
                         <div>
@@ -929,12 +882,6 @@
             </div>
 
             <div id="tracking-s-curve-view" class="hidden">
-                <div id="tracking-s-curve-project-list-view">
-                    <header class="page-header">
-                        <h1>Tracking S-Curve - Select a Project</h1>
-                    </header>
-                    <div id="tracking-s-curve-projects-list" class="list-container"></div>
-                </div>
                 <div id="tracking-s-curve-chart-view" class="hidden">
                     <header class="page-header">
                         <div>

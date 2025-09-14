@@ -6,7 +6,6 @@ let currentConstructionProjectId = null;
 let trackingGanttChart = null;
 let trackingSCurveChart = null;
 
-const accomplishmentProjectsListDiv = document.getElementById('accomplishment-projects-list');
 const accomplishmentProjectName = document.getElementById('accomplishment-project-name');
 const accomplishmentEntryView = document.getElementById('accomplishment-entry-view');
 const accomplishmentDateInput = document.getElementById('accomplishment-date');
@@ -363,20 +362,7 @@ const dailyCosts = new Array(projectDuration + 1).fill(0);
         projectDuration: projectDuration
     };
 };
-const displayAccomplishmentProjects = async () => {
-    const constructionReadyProjects = await getConstructionReadyProjects();
-    accomplishmentProjectsListDiv.innerHTML = '';
-    if (constructionReadyProjects.length === 0) {
-        accomplishmentProjectsListDiv.innerHTML = '<p>No projects with a generated BOQ found. Please generate a BOQ in the "Pre-construction Reports" module first.</p>';
-    } else {
-        constructionReadyProjects.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-accomplishment-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
-            accomplishmentProjectsListDiv.appendChild(item);
-        });
-    }
-};
+
 
 const populateAccomplishmentTable = async (projectId) => {
     try {
@@ -423,9 +409,8 @@ const populateAccomplishmentTable = async (projectId) => {
 const showAccomplishmentForm = async (projectId, projectName) => {
     currentConstructionProjectId = projectId;
     accomplishmentProjectName.textContent = projectName;
-    
+
     showView(accomplishmentView);
-    document.getElementById('accomplishment-project-list-view').classList.add('hidden');
     document.getElementById('accomplishment-list-view').classList.add('hidden');
     document.getElementById('accomplishment-detail-view').classList.add('hidden');
     accomplishmentEntryView.classList.remove('hidden');
@@ -721,57 +706,9 @@ const getConstructionReadyProjects = async () => {
     return allProjects.filter(p => boqProjectIds.has(p.id));
 };
 
-const displayTrackingGanttProjects = async () => {
-    const projects = await getConstructionReadyProjects();
-    const listDiv = document.getElementById('tracking-gantt-projects-list');
-    listDiv.innerHTML = '';
-    if (projects.length === 0) {
-        listDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
-        return;
-    }
-    projects.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-tracking-gantt-btn" data-id="${p.id}" data-name="${p.projectName}">View Chart</button>`;
-        listDiv.appendChild(item);
-    });
-};
-
-const displayTrackingSCurveProjects = async () => {
-    const projects = await getConstructionReadyProjects();
-    const listDiv = document.getElementById('tracking-s-curve-projects-list');
-    listDiv.innerHTML = '';
-    if (projects.length === 0) {
-        listDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
-        return;
-    }
-    projects.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary view-tracking-s-curve-btn" data-id="${p.id}" data-name="${p.projectName}">View Chart</button>`;
-        listDiv.appendChild(item);
-    });
-};
-
-const displayLookaheadProjects = async () => {
-    const projects = await getConstructionReadyProjects();
-    const listDiv = document.getElementById('lookahead-projects-list');
-    listDiv.innerHTML = '';
-    if (projects.length === 0) {
-        listDiv.innerHTML = '<p>No projects with a generated BOQ found.</p>';
-        return;
-    }
-    projects.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `<h3>${p.projectName}</h3><button class="btn btn-primary select-lookahead-project-btn" data-id="${p.id}" data-name="${p.projectName}">Select</button>`;
-        listDiv.appendChild(item);
-    });
-};
 
 const showLookAheadReportView = (projectId, projectName) => {
     currentConstructionProjectId = projectId;
-    document.getElementById('lookahead-project-list-view').classList.add('hidden');
     document.getElementById('lookahead-report-view').classList.remove('hidden');
     document.getElementById('lookahead-project-name').textContent = `Look-Ahead: ${projectName}`;
     document.getElementById('lookahead-start-date').valueAsDate = new Date();
@@ -781,7 +718,6 @@ const showLookAheadReportView = (projectId, projectName) => {
 
 const showTrackingGanttChart = async (projectId, projectName) => {
     currentConstructionProjectId = projectId; 
-    document.getElementById('tracking-gantt-project-list-view').classList.add('hidden');
     trackingGanttChartView.classList.remove('hidden');
     trackingGanttProjectName.textContent = `Tracking Gantt: ${projectName}`;
 
@@ -875,7 +811,6 @@ const showTrackingGanttChart = async (projectId, projectName) => {
 
 const renderTrackingSCurve = async (projectId, projectName) => {
     currentConstructionProjectId = projectId;
-    document.getElementById('tracking-s-curve-project-list-view').classList.add('hidden');
     trackingSCurveChartView.classList.remove('hidden');
     trackingSCurveProjectName.textContent = `Tracking S-Curve: ${projectName}`;
 
@@ -1186,11 +1121,7 @@ const generateLookAheadReport = async () => {
 
 
 function initializeConstructionModule() {
-    accomplishmentView.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-accomplishment-btn')) {
-            showAccomplishmentForm(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
+
     document.getElementById('accomplishment-list-view').addEventListener('click', (e) => {
         if (e.target.classList.contains('view-accomplishment-detail-btn')) {
             showAccomplishmentDetail(currentConstructionProjectId, e.target.dataset.date);
@@ -1202,7 +1133,6 @@ function initializeConstructionModule() {
     document.getElementById('back-to-accomplishment-entry').addEventListener('click', () => {
         showAccomplishmentForm(currentConstructionProjectId, accomplishmentProjectName.textContent);
     });
-    backToAccomplishmentProjectsBtn.addEventListener('click', showAccomplishment);
     
     accomplishmentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1299,11 +1229,7 @@ function initializeConstructionModule() {
     }
 });
 
-    trackingGanttView.addEventListener('click', e => {
-        if (e.target.classList.contains('view-tracking-gantt-btn')) {
-            showTrackingGanttChart(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
+
     backToTrackingGanttProjectsBtn.addEventListener('click', showTrackingGantt);
     document.getElementById('tracking-gantt-view-day').addEventListener('click', () => { if (trackingGanttChart) trackingGanttChart.change_view_mode('Day'); });
     document.getElementById('tracking-gantt-view-week').addEventListener('click', () => { if (trackingGanttChart) trackingGanttChart.change_view_mode('Week'); });
@@ -1314,19 +1240,10 @@ function initializeConstructionModule() {
             showTrackingGanttChart(currentConstructionProjectId, projectName);
         }
     });
-    
-    trackingSCurveView.addEventListener('click', e => {
-        if (e.target.classList.contains('view-tracking-s-curve-btn')) {
-            renderTrackingSCurve(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
+
     backToTrackingSCurveProjectsBtn.addEventListener('click', showTrackingSCurve);
 
-    document.getElementById('lookahead-projects-list').addEventListener('click', (e) => {
-        if (e.target.classList.contains('select-lookahead-project-btn')) {
-            showLookAheadReportView(parseInt(e.target.dataset.id), e.target.dataset.name);
-        }
-    });
+
     document.getElementById('back-to-lookahead-projects').addEventListener('click', showLookahead);
     document.getElementById('generate-lookahead-btn').addEventListener('click', generateLookAheadReport);
         document.getElementById('accomplishment-sort').addEventListener('change', () => {

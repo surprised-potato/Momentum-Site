@@ -8,6 +8,7 @@ let currentDupaProjectId = null;
 let currentDupaQuantityId = null;
 let currentSequencingProjectId = null;
 let currentBoqProjectId = null;
+let currentHubProjectId = null;
 
 // --- End of app.js ---
 

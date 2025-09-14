@@ -3,7 +3,6 @@
 let takeoffModuleInitialized = false;
 
 // --- DOM References ---
-const takeoffProjectsListDiv = document.getElementById('takeoff-projects-list');
 const quantitiesProjectName = document.getElementById('quantities-project-name');
 const addQuantityBtn = document.getElementById('add-quantity-btn');
 const quantitiesTableBody = document.querySelector('#quantities-table tbody');
@@ -27,21 +26,6 @@ const closeQuantityModal = () => quantityModal.style.display = 'none';
 const populateCategoryDatalist = async () => {
     const allCategories = await db.quantities.orderBy('category').uniqueKeys();
     categoryList.innerHTML = allCategories.map(cat => `<option value="${cat}"></option>`).join('');
-};
-
-const displayTakeOffProjects = async () => {
-    const allProjects = await db.projects.orderBy('projectName').toArray();
-    takeoffProjectsListDiv.innerHTML = '';
-    if (allProjects.length === 0) {
-        takeoffProjectsListDiv.innerHTML = '<p>No projects created yet. Add one in the "Projects" module first.</p>';
-    } else {
-        allProjects.forEach(project => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.innerHTML = `<h3>${project.projectName}</h3><button class="btn btn-primary view-quantities-btn" data-id="${project.id}" data-name="${project.projectName}">View Quantities</button>`;
-            takeoffProjectsListDiv.appendChild(item);
-        });
-    }
 };
 
 const displayQuantities = async () => {
@@ -75,7 +59,6 @@ const displayQuantities = async () => {
 const showQuantitiesForProject = async (projectId, projectName) => {
     currentProjectId = projectId;
     quantitiesProjectName.textContent = projectName;
-    takeoffProjectListView.classList.add('hidden');
     takeoffQuantitiesView.classList.remove('hidden');
 
     const lockedBoq = await db.boqs.get({ projectId: projectId });
@@ -112,14 +95,6 @@ const updateMainQuantityFromSubs = () => {
 
 function initializeTakeoffModule() {
     if (takeoffModuleInitialized) return;
-
-    takeoffProjectsListDiv.addEventListener('click', (event) => {
-        if (event.target.classList.contains('view-quantities-btn')) {
-            const id = parseInt(event.target.dataset.id);
-            const name = event.target.dataset.name;
-            showQuantitiesForProject(id, name);
-        }
-    });
 
     addQuantityBtn.addEventListener('pointerdown', () => {
     // 1. Perform all synchronous UI updates immediately.

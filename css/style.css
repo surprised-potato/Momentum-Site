@@ -201,6 +201,7 @@ body {
 .actions-cell {
     display: flex;
     gap: 10px;
+    justify-content: flex-end;
 }
 
 /* --- Buttons --- */
@@ -980,4 +981,22 @@ body {
 .lookahead-task-body .resource-name {
     min-width: 250px;
     flex-shrink: 0;
+}
+
+.actions-cell .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.actions-cell .btn-secondary,
+.actions-cell .btn-danger,
+.actions-cell .btn-warning {
+    padding: 0;
+    width: 38px;
+    height: 38px;
+}
+
+.actions-cell .btn svg {
+    width: 16px;
+    height: 16px;
 }

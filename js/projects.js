@@ -50,7 +50,9 @@ const showProjectSummary = async (projectId) => {
 
         showView(projectSummaryView);
 
+        // Populate project details
         document.getElementById('summary-project-name').textContent = project.projectName;
+        document.getElementById('summary-description-subtitle').textContent = project.projectDescription || 'No description provided.';
         document.getElementById('summary-client-name').textContent = project.clientName || 'N/A';
         document.getElementById('summary-address').textContent = project.address || 'N/A';
         document.getElementById('summary-status').textContent = project.projectStatus || 'N/A';
@@ -63,20 +65,45 @@ const showProjectSummary = async (projectId) => {
         document.getElementById('summary-lot-area').textContent = project.lotArea ? `${project.lotArea} m²` : 'N/A';
         document.getElementById('summary-floor-area').textContent = project.floorArea ? `${project.floorArea} m²` : 'N/A';
         document.getElementById('summary-floors').textContent = project.numFloors || 'N/A';
-        document.getElementById('summary-description').textContent = project.projectDescription || 'No description provided.';
 
+        // Set dataset attributes for all hub buttons
         const hubButtons = document.querySelectorAll('.hub-buttons button');
         hubButtons.forEach(btn => {
             btn.dataset.id = project.id;
             btn.dataset.name = project.projectName;
         });
 
+        // --- Conditional Button Logic ---
+        const lockedBoq = await db.boqs.get({ projectId });
+        const approvedCOs = await db.changeOrders.where({ projectId, status: 'Approved' }).count();
+
+        const boqDependentButtons = document.querySelectorAll('.construction-phase-btn');
+        boqDependentButtons.forEach(btn => {
+            if (lockedBoq) {
+                btn.disabled = false;
+                btn.title = '';
+            } else {
+                btn.disabled = true;
+                btn.title = 'This module requires a locked Bill of Quantities (BOQ).';
+            }
+        });
+
+        const revisedReportsBtn = document.getElementById('hub-btn-revised-reports');
+        if (lockedBoq && approvedCOs > 0) {
+            revisedReportsBtn.disabled = false;
+            revisedReportsBtn.title = '';
+        } else {
+            revisedReportsBtn.disabled = true;
+            if (lockedBoq) {
+                 revisedReportsBtn.title = 'This module requires at least one approved change order.';
+            }
+        }
+
     } catch (error) {
         console.error('Failed to show project summary:', error);
         alert('An error occurred while trying to load the project summary.');
     }
 };
-
 const exportProject = async (projectId) => {
     try {
         const project = await db.projects.get(projectId);

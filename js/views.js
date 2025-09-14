@@ -270,8 +270,8 @@ function initializeViewsModule() {
     document.getElementById('back-to-lookahead-projects').addEventListener('click', backToHub);
     
     projectSummaryView.addEventListener('click', (e) => {
-        const target = e.target;
-        if (!target.matches('.hub-buttons button')) return;
+        const target = e.target.closest('.hub-buttons button');
+        if (!target) return;
 
         const projectId = parseInt(target.dataset.id);
         const projectName = target.dataset.name;

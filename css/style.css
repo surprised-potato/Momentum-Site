@@ -1000,3 +1000,97 @@ body {
     width: 16px;
     height: 16px;
 }
+.summary-layout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+    align-items: start;
+}
+
+.hub-section {
+    margin-bottom: 2rem;
+}
+.hub-section:last-child {
+    margin-bottom: 0;
+}
+
+.hub-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.hub-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.hub-buttons button {
+    display: flex;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 1rem;
+}
+
+.hub-buttons button svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* New style for outline buttons */
+.btn-outline-primary {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+/* New styles for content inside buttons */
+.hub-button-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hub-button-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.hub-button-desc {
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--grey-color);
+}
+
+.btn-primary:hover .hub-button-desc,
+.btn-outline-primary:hover .hub-button-desc {
+    color: rgba(255, 255, 255, 0.85);
+}
+.btn-primary .hub-button-desc {
+    color: rgba(255, 255, 255, 0.85);
+}
+.hub-buttons button:disabled {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: var(--grey-color);
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none; /* Prevents hover effects and clicks */
+}
+
+.hub-buttons button:disabled .hub-button-desc {
+    color: var(--grey-color);
+}

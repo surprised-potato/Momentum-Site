@@ -50,21 +50,48 @@ const showProjectSummary = async (projectId) => {
 
         showView(projectSummaryView);
 
-        // Populate project details
+        // --- Calculate and Display Progress Bar ---
+        const overallProgress = await getProjectActualPercentComplete(projectId);
+        document.getElementById('summary-progress-bar').value = overallProgress;
+        document.getElementById('summary-progress-percent').textContent = `${overallProgress.toFixed(2)}%`;
+
+        // Populate header and subtitle
         document.getElementById('summary-project-name').textContent = project.projectName;
         document.getElementById('summary-description-subtitle').textContent = project.projectDescription || 'No description provided.';
-        document.getElementById('summary-client-name').textContent = project.clientName || 'N/A';
-        document.getElementById('summary-address').textContent = project.address || 'N/A';
-        document.getElementById('summary-status').textContent = project.projectStatus || 'N/A';
-        document.getElementById('summary-project-manager').textContent = project.projectManager || 'N/A';
-        document.getElementById('summary-client-contact').textContent = project.clientContact || 'N/A';
-        document.getElementById('summary-contract-amount').textContent = project.contractAmount ? project.contractAmount.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }) : 'N/A';
-        document.getElementById('summary-contract-date').textContent = project.contractDate || 'N/A';
-        document.getElementById('summary-target-start').textContent = project.targetStartDate || 'N/A';
-        document.getElementById('summary-duration').textContent = project.contractDuration ? `${project.contractDuration} days` : 'N/A';
-        document.getElementById('summary-lot-area').textContent = project.lotArea ? `${project.lotArea} m²` : 'N/A';
-        document.getElementById('summary-floor-area').textContent = project.floorArea ? `${project.floorArea} m²` : 'N/A';
-        document.getElementById('summary-floors').textContent = project.numFloors || 'N/A';
+        
+        // --- Populate KPI Cards ---
+        document.getElementById('kpi-status').textContent = project.projectStatus || 'N/A';
+        document.getElementById('kpi-contract-amount').textContent = project.contractAmount ? project.contractAmount.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }) : 'N/A';
+        document.getElementById('kpi-project-manager').textContent = project.projectManager || 'N/A';
+
+        // Calculate and display Days Remaining
+        const startDate = project.startDate ? new Date(project.startDate) : null;
+        const duration = project.contractDuration;
+        const daysRemainingEl = document.getElementById('kpi-days-remaining');
+        if (project.projectStatus === 'Completed') {
+            daysRemainingEl.textContent = 'Done';
+        } else if (startDate && duration) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset());
+            startDate.setHours(0, 0, 0, 0);
+            const elapsedDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+            const remainingDays = duration - elapsedDays;
+            daysRemainingEl.textContent = remainingDays < 0 ? `${Math.abs(remainingDays)} Overdue` : remainingDays;
+        } else {
+            daysRemainingEl.textContent = 'N/A';
+        }
+
+        // --- Populate Secondary Details ---
+        document.getElementById('secondary-client-name').textContent = project.clientName || 'N/A';
+        document.getElementById('secondary-address').textContent = project.address || 'N/A';
+        document.getElementById('secondary-client-contact').textContent = project.clientContact || 'N/A';
+        document.getElementById('secondary-contract-date').textContent = project.contractDate || 'N/A';
+        document.getElementById('secondary-target-start').textContent = project.targetStartDate || 'N/A';
+        document.getElementById('secondary-duration').textContent = project.contractDuration ? `${project.contractDuration} days` : 'N/A';
+        document.getElementById('secondary-lot-area').textContent = project.lotArea ? `${project.lotArea} m²` : 'N/A';
+        document.getElementById('secondary-floor-area').textContent = project.floorArea ? `${project.floorArea} m²` : 'N/A';
+        document.getElementById('secondary-floors').textContent = project.numFloors || 'N/A';
 
         // Set dataset attributes for all hub buttons
         const hubButtons = document.querySelectorAll('.hub-buttons button');

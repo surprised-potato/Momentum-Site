@@ -52,6 +52,8 @@
     { "predecessorId": 2, "successorId": 3 },
     { "predecessorId": 3, "successorId": 4 },
     { "predecessorId": 4, "successorId": 5 },
+    { "predecessorId": 4, "successorId": 1 },
+    { "predecessorId": 1, "successorId": 2 },
     { "predecessorId": 5, "successorId": 6 },
     { "predecessorId": 6, "successorId": 7 },
     { "predecessorId": 6, "successorId": 8 },
@@ -64,6 +66,48 @@
     { "predecessorId": 10, "successorId": 13 },
     { "predecessorId": 13, "successorId": "PROJECT_END" }
   ],
+   "changeOrders": [
+    { "id": 1, "projectId": 1, "description": "Carport Extension (25 sq.m)", "date": "2025-08-15", "status": "Approved" },
+    { "id": 2, "projectId": 1, "description": "Downgrade perimeter fence to standard CHB", "date": "2025-09-10", "status": "Pending" }
+  ],
+  "changeOrderItems": [
+    { "id": 1, "changeOrderId": 1, "scopeOfWork": "Carport Slab on Fill", "quantity": 2.5, "unit": "cu.m", "originalQuantityId": null },
+    { "id": 2, "changeOrderId": 1, "scopeOfWork": "Carport Steel Roofing", "quantity": 25, "unit": "sq.m", "originalQuantityId": null },
+    { "id": 3, "changeOrderId": 2, "scopeOfWork": "Omit Stone Cladding on Fence", "quantity": -20, "unit": "sq.m", "originalQuantityId": null }
+  ],
+  "changeOrderDupas": [
+    { "id": 1, "changeOrderItemId": 1, "duration": 1, "directCosts": [ { "type": "material", "name": "Ready-Mix Concrete", "quantity": 2.5, "unit": "cu.m", "unitPrice": 5500 }, { "type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 2, "rate": 650 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 2, "changeOrderItemId": 2, "duration": 2, "directCosts": [ { "type": "material", "name": "Metal Roofing System", "quantity": 25, "unit": "sq.m", "unitPrice": 850 }, { "type": "labor", "laborType": "Roofer", "mandays": 4, "rate": 600 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 3, "changeOrderItemId": 3, "duration": 0, "directCosts": [ { "type": "material", "name": "Stone Cladding", "quantity": -20, "unit": "sq.m", "unitPrice": 1200 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
+  ],
+  "boq": {
+    "generatedAt": "2025-07-30T10:00:00.000Z",
+    "boqData": {
+        "A. General Requirements": [
+            { "quantityId": 1, "scopeOfWork": "Site Clearing & Earthworks", "quantity": 1, "unit": "lot", "unitPrice": 6451.2, "totalAmount": 6451.2 },
+            { "quantityId": 2, "scopeOfWork": "Structural Excavation", "quantity": 60, "unit": "cu.m", "unitPrice": 248.58, "totalAmount": 14915.0 },
+            { "quantityId": 13, "scopeOfWork": "Landscaping & Site Finishing", "quantity": 1, "unit": "lot", "unitPrice": 39744.0, "totalAmount": 39744.0 }
+        ],
+        "B. Structural Works": [
+            { "quantityId": 3, "scopeOfWork": "Foundation Rebar Works", "quantity": 1200, "unit": "kg", "unitPrice": 82.52, "totalAmount": 99026.0 },
+            { "quantityId": 4, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 25, "unit": "cu.m", "unitPrice": 5786.7, "totalAmount": 144667.5 },
+            { "quantityId": 5, "scopeOfWork": "Ground Floor Slab on Fill", "quantity": 10, "unit": "cu.m", "unitPrice": 4725.9, "totalAmount": 47259.0 }
+        ],
+        "C. Architectural Works": [
+            { "quantityId": 6, "scopeOfWork": "CHB Wall Masonry", "quantity": 280, "unit": "sq.m", "unitPrice": 464.71, "totalAmount": 130118.0 },
+            { "quantityId": 7, "scopeOfWork": "Plastering Works", "quantity": 560, "unit": "sq.m", "unitPrice": 96.08, "totalAmount": 53802.4 },
+            { "quantityId": 8, "scopeOfWork": "Roof Framing & Sheeting", "quantity": 110, "unit": "sq.m", "unitPrice": 759.03, "totalAmount": 83493.3 },
+            { "quantityId": 9, "scopeOfWork": "Ceiling Installation", "quantity": 180, "unit": "sq.m", "unitPrice": 401.76, "totalAmount": 72316.5 }
+        ],
+        "D. MEPF Works": [
+            { "quantityId": 12, "scopeOfWork": "Plumbing & Electrical Rough-ins", "quantity": 1, "unit": "lot", "unitPrice": 88316.8, "totalAmount": 88316.8 }
+        ],
+        "E. Finishes": [
+            { "quantityId": 10, "scopeOfWork": "Interior Painting", "quantity": 650, "unit": "sq.m", "unitPrice": 96.26, "totalAmount": 62570.81 },
+            { "quantityId": 11, "scopeOfWork": "Tiling Works", "quantity": 150, "unit": "sq.m", "unitPrice": 1109.84, "totalAmount": 166476.0 }
+        ]
+    }
+  },
   "accomplishments": [
     { "type": "quantity", "taskId": 1, "subIndex": null, "date": "2025-08-01", "percentComplete": 100 },
     { "type": "quantity", "taskId": 2, "subIndex": null, "date": "2025-08-04", "percentComplete": 50 },

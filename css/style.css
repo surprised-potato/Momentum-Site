@@ -1094,3 +1094,138 @@ body {
 .hub-buttons button:disabled .hub-button-desc {
     color: var(--grey-color);
 }
+
+/* --- New Project Summary Styles --- */
+.summary-progress-bar-container {
+    margin-bottom: 2rem;
+}
+
+.progress-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.progress-bar-labels label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.progress-bar-labels span {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+progress#summary-progress-bar {
+    width: 100%;
+    height: 12px;
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+}
+
+progress#summary-progress-bar::-webkit-progress-bar {
+    background-color: #e9ecef;
+    border-radius: 6px;
+}
+
+progress#summary-progress-bar::-webkit-progress-value {
+    background-color: var(--primary-color);
+    border-radius: 6px;
+    transition: width 0.5s ease-in-out;
+}
+
+.summary-group {
+    margin-bottom: 2.5rem;
+}
+
+.summary-group:last-child {
+    margin-bottom: 0;
+}
+
+.summary-group h4 {
+    margin: 0 0 1.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    color: var(--dark-color);
+}
+
+/* Adjust grid for smaller groups */
+.summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* --- New KPI Card & Details Styles --- */
+.kpi-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.kpi-card {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    border-left: 5px solid var(--primary-color);
+}
+
+.kpi-card label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--grey-color);
+    margin-bottom: 0.5rem;
+}
+
+.kpi-card .kpi-value {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.summary-secondary-details h4 {
+    margin: 0 0 1.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    color: var(--dark-color);
+}
+/* --- Final Unified Project Dashboard Styles --- */
+.project-dashboard-header {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.project-dashboard-header h1 {
+    margin: 0;
+    font-size: 2.25rem;
+}
+
+.project-dashboard-header .page-subtitle {
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+    max-width: 100%;
+    font-size: 1.1rem;
+}
+
+.project-dashboard-header .summary-progress-bar-container {
+    margin-bottom: 2rem;
+}
+
+.project-dashboard-header .kpi-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 2.5rem;
+}
+
+#project-summary-view .page-header {
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+}

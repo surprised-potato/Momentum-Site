@@ -164,33 +164,57 @@
             </div>
             <div id="project-summary-view" class="hidden">
                 <header class="page-header">
-                    <div class="page-header-main">
-                        <button id="back-to-projects-from-summary" class="btn btn-secondary">&larr; Back to Projects List</button>
+                    <button id="back-to-projects-from-summary" class="btn btn-secondary">&larr; Back to Projects List</button>
+                </header>
+
+                <div class="project-dashboard-layout">
+                    <div class="project-dashboard-header">
                         <h1 id="summary-project-name"></h1>
                         <p id="summary-description-subtitle" class="page-subtitle"></p>
-                    </div>
-                </header>
-                <div class="summary-layout-grid">
-                    <div class="summary-container">
-                        <div class="summary-grid">
-                            <div class="summary-item"><strong>Client</strong> <span id="summary-client-name"></span></div>
-                            <div class="summary-item"><strong>Address</strong> <span id="summary-address"></span></div>
-                            <div class="summary-item"><strong>Status</strong> <span id="summary-status"></span></div>
-                            <div class="summary-item"><strong>Project Manager</strong> <span id="summary-project-manager"></span></div>
-                            <div class="summary-item"><strong>Client Contact</strong> <span id="summary-client-contact"></span></div>
-                            <div class="summary-item"><strong>Contract Amount</strong> <span id="summary-contract-amount"></span></div>
-                            <div class="summary-item"><strong>Contract Date</strong> <span id="summary-contract-date"></span></div>
-                            <div class="summary-item"><strong>Target Start Date</strong> <span id="summary-target-start"></span></div>
-                            <div class="summary-item"><strong>Contract Duration</strong> <span id="summary-duration"></span></div>
-                            <div class="summary-item"><strong>Lot Area</strong> <span id="summary-lot-area"></span></div>
-                            <div class="summary-item"><strong>Floor Area</strong> <span id="summary-floor-area"></span></div>
-                            <div class="summary-item"><strong>Floors</strong> <span id="summary-floors"></span></div>
+
+                        <div class="summary-progress-bar-container">
+                            <div class="progress-bar-labels">
+                                <label>Overall Progress</label>
+                                <span id="summary-progress-percent">0%</span>
+                            </div>
+                            <progress id="summary-progress-bar" value="0" max="100"></progress>
+                        </div>
+
+                        <div class="kpi-card-grid">
+                            <div class="kpi-card">
+                                <label>Status</label>
+                                <span id="kpi-status" class="kpi-value"></span>
+                            </div>
+                            <div class="kpi-card">
+                                <label>Contract Amount</label>
+                                <span id="kpi-contract-amount" class="kpi-value"></span>
+                            </div>
+                            <div class="kpi-card">
+                                <label>Days Remaining</label>
+                                <span id="kpi-days-remaining" class="kpi-value"></span>
+                            </div>
+                            <div class="kpi-card">
+                                <label>Project Manager</label>
+                                <span id="kpi-project-manager" class="kpi-value"></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="summary-container">
-                        <h2>Project Hub</h2>
-                        <p>Jump directly to a module for this project.</p>
+                    <div class="summary-secondary-details">
+                            <h4>Additional Information</h4>
+                            <div class="summary-grid">
+                                <div class="summary-item"><strong>Client</strong> <span id="secondary-client-name"></span></div>
+                                <div class="summary-item"><strong>Client Contact</strong> <span id="secondary-client-contact"></span></div>
+                                <div class="summary-item"><strong>Address</strong> <span id="secondary-address"></span></div>
+                                <div class="summary-item"><strong>Contract Date</strong> <span id="secondary-contract-date"></span></div>
+                                <div class="summary-item"><strong>Target Start Date</strong> <span id="secondary-target-start"></span></div>
+                                <div class="summary-item"><strong>Contract Duration</strong> <span id="secondary-duration"></span></div>
+                                <div class="summary-item"><strong>Lot Area</strong> <span id="secondary-lot-area"></span></div>
+                                <div class="summary-item"><strong>Floor Area</strong> <span id="secondary-floor-area"></span></div>
+                                <div class="summary-item"><strong>Number of Floors</strong> <span id="secondary-floors"></span></div>
+                            </div>
+                        </div>
 
+                    <div class="project-dashboard-hub">
                         <div class="hub-section">
                             <h3>Pre-construction</h3>
                             <div class="hub-buttons">

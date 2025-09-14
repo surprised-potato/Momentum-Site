@@ -52,8 +52,6 @@
     { "predecessorId": 2, "successorId": 3 },
     { "predecessorId": 3, "successorId": 4 },
     { "predecessorId": 4, "successorId": 5 },
-    { "predecessorId": 4, "successorId": 1 },
-    { "predecessorId": 1, "successorId": 2 },
     { "predecessorId": 5, "successorId": 6 },
     { "predecessorId": 6, "successorId": 7 },
     { "predecessorId": 6, "successorId": 8 },
@@ -64,21 +62,24 @@
     { "predecessorId": 12, "successorId": 11 },
     { "predecessorId": 11, "successorId": 10 },
     { "predecessorId": 10, "successorId": 13 },
+    { "predecessorId": 4, "successorId": 101 },
+    { "predecessorId": 101, "successorId": 102 },
+    { "predecessorId": 102, "successorId": 13 },
     { "predecessorId": 13, "successorId": "PROJECT_END" }
   ],
    "changeOrders": [
-    { "id": 1, "projectId": 1, "description": "Carport Extension (25 sq.m)", "date": "2025-08-15", "status": "Approved" },
-    { "id": 2, "projectId": 1, "description": "Downgrade perimeter fence to standard CHB", "date": "2025-09-10", "status": "Pending" }
+    { "id": 101, "projectId": 1, "description": "Carport Extension (25 sq.m)", "date": "2025-08-15", "status": "Approved" },
+    { "id": 102, "projectId": 1, "description": "Downgrade perimeter fence to standard CHB", "date": "2025-09-10", "status": "Pending" }
   ],
   "changeOrderItems": [
-    { "id": 1, "changeOrderId": 1, "scopeOfWork": "Carport Slab on Fill", "quantity": 2.5, "unit": "cu.m", "originalQuantityId": null },
-    { "id": 2, "changeOrderId": 1, "scopeOfWork": "Carport Steel Roofing", "quantity": 25, "unit": "sq.m", "originalQuantityId": null },
-    { "id": 3, "changeOrderId": 2, "scopeOfWork": "Omit Stone Cladding on Fence", "quantity": -20, "unit": "sq.m", "originalQuantityId": null }
+    { "id": 101, "changeOrderId": 101, "scopeOfWork": "Carport Slab on Fill", "quantity": 2.5, "unit": "cu.m", "originalQuantityId": null },
+    { "id": 102, "changeOrderId": 101, "scopeOfWork": "Carport Steel Roofing", "quantity": 25, "unit": "sq.m", "originalQuantityId": null },
+    { "id": 103, "changeOrderId": 102, "scopeOfWork": "Omit Stone Cladding on Fence", "quantity": -20, "unit": "sq.m", "originalQuantityId": null }
   ],
   "changeOrderDupas": [
-    { "id": 1, "changeOrderItemId": 1, "duration": 1, "directCosts": [ { "type": "material", "name": "Ready-Mix Concrete", "quantity": 2.5, "unit": "cu.m", "unitPrice": 5500 }, { "type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 2, "rate": 650 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 2, "changeOrderItemId": 2, "duration": 2, "directCosts": [ { "type": "material", "name": "Metal Roofing System", "quantity": 25, "unit": "sq.m", "unitPrice": 850 }, { "type": "labor", "laborType": "Roofer", "mandays": 4, "rate": 600 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 3, "changeOrderItemId": 3, "duration": 0, "directCosts": [ { "type": "material", "name": "Stone Cladding", "quantity": -20, "unit": "sq.m", "unitPrice": 1200 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
+    { "id": 101, "changeOrderItemId": 101, "duration": 1, "directCosts": [ { "type": "material", "name": "Ready-Mix Concrete", "quantity": 2.5, "unit": "cu.m", "unitPrice": 5500 }, { "type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 2, "rate": 650 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 102, "changeOrderItemId": 102, "duration": 2, "directCosts": [ { "type": "material", "name": "Metal Roofing System", "quantity": 25, "unit": "sq.m", "unitPrice": 850 }, { "type": "labor", "laborType": "Roofer", "mandays": 4, "rate": 600 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 103, "changeOrderItemId": 103, "duration": 0, "directCosts": [ { "type": "material", "name": "Stone Cladding", "quantity": -20, "unit": "sq.m", "unitPrice": 1200 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
   ],
   "boq": {
     "generatedAt": "2025-07-30T10:00:00.000Z",
@@ -114,8 +115,8 @@
     { "type": "quantity", "taskId": 2, "subIndex": null, "date": "2025-08-06", "percentComplete": 50 },
     { "type": "quantity", "taskId": 3, "subIndex": null, "date": "2025-08-11", "percentComplete": 100 },
     { "type": "quantity", "taskId": 4, "subIndex": null, "date": "2025-08-14", "percentComplete": 100 },
-    { "type": "changeOrderItem", "taskId": 1, "subIndex": null, "date": "2025-08-20", "percentComplete": 100 },
-    { "type": "changeOrderItem", "taskId": 2, "subIndex": null, "date": "2025-08-18", "percentComplete": 100 },
+    { "type": "changeOrderItem", "taskId": 101, "subIndex": null, "date": "2025-08-20", "percentComplete": 100 },
+    { "type": "changeOrderItem", "taskId": 102, "subIndex": null, "date": "2025-08-18", "percentComplete": 100 },
     { "type": "quantity", "taskId": 5, "subIndex": null, "date": "2025-08-18", "percentComplete": 100 },
     { "type": "quantity", "taskId": 6, "subIndex": null, "date": "2025-08-25", "percentComplete": 25 },
     { "type": "quantity", "taskId": 10, "subIndex": 0, "date": "2025-09-10", "percentComplete": 10 }

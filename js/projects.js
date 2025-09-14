@@ -196,20 +196,22 @@ const importProjectData = async (data) => {
     }
     data.project.projectName = newProjectName;
     delete data.project.id;
+    if (!data.project.startDate) {
+        data.project.startDate = null;
+    }
 
     const allTables = db.tables.map(t => t.name);
 
     try {
         await db.transaction('rw', allTables, async () => {
-            // ID maps to relink everything
             const quantityIdMap = new Map();
             const changeOrderIdMap = new Map();
             const changeOrderItemIdMap = new Map();
+            
+            const oldNumericIdToNewUniqueIdMap = new Map();
 
-            // 1. Project
             const newProjectId = await db.projects.add(data.project);
 
-            // 2. Quantities
             if (data.quantities && data.quantities.length > 0) {
                 for (const q of data.quantities) {
                     const oldId = q.id;
@@ -217,39 +219,10 @@ const importProjectData = async (data) => {
                     q.projectId = newProjectId;
                     const newId = await db.quantities.add(q);
                     quantityIdMap.set(oldId, newId);
+                    oldNumericIdToNewUniqueIdMap.set(oldId, `qty-${newId}`);
                 }
             }
-
-            // 3. Dupas & 6. Accomplishments
-            if (data.dupas && data.dupas.length > 0) {
-                const newDupas = data.dupas.map(d => ({ ...d, id: undefined, quantityId: quantityIdMap.get(d.quantityId) }));
-                await db.dupas.bulkAdd(newDupas);
-            }
-            if (data.accomplishments && data.accomplishments.length > 0) {
-                const newAccomplishments = data.accomplishments.map(a => ({ ...a, id: undefined, quantityId: quantityIdMap.get(a.quantityId) }));
-                await db.accomplishments.bulkAdd(newAccomplishments);
-            }
             
-            // 4. Tasks (Sequencing)
-            if (data.tasks && data.tasks.length > 0) {
-                const newTasks = data.tasks.map(t => ({
-                    ...t,
-                    id: undefined,
-                    projectId: newProjectId,
-                    predecessorId: typeof t.predecessorId === 'number' ? quantityIdMap.get(t.predecessorId) : t.predecessorId,
-                    successorId: typeof t.successorId === 'number' ? quantityIdMap.get(t.successorId) : t.successorId,
-                }));
-                await db.tasks.bulkAdd(newTasks);
-            }
-            
-            // 5. BOQ
-            if (data.boq) {
-                delete data.boq.id;
-                data.boq.projectId = newProjectId;
-                await db.boqs.add(data.boq);
-            }
-            
-            // 7. Change Orders
             if (data.changeOrders && data.changeOrders.length > 0) {
                  for (const co of data.changeOrders) {
                     const oldId = co.id;
@@ -260,7 +233,6 @@ const importProjectData = async (data) => {
                 }
             }
             
-            // 8. Change Order Items
             if (data.changeOrderItems && data.changeOrderItems.length > 0) {
                 for (const item of data.changeOrderItems) {
                     const oldId = item.id;
@@ -271,13 +243,69 @@ const importProjectData = async (data) => {
                     }
                     const newId = await db.changeOrderItems.add(item);
                     changeOrderItemIdMap.set(oldId, newId);
+                    oldNumericIdToNewUniqueIdMap.set(oldId, `co-${newId}`);
                 }
             }
 
-            // 9. Change Order Dupas
+            if (data.tasks && data.tasks.length > 0) {
+                const newTasks = data.tasks.map(t => {
+                    const predecessor = typeof t.predecessorId === 'string' 
+                        ? t.predecessorId 
+                        : oldNumericIdToNewUniqueIdMap.get(t.predecessorId);
+
+                    const successor = typeof t.successorId === 'string'
+                        ? t.successorId
+                        : oldNumericIdToNewUniqueIdMap.get(t.successorId);
+
+                    return {
+                        projectId: newProjectId,
+                        predecessorId: predecessor,
+                        successorId: successor
+                    };
+                }).filter(t => t.predecessorId && t.successorId);
+
+                if(newTasks.length > 0) await db.tasks.bulkAdd(newTasks);
+            }
+            
+            if (data.dupas && data.dupas.length > 0) {
+                const newDupas = data.dupas.map(d => ({ ...d, id: undefined, quantityId: quantityIdMap.get(d.quantityId) }));
+                if(newDupas.length > 0) await db.dupas.bulkAdd(newDupas);
+            }
             if (data.changeOrderDupas && data.changeOrderDupas.length > 0) {
                 const newCoDupas = data.changeOrderDupas.map(d => ({ ...d, id: undefined, changeOrderItemId: changeOrderItemIdMap.get(d.changeOrderItemId) }));
-                await db.changeOrderDupas.bulkAdd(newCoDupas);
+                if(newCoDupas.length > 0) await db.changeOrderDupas.bulkAdd(newCoDupas);
+            }
+            
+            if (data.accomplishments && data.accomplishments.length > 0) {
+                const newAccomplishments = data.accomplishments.map(a => {
+                    const newRecord = {
+                        date: a.date,
+                        percentComplete: a.percentComplete,
+                        subIndex: a.subIndex,
+                        type: a.type
+                    };
+                    if (a.type === 'changeOrderItem') {
+                        newRecord.taskId = changeOrderItemIdMap.get(a.taskId);
+                    } else {
+                        newRecord.taskId = quantityIdMap.get(a.taskId);
+                    }
+                    return newRecord;
+                });
+                if(newAccomplishments.length > 0) await db.accomplishments.bulkAdd(newAccomplishments);
+            }
+            
+            if (data.boq) {
+                // Remap quantityIds within the boqData object before saving
+                for (const category in data.boq.boqData) {
+                    data.boq.boqData[category].forEach(item => {
+                        if (item.quantityId && quantityIdMap.has(item.quantityId)) {
+                            item.quantityId = quantityIdMap.get(item.quantityId);
+                        }
+                    });
+                }
+                delete data.boq.id;
+                data.boq.projectId = newProjectId;
+                await db.boqs.add(data.boq);
             }
         });
         alert('Project imported successfully!');
@@ -352,24 +380,29 @@ function initializeProjectsModule() {
         const allTables = db.tables.map(t => t.name);
 
         try {
+            // Step 1: Read all data from the source project outside the transaction
+            const sourceProject = await db.projects.get(sourceProjectId);
+            const quantities = await db.quantities.where({ projectId: sourceProjectId }).toArray();
+            const quantityIds = quantities.map(q => q.id);
+            const changeOrders = await db.changeOrders.where({ projectId: sourceProjectId }).toArray();
+            const changeOrderIds = changeOrders.map(co => co.id);
+            const changeOrderItems = changeOrderIds.length > 0 ? await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray() : [];
+            const changeOrderItemIds = changeOrderItems.map(item => item.id);
+
+            const dupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
+            const changeOrderDupas = changeOrderItemIds.length > 0 ? await db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray() : [];
+            const tasks = await db.tasks.where({ projectId: sourceProjectId }).toArray();
+            const boq = await db.boqs.where({ projectId: sourceProjectId }).first();
+            const qtyAccomplishments = quantityIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').toArray() : [];
+            const coAccomplishments = changeOrderItemIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(r => r.type === 'changeOrderItem').toArray() : [];
+            const accomplishments = [...qtyAccomplishments, ...coAccomplishments];
+
+            // Step 2: Perform all writes in a single transaction
             await db.transaction('rw', allTables, async () => {
-                const sourceProject = await db.projects.get(sourceProjectId);
-                const quantities = await db.quantities.where({ projectId: sourceProjectId }).toArray();
-                const quantityIds = quantities.map(q => q.id);
-
-                const accomplishments = quantityIds.length > 0 ? await db.accomplishments.where('type').equals('quantity').and(record => quantityIds.includes(record.taskId)).toArray() : [];
-                const dupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
-                const tasks = await db.tasks.where({ projectId: sourceProjectId }).toArray();
-                const boq = await db.boqs.where({ projectId: sourceProjectId }).first();
-                const changeOrders = await db.changeOrders.where({ projectId: sourceProjectId }).toArray();
-                const changeOrderIds = changeOrders.map(co => co.id);
-                const changeOrderItems = changeOrderIds.length > 0 ? await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray() : [];
-                const changeOrderItemIds = changeOrderItems.map(item => item.id);
-                const changeOrderDupas = changeOrderItemIds.length > 0 ? await db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray() : [];
-
                 const quantityIdMap = new Map();
                 const changeOrderIdMap = new Map();
                 const changeOrderItemIdMap = new Map();
+                const oldNumericIdToNewUniqueIdMap = new Map();
 
                 const newProjectData = { ...sourceProject, id: undefined, projectName: newProjectName };
                 const newProjectId = await db.projects.add(newProjectData);
@@ -378,29 +411,8 @@ function initializeProjectsModule() {
                     const oldId = q.id;
                     const newId = await db.quantities.add({ ...q, id: undefined, projectId: newProjectId });
                     quantityIdMap.set(oldId, newId);
+                    oldNumericIdToNewUniqueIdMap.set(oldId, `qty-${newId}`);
                 }
-
-                if (dupas.length > 0) await db.dupas.bulkAdd(dupas.map(d => ({ ...d, id: undefined, quantityId: quantityIdMap.get(d.quantityId) })));
-
-                if (accomplishments.length > 0) {
-                    await db.accomplishments.bulkAdd(accomplishments.map(a => ({
-                        ...a,
-                        id: undefined,
-                        taskId: quantityIdMap.get(a.taskId)
-                    })));
-                }
-
-                if (tasks.length > 0) {
-                    await db.tasks.bulkAdd(tasks.map(t => ({
-                        ...t,
-                        id: undefined,
-                        projectId: newProjectId,
-                        predecessorId: typeof t.predecessorId === 'number' ? quantityIdMap.get(t.predecessorId) : t.predecessorId,
-                        successorId: typeof t.successorId === 'number' ? quantityIdMap.get(t.successorId) : t.successorId,
-                    })));
-                }
-
-                if (boq) await db.boqs.add({ ...boq, id: undefined, projectId: newProjectId });
 
                 for (const co of changeOrders) {
                     const oldId = co.id;
@@ -410,19 +422,52 @@ function initializeProjectsModule() {
 
                 for (const item of changeOrderItems) {
                     const oldId = item.id;
-                    const newItemData = {
-                        ...item,
-                        id: undefined,
-                        changeOrderId: changeOrderIdMap.get(item.changeOrderId)
-                    };
+                    const newItemData = { ...item, id: undefined, changeOrderId: changeOrderIdMap.get(item.changeOrderId) };
                     if (item.originalQuantityId) {
                         newItemData.originalQuantityId = quantityIdMap.get(item.originalQuantityId);
                     }
                     const newId = await db.changeOrderItems.add(newItemData);
                     changeOrderItemIdMap.set(oldId, newId);
+                    oldNumericIdToNewUniqueIdMap.set(oldId, `co-${newId}`);
                 }
 
+                if (tasks.length > 0) {
+                    const newTasks = tasks.map(t => {
+                        const oldPredId = parseInt(String(t.predecessorId).split('-')[1]);
+                        const oldSuccId = parseInt(String(t.successorId).split('-')[1]);
+                        const predecessor = typeof t.predecessorId === 'string' && t.predecessorId.startsWith('qty-') ? `qty-${quantityIdMap.get(oldPredId)}` : (typeof t.predecessorId === 'string' && t.predecessorId.startsWith('co-') ? `co-${changeOrderItemIdMap.get(oldPredId)}` : t.predecessorId);
+                        const successor = typeof t.successorId === 'string' && t.successorId.startsWith('qty-') ? `qty-${quantityIdMap.get(oldSuccId)}` : (typeof t.successorId === 'string' && t.successorId.startsWith('co-') ? `co-${changeOrderItemIdMap.get(oldSuccId)}` : t.successorId);
+                        return { projectId: newProjectId, predecessorId: predecessor, successorId: successor };
+                    }).filter(t => t.predecessorId && t.successorId);
+                    if(newTasks.length > 0) await db.tasks.bulkAdd(newTasks);
+                }
+
+                if (dupas.length > 0) await db.dupas.bulkAdd(dupas.map(d => ({ ...d, id: undefined, quantityId: quantityIdMap.get(d.quantityId) })));
                 if (changeOrderDupas.length > 0) await db.changeOrderDupas.bulkAdd(changeOrderDupas.map(d => ({ ...d, id: undefined, changeOrderItemId: changeOrderItemIdMap.get(d.changeOrderItemId) })));
+                
+                if (accomplishments.length > 0) {
+                    const newAccomplishments = accomplishments.map(a => {
+                        const newRecord = { ...a, id: undefined };
+                        if (a.type === 'changeOrderItem') {
+                            newRecord.taskId = changeOrderItemIdMap.get(a.taskId);
+                        } else {
+                            newRecord.taskId = quantityIdMap.get(a.taskId);
+                        }
+                        return newRecord;
+                    });
+                    if(newAccomplishments.length > 0) await db.accomplishments.bulkAdd(newAccomplishments);
+                }
+
+                if (boq) {
+                    for (const category in boq.boqData) {
+                        boq.boqData[category].forEach(item => {
+                            if (item.quantityId && quantityIdMap.has(item.quantityId)) {
+                                item.quantityId = quantityIdMap.get(item.quantityId);
+                            }
+                        });
+                    }
+                    await db.boqs.add({ ...boq, id: undefined, projectId: newProjectId });
+                }
             });
             alert('Project copied successfully!');
             closeCopyProjectModal();

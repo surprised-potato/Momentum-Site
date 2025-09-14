@@ -19,6 +19,55 @@ const trackingSCurveChartView = document.getElementById('tracking-s-curve-chart-
 const trackingSCurveProjectName = document.getElementById('tracking-s-curve-project-name');
 const trackingSCurveCanvas = document.getElementById('tracking-s-curve-chart');
 const backToTrackingSCurveProjectsBtn = document.getElementById('back-to-tracking-s-curve-projects');
+
+// Add this entire function to the file.
+
+const getAllProjectTasks = async (projectId) => {
+    // 1. Get all base items
+    const quantities = await db.quantities.where({ projectId }).toArray();
+    const approvedChangeOrders = await db.changeOrders.where({ projectId, status: 'Approved' }).toArray();
+    const approvedChangeOrderIds = approvedChangeOrders.map(co => co.id);
+    const changeOrderItems = approvedChangeOrderIds.length > 0
+        ? await db.changeOrderItems.where('changeOrderId').anyOf(approvedChangeOrderIds).toArray()
+        : [];
+
+    const expandedTasks = [];
+
+    // 2. Create a uniqueId for each task and sub-task
+    quantities.forEach(q => {
+        if (q.subquantities && q.subquantities.length > 0) {
+            q.subquantities.forEach((sub, index) => {
+                expandedTasks.push({
+                    ...q,
+                    id: q.id, // Keep original ID for DUPA linking
+                    subIndex: index,
+                    uniqueId: `sub-${q.id}-${index}`,
+                    displayName: `${q.scopeOfWork}: ${sub.name}`,
+                    quantity: sub.quantity, // Use sub-quantity value
+                    type: 'subquantity'
+                });
+            });
+        } else {
+            expandedTasks.push({
+                ...q,
+                uniqueId: `qty-${q.id}`,
+                displayName: q.scopeOfWork,
+                type: 'quantity'
+            });
+        }
+    });
+
+    changeOrderItems.forEach(ci => {
+        expandedTasks.push({
+            ...ci,
+            uniqueId: `co-${ci.id}`,
+            displayName: `(CO) ${ci.scopeOfWork}`,
+            type: 'changeOrderItem'
+        });
+    });
+
+    return expandedTasks;
+};
 const showAccomplishmentList = (projectId) => {
     document.getElementById('accomplishment-entry-view').classList.add('hidden');
     document.getElementById('accomplishment-detail-view').classList.add('hidden');
@@ -174,8 +223,11 @@ const getAllAccomplishmentTasks = async (projectId) => {
 };
 
 const getPertCpmData = async (projectId, isRevised = false) => {
-    const { allTasks, allDupas } = await getAllTasksForReport(projectId, isRevised);
+    const allTasksForReport = await getAllTasksForReport(projectId, isRevised);
+    const allTasks = allTasksForReport.allTasks; // This now comes from the corrected function
+    const allDupas = allTasksForReport.allDupas;
     const links = await db.tasks.where({ projectId }).toArray();
+
     if (allTasks.length === 0) return null;
 
     const dupaMap = new Map();
@@ -185,69 +237,21 @@ const getPertCpmData = async (projectId, isRevised = false) => {
     });
 
     const tasks = new Map(allTasks.map(t => {
-        let duration = 0;
-        if (t.type === 'subquantity') {
-            const parentDupa = dupaMap.get(t.quantityId);
-            const parentQuantity = allTasks.find(p => p.id === t.quantityId && p.type === 'quantity');
-            const parentTotalDuration = parentDupa?.duration || 0;
-            if (parentQuantity && parentTotalDuration > 0 && Array.isArray(parentQuantity.subquantities)) {
-                const totalSubQuantity = parentQuantity.subquantities.reduce((sum, sub) => sum + sub.quantity, 0);
-                if (totalSubQuantity > 0) {
-                    const proportion = t.quantity / totalSubQuantity;
-                    duration = Math.round(parentTotalDuration * proportion);
-                }
-            }
-        } else {
-            const dupa = dupaMap.get(t.id);
-            duration = dupa?.duration || 0;
-        }
+        const dupa = dupaMap.get(t.type === 'subquantity' ? t.quantityId : t.id);
+        const duration = dupa?.duration || 0;
         return [t.uniqueId, { id: t.uniqueId, name: t.displayName, duration, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() }];
     }));
 
     tasks.set('PROJECT_START', { id: 'PROJECT_START', name: 'Start', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
     tasks.set('PROJECT_END', { id: 'PROJECT_END', name: 'End', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
 
-    const subTaskMap = new Map();
-    allTasks.forEach(t => {
-        if (t.type === 'subquantity') {
-            if (!subTaskMap.has(t.quantityId)) subTaskMap.set(t.quantityId, []);
-            subTaskMap.get(t.quantityId).push(t.uniqueId);
-        }
-    });
-
-    // Link sub-tasks sequentially
-    for (const subTaskIds of subTaskMap.values()) {
-        for (let i = 0; i < subTaskIds.length - 1; i++) {
-            tasks.get(subTaskIds[i + 1]).predecessors.add(subTaskIds[i]);
-            tasks.get(subTaskIds[i]).successors.add(subTaskIds[i + 1]);
-        }
-    }
-
-    // Create separate maps to avoid ID collisions
-    const idToUniqueIdMap = new Map(allTasks.map(t => [`${t.type}-${t.id}`, t.uniqueId]));
-
     links.forEach(link => {
-        // Find the uniqueIds for the predecessor and successor from all tasks
-        // This is complex because a numeric ID in the `links` table could be a quantity or a change order item
-        const predTask = allTasks.find(t => t.id === link.predecessorId && t.type !== 'subquantity');
-        const succTask = allTasks.find(t => t.id === link.successorId && t.type !== 'subquantity');
-
-        let predUniqueId = link.predecessorId === 'PROJECT_START' ? 'PROJECT_START' : (predTask ? predTask.uniqueId : null);
-        let succUniqueId = link.successorId === 'PROJECT_END' ? 'PROJECT_END' : (succTask ? succTask.uniqueId : null);
-        
-        const predSubTasks = subTaskMap.get(link.predecessorId);
-        if (predSubTasks) predUniqueId = predSubTasks[predSubTasks.length - 1];
-
-        const succSubTasks = subTaskMap.get(link.successorId);
-        if (succSubTasks) succUniqueId = succSubTasks[0];
-
-        if (tasks.has(predUniqueId) && tasks.has(succUniqueId)) {
-            tasks.get(succUniqueId).predecessors.add(predUniqueId);
-            tasks.get(predUniqueId).successors.add(succUniqueId);
+        if (tasks.has(link.predecessorId) && tasks.has(link.successorId)) {
+            tasks.get(link.successorId).predecessors.add(link.predecessorId);
+            tasks.get(link.predecessorId).successors.add(link.successorId);
         }
     });
     
-    // Forward Pass (Topological Sort + ES/EF Calculation)
     const sortedNodes = [];
     const queue = new Map();
     tasks.forEach((task, id) => {
@@ -272,11 +276,7 @@ const getPertCpmData = async (projectId, isRevised = false) => {
         });
     }
 
-    const projectDuration = tasks.get('PROJECT_END')?.ef;
-    if (typeof projectDuration !== 'number' || isNaN(projectDuration) || projectDuration < 0) {
-        console.error("Failed to calculate a valid project duration.", { tasks, links });
-        return null;
-    }
+    const projectDuration = tasks.get('PROJECT_END')?.ef || 0;
     tasks.forEach(task => task.lf = projectDuration);
 
     for (let i = sortedNodes.length - 1; i >= 0; i--) {

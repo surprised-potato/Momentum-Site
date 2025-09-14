@@ -21,44 +21,49 @@ const populateInitialDataIfNeeded = async () => {
 
         console.log('First-time setup: Populating database with sample data...');
 
-        const libraryResponse = await fetch('import samples/Sample Libraries/bat-os Materials.json');
-        const libraryData = await libraryResponse.json();
+        // Fetch both library files concurrently
+        const [libResponse1, libResponse2] = await Promise.all([
+            fetch('import samples/Sample Libraries/comprehensive_library.json'),
+            fetch('import samples/Sample Libraries/bat-os Materials.json')
+        ]);
+        const comprehensiveLib = await libResponse1.json();
+        const batOsLib = await libResponse2.json();
+
+        // Merge and de-duplicate data from both libraries
+        const allMaterials = [...(comprehensiveLib.materials || []), ...(batOsLib.materials || [])];
+        const uniqueMaterials = Array.from(new Map(allMaterials.map(m => [m.name.toLowerCase(), m])).values());
+
+        const allResources = [...(comprehensiveLib.resources || []), ...(batOsLib.resources || [])];
+        const uniqueResources = Array.from(new Map(allResources.map(r => [`${r.name.toLowerCase()}|${r.type}`, r])).values());
         
+        const crews = comprehensiveLib.crews || [];
+        const crewComposition = comprehensiveLib.crewComposition || [];
+
+        // Save merged library to the database
         await db.transaction('rw', db.materials, db.resources, db.crews, db.crewComposition, async () => {
-            const uniqueMaterials = Array.from(
-                new Map(libraryData.materials.map(m => [m.name, m])).values()
-            );
-            await db.materials.bulkPut(uniqueMaterials);
-        
-            const uniqueResources = Array.from(
-                new Map(libraryData.resources.map(r => [`${r.name}|${r.type}`, r])).values()
-            );
-            await db.resources.bulkPut(uniqueResources);
-            
-            const uniqueCrews = Array.from(
-                new Map(libraryData.crews.map(c => [c.name, c])).values()
-            );
-            await db.crews.bulkPut(uniqueCrews);
-        
-            await db.crewComposition.bulkPut(libraryData.crewComposition);
+            if (uniqueMaterials.length > 0) await db.materials.bulkPut(uniqueMaterials);
+            if (uniqueResources.length > 0) await db.resources.bulkPut(uniqueResources);
+            if (crews.length > 0) await db.crews.bulkPut(crews);
+            if (crewComposition.length > 0) await db.crewComposition.bulkPut(crewComposition);
         });
 
-        // --- 2. Populate the Sample Projects ---
-        // Use Promise.all to fetch both project files concurrently
-        const [projectResponse1, projectResponse2] = await Promise.all([
+        // Fetch all three sample project files concurrently
+        const [projectResponse1, projectResponse2, projectResponse3] = await Promise.all([
             fetch('import samples/sample projects/default multistory.json'),
-            fetch('import samples/sample projects/commercial_cafe.json') // New file
+            fetch('import samples/sample projects/commercial_cafe.json'),
+            fetch('import samples/sample projects/warehouse_project.json')
         ]);
 
         const projectData1 = await projectResponse1.json();
-        const projectData2 = await projectResponse2.json(); // New data
+        const projectData2 = await projectResponse2.json();
+        const projectData3 = await projectResponse3.json();
 
-        // Import both projects one after the other
+        // Import the projects
         await importProjectData(projectData1);
-        await importProjectData(projectData2); // New import call
+        await importProjectData(projectData2);
+        await importProjectData(projectData3);
 
-        // Update the alert message
-        alert('Welcome! Two sample projects and library data have been loaded.');
+        alert('Welcome! Three sample projects and an expanded library have been loaded.');
         window.location.reload();
 
     } catch (error) {

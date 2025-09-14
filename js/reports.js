@@ -197,25 +197,40 @@ const handleDeleteBoq = () => {
         }
 
         try {
-            await db.transaction('rw', ['boqs', 'quantities', 'accomplishments', 'projects'], async () => {
+            await db.transaction('rw', db.tables.map(t => t.name), async () => {
+                // Delete the BOQ record itself
                 const boqToDelete = await db.boqs.where({ projectId: currentBoqProjectId }).first();
                 if (boqToDelete) {
                     await db.boqs.delete(boqToDelete.id);
                 }
+
+                // Reset progress for original quantities
                 const quantitiesToReset = await db.quantities.where({ projectId: currentBoqProjectId }).toArray();
                 const quantityIds = quantitiesToReset.map(q => q.id);
                 if (quantityIds.length > 0) {
-                    await db.accomplishments
-                        .where('taskId').anyOf(quantityIds)
-                        .and(record => record.type === 'quantity')
-                        .delete();
+                    await db.accomplishments.where('taskId').anyOf(quantityIds).and(record => record.type === 'quantity').delete();
                     await db.quantities.where('projectId').equals(currentBoqProjectId).modify({ percentComplete: null });
                 }
+
+                // --- NEW: Find and reset progress for change order items ---
+                const changeOrders = await db.changeOrders.where({ projectId: currentBoqProjectId }).toArray();
+                const changeOrderIds = changeOrders.map(co => co.id);
+                if (changeOrderIds.length > 0) {
+                    const changeOrderItems = await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray();
+                    const changeOrderItemIds = changeOrderItems.map(item => item.id);
+
+                    if (changeOrderItemIds.length > 0) {
+                        await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(record => record.type === 'changeOrderItem').delete();
+                        await db.changeOrderItems.where('id').anyOf(changeOrderItemIds).modify({ percentComplete: null });
+                    }
+                }
+                
+                // Reset the project's start date
                 await db.projects.update(currentBoqProjectId, { startDate: null });
             });
 
             alert("BOQ and all construction progress deleted successfully. Pre-construction data is now unlocked.");
-            showReports();
+            showProjectSummary(currentBoqProjectId);
         } catch (error) {
             console.error("Failed to delete BOQ and related data:", error);
             alert("An error occurred during the deletion process. Please check the console for details.");

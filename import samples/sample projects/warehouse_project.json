@@ -1,0 +1,57 @@
+{
+  "project": {
+    "projectName": "Warehouse & Site Development",
+    "address": "Industrial Zone, Bacolod City",
+    "clientName": "Visayan Logistics Inc.",
+    "projectDescription": "An industrial project showcasing crew-based DUPA and parallel workstreams for a new warehouse and its surrounding site infrastructure.",
+    "startDate": null,
+    "lotArea": 5000,
+    "floorArea": 1200,
+    "numFloors": 1,
+    "contractAmount": 12500000,
+    "contractDate": "2025-10-01",
+    "projectStatus": "Bidding",
+    "targetStartDate": "2025-11-15",
+    "contractDuration": 120,
+    "projectManager": "Engr. Ben Carter",
+    "clientContact": "b.carter@vislog.com"
+  },
+  "quantities": [
+    { "id": 1, "scopeOfWork": "Site Clearing & Grubbing", "quantity": 1, "unit": "lot", "category": "A. Site Development" },
+    { "id": 2, "scopeOfWork": "Bulk Earthworks & Grading", "quantity": 1500, "unit": "cu.m", "category": "A. Site Development" },
+    { "id": 3, "scopeOfWork": "Warehouse Foundation Excavation", "quantity": 250, "unit": "cu.m", "category": "B. Warehouse Substructure" },
+    { "id": 4, "scopeOfWork": "Foundation Rebar Works", "quantity": 8500, "unit": "kg", "category": "B. Warehouse Substructure" },
+    { "id": 5, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 120, "unit": "cu.m", "category": "B. Warehouse Substructure" },
+    { "id": 6, "scopeOfWork": "Structural Steel Erection", "quantity": 25000, "unit": "kg", "category": "C. Warehouse Superstructure" },
+    { "id": 7, "scopeOfWork": "Road Base Preparation & Compaction", "quantity": 800, "unit": "sq.m", "category": "A. Site Development" },
+    { "id": 8, "scopeOfWork": "Concrete Road Paving", "quantity": 800, "unit": "sq.m", "category": "A. Site Development" },
+    { "id": 9, "scopeOfWork": "Roofing & Wall Cladding Installation", "quantity": 1800, "unit": "sq.m", "category": "C. Warehouse Superstructure" },
+    { "id": 10, "scopeOfWork": "Site Finishing & Landscaping", "quantity": 1, "unit": "lot", "category": "A. Site Development" }
+  ],
+  "dupas": [
+    { "id": 1, "quantityId": 1, "duration": 4, "directCosts": [{"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480}, {"type": "equipment", "name": "Backhoe Loader", "hours": 16, "rate": 1800}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 2, "quantityId": 2, "duration": 6, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 6, "rate": 850}, {"type": "labor", "laborType": "Heavy Equipment Operator", "mandays": 6, "rate": 950}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480}, {"type": "equipment", "name": "Backhoe Loader", "hours": 48, "rate": 1800}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 3, "quantityId": 3, "duration": 3, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 3, "rate": 850}, {"type": "labor", "laborType": "Heavy Equipment Operator", "mandays": 3, "rate": 950}, {"type": "equipment", "name": "Backhoe Loader", "hours": 24, "rate": 1800}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 4, "quantityId": 4, "duration": 10, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 10, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Steelman)", "mandays": 40, "rate": 650}, {"type": "material", "name": "Deformed Rebar 16mm", "quantity": 8500, "unit": "kg", "unitPrice": 52}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 5, "quantityId": 5, "duration": 3, "directCosts": [{"type": "material", "name": "Ready-Mix Concrete (3000 PSI)", "quantity": 120, "unit": "cu.m", "unitPrice": 5200}, {"type": "labor", "laborType": "Construction Foreman", "mandays": 3, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 9, "rate": 650}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 6, "quantityId": 6, "duration": 13, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 13, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Steelman)", "mandays": 78, "rate": 650}, {"type": "equipment", "name": "Mobile Crane (25-ton)", "hours": 104, "rate": 3500}, {"type": "material", "name": "Structural Steel Wide Flange", "quantity": 25000, "unit": "kg", "unitPrice": 65}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 7, "quantityId": 7, "duration": 5, "directCosts": [{"type": "material", "name": "Road Base Coarse Aggregate", "quantity": 240, "unit": "cu.m", "unitPrice": 1200}, {"type": "labor", "laborType": "Construction Foreman", "mandays": 5, "rate": 850}, {"type": "equipment", "name": "Road Roller (5-ton)", "hours": 40, "rate": 2200}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 8, "quantityId": 8, "duration": 6, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 6, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 24, "rate": 480}, {"type": "equipment", "name": "Concrete Mixer (1-Bagger)", "hours": 48, "rate": 190}, {"type": "material", "name": "Ready-Mix Concrete (3000 PSI)", "quantity": 120, "unit": "cu.m", "unitPrice": 5200}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 9, "quantityId": 9, "duration": 12, "directCosts": [{"type": "labor", "laborType": "Construction Foreman", "mandays": 12, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 48, "rate": 650}, {"type": "material", "name": "Roofing & Wall Cladding Installation", "quantity": 1800, "unit": "sq.m", "unitPrice": 950}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }},
+    { "id": 10, "quantityId": 10, "duration": 7, "directCosts": [{"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}], "indirectCosts": { "ocm": 15, "profit": 15, "taxes": 5 }}
+  ],
+  "tasks": [
+    { "predecessorId": "PROJECT_START", "successorId": 1 },
+    { "predecessorId": 1, "successorId": 2 },
+    { "predecessorId": 1, "successorId": 3 },
+    { "predecessorId": 2, "successorId": 7 },
+    { "predecessorId": 3, "successorId": 4 },
+    { "predecessorId": 4, "successorId": 5 },
+    { "predecessorId": 5, "successorId": 6 },
+    { "predecessorId": 6, "successorId": 9 },
+    { "predecessorId": 7, "successorId": 8 },
+    { "predecessorId": 8, "successorId": 10 },
+    { "predecessorId": 9, "successorId": 10 },
+    { "predecessorId": 10, "successorId": "PROJECT_END" }
+  ]
+}

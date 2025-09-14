@@ -1,0 +1,48 @@
+{
+  "materials": [
+    { "name": "Portland Cement (40kg)", "unit": "bag", "unitPrice": 255 },
+    { "name": "Washed Sand", "unit": "cu.m", "unitPrice": 1350 },
+    { "name": "Gravel 3/4\"", "unit": "cu.m", "unitPrice": 1450 },
+    { "name": "Deformed Rebar 16mm", "unit": "kg", "unitPrice": 52 },
+    { "name": "Deformed Rebar 10mm", "unit": "kg", "unitPrice": 48 },
+    { "name": "G.I. Tie Wire #16", "unit": "kg", "unitPrice": 85 },
+    { "name": "CHB 4\"", "unit": "pc", "unitPrice": 14 },
+    { "name": "CHB 6\"", "unit": "pc", "unitPrice": 18 },
+    { "name": "Structural Steel Wide Flange", "unit": "kg", "unitPrice": 65 },
+    { "name": "Metal Roofing Sheets", "unit": "sq.m", "unitPrice": 450 },
+    { "name": "Metal Wall Cladding", "unit": "sq.m", "unitPrice": 550 },
+    { "name": "Ready-Mix Concrete (3000 PSI)", "unit": "cu.m", "unitPrice": 5200 },
+    { "name": "Road Base Coarse Aggregate", "unit": "cu.m", "unitPrice": 1200 }
+  ],
+  "resources": [
+    { "id": 101, "name": "Construction Foreman", "type": "labor", "unit": "manday", "rate": 850 },
+    { "id": 102, "name": "Skilled Labor (Carpenter)", "type": "labor", "unit": "manday", "rate": 650 },
+    { "id": 103, "name": "Skilled Labor (Mason)", "type": "labor", "unit": "manday", "rate": 650 },
+    { "id": 104, "name": "Skilled Labor (Steelman)", "type": "labor", "unit": "manday", "rate": 650 },
+    { "id": 105, "name": "Unskilled Labor (Laborer)", "type": "labor", "unit": "manday", "rate": 480 },
+    { "id": 106, "name": "Heavy Equipment Operator", "type": "labor", "unit": "manday", "rate": 950 },
+    { "id": 201, "name": "Concrete Mixer (1-Bagger)", "type": "equipment", "unit": "hour", "rate": 190 },
+    { "id": 202, "name": "Backhoe Loader", "type": "equipment", "unit": "hour", "rate": 1800 },
+    { "id": 203, "name": "Bar Cutter", "type": "equipment", "unit": "hour", "rate": 250 },
+    { "id": 204, "name": "Road Roller (5-ton)", "type": "equipment", "unit": "hour", "rate": 2200 },
+    { "id": 205, "name": "Mobile Crane (25-ton)", "type": "equipment", "unit": "hour", "rate": 3500 }
+  ],
+  "crews": [
+    { "id": 51, "name": "Site Grading Crew", "productivityRate": 250, "productivityUnit": "cu.m/day" },
+    { "id": 52, "name": "Concrete Paving Crew", "productivityRate": 150, "productivityUnit": "sq.m/day" },
+    { "id": 53, "name": "Steel Erection Crew", "productivityRate": 2000, "productivityUnit": "kg/day" }
+  ],
+  "crewComposition": [
+    { "crewId": 51, "resourceId": 101, "quantity": 1 },
+    { "crewId": 51, "resourceId": 106, "quantity": 1 },
+    { "crewId": 51, "resourceId": 105, "quantity": 2 },
+    { "crewId": 51, "resourceId": 202, "quantity": 1 },
+    { "crewId": 52, "resourceId": 101, "quantity": 1 },
+    { "crewId": 52, "resourceId": 103, "quantity": 3 },
+    { "crewId": 52, "resourceId": 105, "quantity": 4 },
+    { "crewId": 52, "resourceId": 201, "quantity": 1 },
+    { "crewId": 53, "resourceId": 101, "quantity": 1 },
+    { "crewId": 53, "resourceId": 104, "quantity": 6 },
+    { "crewId": 53, "resourceId": 205, "quantity": 1 }
+  ]
+}

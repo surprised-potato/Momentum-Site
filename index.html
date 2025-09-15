@@ -89,55 +89,74 @@
                     <div class="gantt-chart-container" id="dashboard-gantt-chart-target"></div>
                     </div>
             </div>
-                <div id="documentation-view" class="hidden">
-                    <header class="page-header">
-                        <h1>Application Guide</h1>
-                    </header>
-                    <div class="summary-container" style="max-width: 800px; margin: 0 auto; line-height: 1.6;">
-                        <h2>🏗️ Momentum Construction Management Workflow: A Step-by-Step Guide</h2>
-                        <p>This guide walks you through the four main phases of managing a project in the application: <strong>Setup & Pre-construction</strong>, <strong>Handling Changes</strong>, <strong>Construction & Monitoring</strong>, and <strong>Data Management</strong>.</p>
-                        <hr>
-                        <h3>Phase 1: Setup & Pre-construction</h3>
-                        <p>This phase involves setting up your project, defining its scope, calculating costs, and creating an initial schedule.</p>
-                        <h4>1. Populate Your Libraries (Recommended First Step)</h4>
-                        <p>Before creating a project, it's best to add common data to your libraries. This will make the cost estimation process much faster.</p>
+            <div id="documentation-view" class="hidden">
+                <header class="page-header">
+                    <h1>Momentum: A Quick Start Guide</h1>
+                </header>
+                
+                <p style="text-align: center; font-size: 1.1rem; color: var(--grey-color);">Welcome to Momentum! Follow these key phases to take your project from plan to completion.</p>
+
+                <div class="manual-card-grid">
+
+                    <div class="manual-card">
+                        <h4>⚙️ 1. Setup: Your Foundation</h4>
                         <ul>
-                            <li><strong>Materials Library:</strong> Go to <strong>Libraries > Materials Library</strong> to add all your common construction materials, their units, and prices.</li>
-                            <li><strong>DUPA Library:</strong> Go to <strong>Libraries > DUPA Labor & Equipment</strong> to define reusable resources (like "Mason" or "Excavator") and crews (pre-defined teams with specific productivity rates).</li>
+                            <li>Begin on the <strong>Projects</strong> page to create a new project, filling in its core details.</li>
+                            <li><strong>Pro-Tip:</strong> Before planning, visit the <strong>Libraries</strong> (top menu) to pre-populate common Materials, Resources (Labor/Equipment), and even pre-defined construction Crews.</li>
+                            <li>A well-stocked library makes the cost estimation process significantly faster and more consistent.</li>
                         </ul>
-                        <h4>2. Create Your Project</h4>
-                        <p>Navigate to the <strong>Projects</strong> module. Click the <strong>"Add New Project"</strong> button and fill in all the relevant details like the project name, client, address, and contract information.</p>
-                        <h4>3. Define the Scope in Take Off</h4>
-                        <p>Go to the <strong>Take Off</strong> module and select your newly created project. Here, you'll add every work item for the project by clicking <strong>"Add Quantity"</strong>. Assign each item a <strong>Category</strong> (e.g., "Earthworks," "Structural Concrete," "Finishes") for better organization.</p>
-                        <h4>4. Perform Detailed Unit Price Analysis (DUPA)</h4>
-                        <p>Navigate to the <strong>DUPA</strong> module and select your project. Click on a work item to define its cost breakdown by adding the required <strong>Labor</strong>, <strong>Materials</strong>, and <strong>Equipment</strong>, either manually or from your libraries.</p>
-                        <h4>5. Sequence the Tasks</h4>
-                        <p>Go to the <strong>Task Sequencing</strong> module. Click on a task to define its dependencies by selecting its <strong>Predecessors</strong> (tasks that must finish before) and <strong>Successors</strong> (tasks that start after).</p>
-                        <h4>6. Generate Pre-construction Reports</h4>
-                        <p>Go to the <strong>Pre-construction Reports</strong> module. First, generate the **Bill of Quantities (BOQ)**. This is a critical step that **locks all pre-construction data**. Once locked, you can view the **PERT-CPM**, initial **Gantt Chart**, planned **S-Curve**, and other reports.</p>
-                        <hr>
-                        <h3>Phase 2: Handling Changes</h3>
-                        <h4>Manage Change Orders</h4>
-                        <p>Navigate to the <strong>Change Orders</strong> module. You can create a new change order and add line items for new scope or to modify existing items (a Variation Order). For a change to be included in the official schedule, you must edit it and set its status to <strong>"Approved"</strong>.</p>
-                        <hr>
-                        <h3>Phase 3: Construction & Monitoring</h3>
-                        <h4>1. Set the Project Start Date</h4>
-                        <p>Go to the <strong>Accomplishment Report</strong> module. The first time you file a report for a project, the app will prompt you to set the official **project start date**, which is the baseline for all tracking.</p>
-                        <h4>2. File Accomplishment Reports</h4>
-                        <p>In the same module, you can enter the percentage of work completed for each task on a specific date to track progress over time.</p>
-                        <h4>3. Monitor Progress with Tracking Reports</h4>
-                        <ul>
-                            <li><strong>Tracking Gantt Chart:</strong> Visually compares your planned schedule against actual progress.</li>
-                            <li><strong>Tracking S-Curve:</strong> Plots planned vs. actual cumulative progress to see if the project is ahead or behind schedule.</li>
-                            <li><strong>Revised Reports:</strong> Shows the BOQ and PERT-CPM updated to include all **approved** change orders.</li>
-                            <li><strong>Look-Ahead Report:</strong> Helps with short-term planning by showing upcoming tasks and their resource requirements.</li>
-                        </ul>
-                        <hr>
-                        <h3>Phase 4: Data Management</h3>
-                        <h4>Import/Export Data</h4>
-                        <p>You can easily back up and share your data. The **Projects** module has an "Export" button for individual projects. The **Libraries > Import/Export Library** module allows you to save or load your entire materials, resources, and crews library.</p>
                     </div>
+
+                    <div class="manual-card">
+                        <h4>📐 2. Pre-construction: The Blueprint</h4>
+                        <ul>
+                            <li>The <strong>Project Workspace</strong> is your central hub for managing a single project.</li>
+                            <li><strong>Take Off:</strong> Define your project's scope by adding every work item. Use categories to keep things organized and break down complex items with <strong>sub-quantities</strong>.</li>
+                            <li><strong>DUPA:</strong> For each item, perform a Detailed Unit Price Analysis. Add labor, materials, and equipment from your libraries or create them on the fly.</li>
+                            <li><strong>Task Sequencing:</strong> Create the project's logical workflow by defining which tasks must come before others (predecessors and successors).</li>
+                        </ul>
+                    </div>
+
+                    <div class="manual-card critical">
+                        <h4>🔑 3. The Critical Step: Locking the Plan</h4>
+                        <ul>
+                            <li>This is the most important step in the workflow. From the workspace, open the <strong>Baseline Reports</strong> module.</li>
+                            <li>You will be prompted to <strong>Generate a Bill of Quantities (BOQ)</strong>.</li>
+                            <li>This action <strong>locks</strong> all your pre-construction data (Take Off, DUPA, Sequencing), creating the official project baseline against which all future progress is measured.</li>
+                            <li>Once the BOQ is locked, all <strong>Construction</strong> and <strong>Tracking</strong> modules for the project become enabled.</li>
+                        </ul>
+                    </div>
+
+                    <div class="manual-card">
+                        <h4>🏗️ 4. Construction: Tracking Progress</h4>
+                        <ul>
+                            <li>Begin by opening the <strong>Accomplishment</strong> module. Your first report will prompt you to set the project's official <strong>Start Date</strong>, which anchors the entire construction schedule.</li>
+                            <li>File progress reports regularly by entering the percentage of work completed for each task.</li>
+                            <li>Monitor project health in real-time using the <strong>Tracking Gantt</strong> and <strong>Tracking S-Curve</strong> to visually compare your actual progress against the planned baseline.</li>
+                        </ul>
+                    </div>
+
+                    <div class="manual-card">
+                        <h4>📋 5. Handling Changes: Staying Agile</h4>
+                        <ul>
+                            <li>Use the <strong>Change Orders</strong> module to formally document any variation or change in scope.</li>
+                            <li>Items can be additive (new work) or deductive (removed work).</li>
+                            <li>Once a Change Order's status is set to <strong>"Approved,"</strong> its tasks and costs are automatically integrated into the project.</li>
+                            <li>View the impact of these changes on the schedule and budget in the <strong>Revised Reports</strong> module.</li>
+                        </ul>
+                    </div>
+
+                    <div class="manual-card">
+                        <h4>💾 6. Data Management: Import & Export</h4>
+                        <ul>
+                            <li>All your data is saved automatically in your browser's local storage—no internet connection is required.</li>
+                            <li>To create a backup or move data, use the <strong>Export Project</strong> button on the main Projects page. This saves a single project and all its related data to a <strong>.json</strong> file.</li>
+                            <li>To manage your library, go to <strong>Libraries > Import/Export Library</strong>. This allows you to save or load your entire collection of materials, resources, and crews.</li>
+                        </ul>
+                    </div>
+
                 </div>
+            </div>
 
             <div id="projects-view" class="hidden">
                 <header class="page-header">
@@ -973,7 +992,7 @@
             </div>
         </main>
         <footer class="app-footer">
-            <p>© 2025 Momentum alpha 1.0 | Daniel Pollentes. All Rights Reserved.</p>
+            <p>© 2025 Momentum alpha 2.0 | Daniel Pollentes. All Rights Reserved.</p>
         </footer>
 
         <div id="project-modal" class="modal">

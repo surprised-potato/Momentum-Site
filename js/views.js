@@ -93,6 +93,88 @@ const showProjects = () => { showView(projectsView); setActiveNav(navProjects); 
 const showDocumentation = () => {
     showView(documentationView);
     setActiveNav(navDocumentation);
+
+    const diagramContainer = document.getElementById('workflow-diagram-container');
+    if (!diagramContainer) return;
+    
+    diagramContainer.innerHTML = 'Loading Diagram...';
+
+    const mermaidGraph = `
+    graph TD
+        %% Define styles for the different node types
+        classDef actionNode fill:#0d6efd,stroke:#0a58ca,stroke-width:2px,color:#fff,font-weight:bold;
+        classDef criticalNode fill:#ffc107,stroke:#997404,stroke-width:2px,color:#212529,font-weight:bold;
+        classDef descNode fill:none,stroke:none,color:#343a40,font-size:13px,text-align:left;
+
+        %% Phase 1: Setup
+        subgraph Phase 1: Setup
+            A1("Create Project")
+            A1_desc("Start by defining your<br/>project's basic details.")
+            A2("Populate Libraries")
+            A2_desc("Add common materials,<br/>resources, and crews.")
+            
+            A1 ~~~ A1_desc
+            A2 ~~~ A2_desc
+            A1 --> A2
+        end
+
+        %% Phase 2: Pre-construction
+        subgraph Phase 2: Pre-construction
+            B1("Take Off")
+            B1_desc("Define the complete scope of<br/>work and item quantities.")
+            B2("DUPA")
+            B2_desc("Perform a detailed cost<br/>analysis for each work item.")
+            B3("Task Sequencing")
+            B3_desc("Set dependencies between tasks<br/>to create the project's workflow.")
+
+            B1 ~~~ B1_desc
+            B2 ~~~ B2_desc
+            B3 ~~~ B3_desc
+            B1 --> B2 --> B3
+        end
+        
+        %% Phase 3: Locking the Plan
+        subgraph Phase 3: Locking the Plan
+            C1("<b>Generate BOQ</b>")
+            C1_desc("<i>This critical step locks the plan<br/>and enables all construction modules.</i>")
+
+            C1 ~~~ C1_desc
+        end
+
+        %% Phase 4: Construction & Monitoring
+        subgraph Phase 4: Construction & Monitoring
+            D1("File Accomplishment")
+            D1_desc("Set the project start date and<br/>track daily progress.")
+            D2("View Tracking Reports")
+            D2_desc("Monitor health with live<br/>Gantt charts and S-Curves.")
+            D3("Manage Change Orders")
+            D3_desc("Create and approve any<br/>variations to the scope.")
+            
+            D1 ~~~ D1_desc
+            D2 ~~~ D2_desc
+            D3 ~~~ D3_desc
+            D1 --> D2 & D3
+        end
+
+        %% Link Phases
+        A2 --> B1
+        B3 --> C1
+        C1 --> D1
+
+        %% Apply styles to all nodes
+        class A1,A2,B1,B2,B3,D1,D2,D3 actionNode;
+        class C1 criticalNode;
+        class A1_desc,A2_desc,B1_desc,B2_desc,B3_desc,C1_desc,D1_desc,D2_desc,D3_desc descNode;
+    `;
+
+    try {
+        mermaid.render('workflow-diagram-svg', mermaidGraph).then(({ svg }) => {
+            diagramContainer.innerHTML = svg;
+        });
+    } catch (e) {
+        diagramContainer.innerHTML = 'Error rendering diagram.';
+        console.error("Mermaid rendering error:", e);
+    }
 };
 const showTakeOff = () => showProjects();
 const showDupa = () => showProjects();

@@ -126,6 +126,10 @@ function initializeSequencingModule() {
         }
     });
 
+    // Add the missing event listeners for the dropdowns
+    document.getElementById('sequence-sort').addEventListener('change', displaySequencesOverview);
+    document.getElementById('sequence-group').addEventListener('change', displaySequencesOverview);
+
     sequenceModalClose.addEventListener('click', closeSequenceEditModal);
 
     sequenceEditForm.addEventListener('submit', async (e) => {

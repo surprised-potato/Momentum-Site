@@ -73,44 +73,49 @@ const populateInitialDataIfNeeded = async () => {
 };
 
 window.addEventListener('load', () => {
-    db.open().then(async () => {
-        console.log("Database opened successfully.");
-        
-        await populateInitialDataIfNeeded();
-        
-        mermaid.initialize({ startOnLoad: false });
-        
-        initializeViewsModule();
-        initializeProjectsModule();
-        initializeTakeoffModule();
-        initializeDupaModule();
-        initializeSequencingModule();
-        initializeConstructionModule();
-        initializeReportsModule();
-        initializeChangeOrdersModule();
-        initializeDashboardModule();
-        initializeMaterialsLibraryModule();
-        initializeDupaLibraryModule();
-        initializeLibraryManagementModule();
-
-        window.addEventListener('click', (event) => {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                return;
-            }
-            const closeButton = event.target.closest('.close-button');
-            if (closeButton) {
-                const modal = closeButton.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'none';
+    sessionManager.checkSession().then(() => {
+        db.open().then(async () => {
+            await populateInitialDataIfNeeded();
+            
+            mermaid.initialize({ startOnLoad: false });
+            
+            initializeViewsModule();
+            initializeProjectsModule();
+            initializeTakeoffModule();
+            initializeDupaModule();
+            initializeSequencingModule();
+            initializeConstructionModule();
+            initializeReportsModule();
+            initializeChangeOrdersModule();
+            initializeDashboardModule();
+            initializeMaterialsLibraryModule();
+            initializeDupaLibraryModule();
+            initializeLibraryManagementModule();
+    
+            window.addEventListener('click', (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                    return;
                 }
-            }
+                const closeButton = event.target.closest('.close-button');
+                if (closeButton) {
+                    const modal = closeButton.closest('.modal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                }
+            });
+
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionManager.logout();
+            });
+    
+            showDashboard();
+    
+        }).catch(err => {
+            console.error("Failed to open db: ", err.stack || err);
         });
-
-        showDashboard();
-
-    }).catch(err => {
-        console.error("Failed to open db: ", err.stack || err);
     });
 });
 // --- End of app.js ---

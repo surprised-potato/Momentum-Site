@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Momentum</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body.login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--background-color);
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 2rem 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+        .form-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .form-toggle button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--grey-color);
+            border-bottom: 2px solid transparent;
+        }
+        .form-toggle button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        #error-message {
+            color: var(--danger-color);
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <h1>Momentum</h1>
+        <div class="form-toggle">
+            <button id="show-login-btn" class="active">Login</button>
+            <button id="show-signup-btn">Sign Up</button>
+        </div>
+        <p id="error-message"></p>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+
+        <form id="signup-form" class="hidden">
+            <div class="form-group">
+                <label for="signup-name">Name</label>
+                <input type="text" id="signup-name" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-email">Email</label>
+                <input type="email" id="signup-email" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-password">Password (min. 8 characters)</label>
+                <input type="password" id="signup-password" required minlength="8">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        </form>
+    </div>
+
+    <script src="js/appwrite.min.js"></script>
+    <script src="js/sdk.js"></script>
+    <script src="js/auth_login.js"></script>
+</body>
+</html>

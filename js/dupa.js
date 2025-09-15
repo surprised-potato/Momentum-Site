@@ -245,18 +245,19 @@ function initializeDupaModule() {
     });
 
     addLaborFromLibraryBtn.addEventListener('click', async () => {
-        const labor = await db.resources.where('type').equals('labor').sortBy('name');
-        openLibraryPicker({
-            title: 'Select Labor from Library',
-            dataSource: labor,
-            onSelect: (item) => {
-                addLaborRow({ laborType: item.name, rate: item.rate });
-                calculateAndDisplayDupaTotals();
-            },
-            searchKeys: ['name'],
-            isCrewPicker: false
-        });
+    // The extra line causing the blank row has been removed from here.
+    const labor = await db.resources.where('type').equals('labor').sortBy('name');
+    openLibraryPicker({
+        title: 'Select Labor from Library',
+        dataSource: labor,
+        onSelect: (item) => {
+            addLaborRow({ laborType: item.name, rate: item.rate });
+            calculateAndDisplayDupaTotals();
+        },
+        searchKeys: ['name'],
+        isCrewPicker: false
     });
+});
 
     addEquipmentFromLibraryBtn.addEventListener('click', async () => {
         const equipment = await db.resources.where('type').equals('equipment').sortBy('name');

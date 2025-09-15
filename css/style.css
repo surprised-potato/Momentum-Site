@@ -1229,3 +1229,6 @@ progress#summary-progress-bar::-webkit-progress-value {
     justify-content: flex-start;
     margin-bottom: 1rem;
 }
+.list-item.no-dupa {
+    border-left: 4px solid var(--warning-color);
+}

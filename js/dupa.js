@@ -14,12 +14,18 @@ const displayDupaQuantities = async () => {
         dupaQuantitiesListDiv.innerHTML = "<p>No quantities found for this project.</p>";
         return;
     }
+    
+    const quantityIds = quantities.map(q => q.id);
+    const dupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
+    const hasDupaSet = new Set(dupas.map(d => d.quantityId));
+
     const grouped = quantities.reduce((acc, q) => {
         const category = q.category || 'Uncategorized';
         if (!acc[category]) { acc[category] = []; }
         acc[category].push(q);
         return acc;
     }, {});
+
     const sortedCategories = Object.keys(grouped).sort();
     for (const category of sortedCategories) {
         const header = document.createElement('h3');
@@ -27,9 +33,16 @@ const displayDupaQuantities = async () => {
         header.textContent = category;
         dupaQuantitiesListDiv.appendChild(header);
         grouped[category].forEach(q => {
+            const hasDupa = hasDupaSet.has(q.id);
+            const buttonText = hasDupa ? 'Show/Edit DUPA' : 'Add DUPA';
+            const buttonClass = hasDupa ? 'btn-primary' : 'btn-secondary';
+
             const item = document.createElement('div');
             item.className = 'list-item';
-            item.innerHTML = `<h3>${q.scopeOfWork}</h3><button class="btn btn-primary show-dupa-form-btn" data-id="${q.id}" data-name="${q.scopeOfWork}">Show DUPA</button>`;
+            if (!hasDupa) {
+                item.classList.add('no-dupa');
+            }
+            item.innerHTML = `<h3>${q.scopeOfWork}</h3><button class="btn ${buttonClass} show-dupa-form-btn" data-id="${q.id}" data-name="${q.scopeOfWork}">${buttonText}</button>`;
             dupaQuantitiesListDiv.appendChild(item);
         });
     }

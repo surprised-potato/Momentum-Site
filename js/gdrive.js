@@ -116,19 +116,44 @@ function handleAuthClick() {
  * @returns {Promise<string>} A JSON string of the complete project data.
  */
 async function getProjectDataAsJson(projectId) {
-    const project = await db.projects.get(projectId);
-    const quantities = await db.quantities.where({ projectId }).toArray();
+    // This ensures all data is fetched before proceeding.
+    const [
+        project,
+        quantities,
+        tasks,
+        boq,
+        changeOrders
+    ] = await Promise.all([
+        db.projects.get(projectId),
+        db.quantities.where({ projectId }).toArray(),
+        db.tasks.where({ projectId }).toArray(),
+        db.boqs.where({ projectId }).first(),
+        db.changeOrders.where({ projectId }).toArray()
+    ]);
+
     const quantityIds = quantities.map(q => q.id);
-    const dupas = quantityIds.length > 0 ? await db.dupas.where('quantityId').anyOf(quantityIds).toArray() : [];
-    const tasks = await db.tasks.where({ projectId }).toArray();
-    const boq = await db.boqs.where({ projectId }).first();
-    const changeOrders = await db.changeOrders.where({ projectId }).toArray();
     const changeOrderIds = changeOrders.map(co => co.id);
-    const changeOrderItems = changeOrderIds.length > 0 ? await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray() : [];
+
+    const [
+        dupas,
+        changeOrderItems
+    ] = await Promise.all([
+        quantityIds.length > 0 ? db.dupas.where('quantityId').anyOf(quantityIds).toArray() : Promise.resolve([]),
+        changeOrderIds.length > 0 ? db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray() : Promise.resolve([])
+    ]);
+
     const changeOrderItemIds = changeOrderItems.map(item => item.id);
-    const changeOrderDupas = changeOrderItemIds.length > 0 ? await db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray() : [];
-    const qtyAccomplishments = quantityIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').toArray() : [];
-    const coAccomplishments = changeOrderItemIds.length > 0 ? await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(r => r.type === 'changeOrderItem').toArray() : [];
+
+    const [
+        changeOrderDupas,
+        qtyAccomplishments,
+        coAccomplishments
+    ] = await Promise.all([
+        changeOrderItemIds.length > 0 ? db.changeOrderDupas.where('changeOrderItemId').anyOf(changeOrderItemIds).toArray() : Promise.resolve([]),
+        quantityIds.length > 0 ? db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').toArray() : Promise.resolve([]),
+        changeOrderItemIds.length > 0 ? db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(r => r.type === 'changeOrderItem').toArray() : Promise.resolve([])
+    ]);
+
     const accomplishments = [...qtyAccomplishments, ...coAccomplishments];
 
     const exportData = {
@@ -266,16 +291,22 @@ function handleImportClick() {
 /**
  * Creates and displays the Google Picker interface.
  */
-function createPicker() {
+async function createPicker() {
     const token = gapi.client.getToken();
     if (token === null) return;
 
+    // First, get the ID of the dedicated app folder.
+    const folderId = await getOrCreateFolderId();
+
     const view = new google.picker.View(google.picker.ViewId.DOCS);
     view.setMimeTypes("application/json");
+    
+    // Tell the Picker to start inside our specific folder.
+    view.setParent(folderId);
 
     const picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .setAppId('994807186446')
+        .setAppId('PASTE_YOUR_PROJECT_NUMBER_HERE')
         .setOAuthToken(token.access_token)
         .addView(view)
         .setDeveloperKey(API_KEY)

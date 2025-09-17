@@ -11,6 +11,7 @@ let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, c
 let navDashboard, navProjects, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
 let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
 let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
+let settingsView, navSyncSettings;
 
 const openDupaReportModal = () => dupaReportModal.style.display = 'block';
 const closeDupaReportModal = () => dupaReportModal.style.display = 'none';
@@ -87,6 +88,10 @@ const setActiveNav = (activeLink) => {
     }
 };
 const showView = (activeView) => allViews.forEach(v => v.classList.toggle('hidden', v !== activeView));
+const showSyncSettings = () => {
+    showView(settingsView);
+    setActiveNav(navSyncSettings);
+};
 
 const showDashboard = () => { showView(dashboardView); setActiveNav(navDashboard); updateDashboard(); };
 const showProjects = () => { showView(projectsView); setActiveNav(navProjects); displayProjects(); };
@@ -222,11 +227,13 @@ function initializeViewsModule() {
     dupaLibraryView = document.getElementById('dupa-library-view');
     libraryManagementView = document.getElementById('library-management-view');
     documentationView = document.getElementById('documentation-view');
+    settingsView = document.getElementById('settings-view');
+    navSyncSettings = document.getElementById('nav-sync-settings');
     
     revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
     revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
 
-    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView, revisedPertCpmNetworkView, revisedResourceScheduleView];
+    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, revisedPertCpmNetworkView, revisedResourceScheduleView];
 
     takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
     dupaQuantityListView = document.getElementById('dupa-quantity-list-view');
@@ -267,6 +274,7 @@ function initializeViewsModule() {
     navLibraryManagement = document.getElementById('nav-library-management');
     navDocumentation = document.getElementById('nav-documentation');
     navBrandLink = document.getElementById('nav-brand-link');
+    navSyncSettings.addEventListener('click', (e) => { e.preventDefault(); showSyncSettings(); });
 
     navDashboard.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
     navProjects.addEventListener('click', (e) => { e.preventDefault(); showProjects(); });
@@ -275,6 +283,7 @@ function initializeViewsModule() {
     navLibraryManagement.addEventListener('click', (e) => { e.preventDefault(); showLibraryManagement(); });
     navDocumentation.addEventListener('click', (e) => { e.preventDefault(); showDocumentation(); });
     navBrandLink.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
+    
 
     const backToHub = () => { if(currentHubProjectId) showProjectSummary(currentHubProjectId); };
 
@@ -350,6 +359,7 @@ function initializeViewsModule() {
     document.getElementById('back-to-tracking-gantt-projects').addEventListener('click', backToHub);
     document.getElementById('back-to-tracking-s-curve-projects').addEventListener('click', backToHub);
     document.getElementById('back-to-lookahead-projects').addEventListener('click', backToHub);
+    
     
     projectSummaryView.addEventListener('click', (e) => {
         const target = e.target.closest('.hub-buttons button');

@@ -161,9 +161,9 @@ async function saveProjectToDrive(projectId) {
     try {
         const projectJsonString = await getProjectDataAsJson(projectId);
         const project = JSON.parse(projectJsonString).project;
-        const fileName = `${project.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+        let fileName = `${project.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
 
-        alert(`Saving project "${project.projectName}" to Google Drive...`);
+        alert(`Checking Google Drive for existing files...`);
 
         const folderId = await getOrCreateFolderId();
 
@@ -172,7 +172,27 @@ async function saveProjectToDrive(projectId) {
             fields: 'files(id)',
         });
         
-        const existingFileId = searchResponse.result.files.length > 0 ? searchResponse.result.files[0].id : null;
+        let existingFileId = searchResponse.result.files.length > 0 ? searchResponse.result.files[0].id : null;
+        let method = 'POST'; // Default to creating a new file
+
+        if (existingFileId) {
+            const shouldOverwrite = confirm(`A file named "${fileName}" already exists.\n\nClick 'OK' to overwrite it.\nClick 'Cancel' to save a new file with a "(copy)" suffix.`);
+            
+            if (shouldOverwrite) {
+                // User wants to overwrite. Set method to PATCH to update the existing file.
+                method = 'PATCH';
+            } else {
+                // User wants to save a copy. Reset the file ID and update the filename.
+                existingFileId = null; 
+                if (fileName.endsWith('.json')) {
+                    fileName = fileName.replace('.json', ' (copy).json');
+                } else {
+                    fileName += ' (copy)';
+                }
+            }
+        }
+
+        alert(`Preparing to ${method === 'PATCH' ? 'overwrite' : 'create'} "${fileName}"...`);
 
         const metadata = { name: fileName, mimeType: 'application/json' };
         if (!existingFileId) {
@@ -193,8 +213,7 @@ async function saveProjectToDrive(projectId) {
             close_delim;
 
         const path = `/upload/drive/v3/files${existingFileId ? `/${existingFileId}` : ''}`;
-        const method = existingFileId ? 'PATCH' : 'POST';
-
+        
         const request = gapi.client.request({
             'path': path,
             'method': method,
@@ -204,7 +223,7 @@ async function saveProjectToDrive(projectId) {
         });
 
         await request;
-        alert(`Project "${project.projectName}" saved successfully to the "${FOLDER_NAME}" folder in your Google Drive.`);
+        alert(`Project "${project.projectName}" saved successfully as "${fileName}" in the "${FOLDER_NAME}" folder in your Google Drive.`);
 
     } catch (err) {
         console.error('Error saving to Google Drive:', err);

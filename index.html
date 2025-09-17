@@ -844,15 +844,17 @@
 
                 <div class="library-section">
                     <h2>Export Library</h2>
-                    <p>This will save your entire Materials, Resources, and Crews library to a single JSON file.</p>
-                    <button id="export-library-btn" class="btn btn-primary">Export Full Library</button>
+                    <p>Save your entire Materials, Resources, and Crews library.</p>
+                    <button id="export-library-btn" class="btn btn-primary">Export to File</button>
+                    <button id="export-library-gdrive-btn" class="btn btn-secondary">Export to Google Drive</button>
                 </div>
 
                 <div class="library-section">
                     <h2>Import Library</h2>
-                    <p><strong>Warning:</strong> Importing a library file will completely erase and replace your existing library data. This action cannot be undone.</p>
+                    <p>Load a previously saved library. Importing will give you the option to merge new items or overwrite existing ones.</p>
                     <input type="file" id="import-library-input" class="hidden" accept=".json">
                     <button id="import-library-btn" class="btn btn-secondary">Import from File</button>
+                    <button id="import-library-gdrive-btn" class="btn btn-secondary">Import from Google Drive</button>
                 </div>
             </div>
 

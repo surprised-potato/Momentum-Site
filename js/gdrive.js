@@ -339,3 +339,134 @@ async function pickerCallback(data) {
         }
     }
 }
+/**
+ * Gathers all library data into a single JSON object.
+ * @returns {Promise<string>} A JSON string of the complete library data.
+ */
+async function getLibraryDataAsJson() {
+    const [materials, resources, crews, crewComposition] = await Promise.all([
+        db.materials.toArray(),
+        db.resources.toArray(),
+        db.crews.toArray(),
+        db.crewComposition.toArray()
+    ]);
+
+    const libraryData = { materials, resources, crews, crewComposition };
+    return JSON.stringify(libraryData, null, 2);
+}
+
+/**
+ * Saves the entire library to a file in Google Drive.
+ */
+async function saveLibraryToDrive() {
+    if (gapi.client.getToken() === null) {
+        alert('Please sign in to save the library.');
+        handleAuthClick();
+        return;
+    }
+
+    try {
+        const libraryJsonString = await getLibraryDataAsJson();
+        let fileName = 'momentum_library.json';
+
+        alert(`Saving library to Google Drive...`);
+
+        const folderId = await getOrCreateFolderId();
+
+        const searchResponse = await gapi.client.drive.files.list({
+            q: `'${folderId}' in parents and name='${fileName}' and trashed=false`,
+            fields: 'files(id)',
+        });
+        
+        let existingFileId = searchResponse.result.files.length > 0 ? searchResponse.result.files[0].id : null;
+        let method = 'POST';
+
+        if (existingFileId) {
+            const shouldOverwrite = confirm(`A library file named "${fileName}" already exists.\n\nClick 'OK' to overwrite it.\nClick 'Cancel' to save a new file with a "(copy)" suffix.`);
+            if (shouldOverwrite) {
+                method = 'PATCH';
+            } else {
+                existingFileId = null;
+                fileName = 'momentum_library (copy).json';
+            }
+        }
+        
+        const metadata = { name: fileName, mimeType: 'application/json' };
+        if (!existingFileId) {
+            metadata.parents = [folderId];
+        }
+
+        const boundary = '-------314159265358979323846';
+        const delimiter = "\r\n--" + boundary + "\r\n";
+        const close_delim = "\r\n--" + boundary + "--";
+
+        const multipartRequestBody =
+            delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+            delimiter + 'Content-Type: application/json\r\n\r\n' + libraryJsonString + close_delim;
+
+        const path = `/upload/drive/v3/files${existingFileId ? `/${existingFileId}` : ''}`;
+        
+        await gapi.client.request({
+            'path': path,
+            'method': method,
+            'params': { 'uploadType': 'multipart' },
+            'headers': { 'Content-Type': 'multipart/related; boundary="' + boundary + '"' },
+            'body': multipartRequestBody
+        });
+
+        alert(`Library saved successfully as "${fileName}" in your Google Drive.`);
+
+    } catch (err) {
+        console.error('Error saving library to Google Drive:', err);
+        alert(`An error occurred while saving the library: ${err.result?.error?.message || err.message}`);
+    }
+}
+
+/**
+ * Callback function for the library import picker.
+ * @param {object} data The data returned from the Picker API.
+ */
+async function libraryPickerCallback(data) {
+    if (data.action === google.picker.Action.PICKED) {
+        const fileId = data.docs[0].id;
+        try {
+            const response = await gapi.client.drive.files.get({ fileId: fileId, alt: 'media' });
+            const libraryData = typeof response.body === 'string' ? JSON.parse(response.body) : response.result;
+            
+            // This reuses your existing import preview logic from library_management.js
+            await processAndPreviewImport(libraryData);
+
+        } catch (error) {
+            console.error('Error fetching library file from Google Drive:', error);
+            alert(`Could not import the selected file. Error: ${error.result?.error?.message || error.message}`);
+        }
+    }
+}
+
+/**
+ * Triggers the Google Drive import process for the library.
+ */
+function handleLibraryImportClick() {
+     if (gapi.client.getToken() === null) {
+        alert('Please sign in to import a library.');
+        handleAuthClick();
+        return;
+    }
+    
+    // This is the same as the project picker, but with a different callback
+    const token = gapi.client.getToken();
+    if (token === null) return;
+    const view = new google.picker.View(google.picker.ViewId.DOCS);
+    view.setMimeTypes("application/json");
+    view.setParent(getOrCreateFolderId());
+
+    const picker = new google.picker.PickerBuilder()
+        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        .setAppId('PASTE_YOUR_PROJECT_NUMBER_HERE')
+        .setOAuthToken(token.access_token)
+        .addView(view)
+        .setDeveloperKey(API_KEY)
+        .setCallback(libraryPickerCallback) // Use the new callback
+        .build();
+    picker.setVisible(true);
+}

@@ -1280,7 +1280,7 @@ progress#summary-progress-bar::-webkit-progress-value {
 }
 
 /* --- Google Brand Button --- */
-.google-btn {
+#google-auth-btn {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1298,12 +1298,12 @@ progress#summary-progress-bar::-webkit-progress-value {
     margin-top: 10px;
 }
 
-.google-btn:hover {
+#google-auth-btn:hover {
     box-shadow: 0 1px 3px 1px rgba(60,64,67,.15);
     border-color: #c6c6c6;
 }
 
-.google-btn .google-icon {
+#google-auth-btn .google-icon {
     width: 18px;
     height: 18px;
 }

@@ -86,7 +86,8 @@ function updateSigninStatus(isSignedIn) {
  */
 function handleAuthClick() {
     if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({ prompt: 'consent' });
+        // This forces the account chooser to appear.
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
     } else {
         const token = gapi.client.getToken();
         if (token !== null) {
@@ -152,9 +153,17 @@ async function getOrCreateFolderId() {
  * @param {number} projectId The ID of the project to save.
  */
 async function saveProjectToDrive(projectId) {
+    // If not signed in, prompt for sign-in and wait for the token.
     if (gapi.client.getToken() === null) {
-        alert('Please sign in to save the project.');
-        handleAuthClick(); // This will trigger the sign-in flow
+        tokenClient.callback = async (tokenResponse) => {
+            if (tokenResponse.error) {
+                throw new Error('Google sign-in error: ' + tokenResponse.error);
+            }
+            gapi.client.setToken(tokenResponse);
+            await saveProjectToDrive(projectId); // Retry the save operation
+        };
+        // This forces the account chooser to appear.
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
     }
 

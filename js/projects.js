@@ -204,103 +204,99 @@ const importProjectData = async (data) => {
 
     try {
         await db.transaction('rw', allTables, async () => {
-            const quantityIdMap = new Map();
-            const changeOrderIdMap = new Map();
-            const changeOrderItemIdMap = new Map();
+            const oldToNewTaskIdMap = new Map();
             
-            const oldNumericIdToNewUniqueIdMap = new Map();
-
             const newProjectId = await db.projects.add(data.project);
 
+            // Process original quantities
             if (data.quantities && data.quantities.length > 0) {
                 for (const q of data.quantities) {
                     const oldId = q.id;
                     delete q.id;
                     q.projectId = newProjectId;
                     const newId = await db.quantities.add(q);
-                    quantityIdMap.set(oldId, newId);
-                    oldNumericIdToNewUniqueIdMap.set(oldId, `qty-${newId}`);
+                    oldToNewTaskIdMap.set(`qty-${oldId}`, `qty-${newId}`);
                 }
             }
             
+            // Process change orders and their items
+            const changeOrderIdMap = new Map();
             if (data.changeOrders && data.changeOrders.length > 0) {
                  for (const co of data.changeOrders) {
-                    const oldId = co.id;
+                    const oldCoId = co.id;
                     delete co.id;
                     co.projectId = newProjectId;
-                    const newId = await db.changeOrders.add(co);
-                    changeOrderIdMap.set(oldId, newId);
+                    const newCoId = await db.changeOrders.add(co);
+                    changeOrderIdMap.set(oldCoId, newCoId);
                 }
             }
-            
             if (data.changeOrderItems && data.changeOrderItems.length > 0) {
                 for (const item of data.changeOrderItems) {
-                    const oldId = item.id;
+                    const oldItemId = item.id;
                     delete item.id;
                     item.changeOrderId = changeOrderIdMap.get(item.changeOrderId);
                     if (item.originalQuantityId) {
-                        item.originalQuantityId = quantityIdMap.get(item.originalQuantityId);
+                        const newOriginalId = Array.from(oldToNewTaskIdMap.entries())
+                                                 .find(([oldStr, newStr]) => oldStr === `qty-${item.originalQuantityId}`);
+                        if (newOriginalId) item.originalQuantityId = parseInt(newOriginalId[1].split('-')[1]);
                     }
-                    const newId = await db.changeOrderItems.add(item);
-                    changeOrderItemIdMap.set(oldId, newId);
-                    oldNumericIdToNewUniqueIdMap.set(oldId, `co-${newId}`);
+                    const newItemId = await db.changeOrderItems.add(item);
+                    oldToNewTaskIdMap.set(`co-${oldItemId}`, `co-${newItemId}`);
                 }
             }
 
+            // Rebuild tasks using the complete ID map
             if (data.tasks && data.tasks.length > 0) {
                 const newTasks = data.tasks.map(t => {
-                    const predecessor = typeof t.predecessorId === 'string' 
-                        ? t.predecessorId 
-                        : oldNumericIdToNewUniqueIdMap.get(t.predecessorId);
-
-                    const successor = typeof t.successorId === 'string'
-                        ? t.successorId
-                        : oldNumericIdToNewUniqueIdMap.get(t.successorId);
+                    const newPredecessorId = oldToNewTaskIdMap.get(t.predecessorId) || t.predecessorId;
+                    const newSuccessorId = oldToNewTaskIdMap.get(t.successorId) || t.successorId;
 
                     return {
                         projectId: newProjectId,
-                        predecessorId: predecessor,
-                        successorId: successor
+                        predecessorId: newPredecessorId,
+                        successorId: newSuccessorId
                     };
                 }).filter(t => t.predecessorId && t.successorId);
 
                 if(newTasks.length > 0) await db.tasks.bulkAdd(newTasks);
             }
             
+            // Rebuild DUPAs and other related data
             if (data.dupas && data.dupas.length > 0) {
-                const newDupas = data.dupas.map(d => ({ ...d, id: undefined, quantityId: quantityIdMap.get(d.quantityId) }));
+                 const newDupas = data.dupas.map(d => {
+                    const newQtyIdStr = oldToNewTaskIdMap.get(`qty-${d.quantityId}`);
+                    return newQtyIdStr ? { ...d, id: undefined, quantityId: parseInt(newQtyIdStr.split('-')[1]) } : null;
+                }).filter(Boolean);
                 if(newDupas.length > 0) await db.dupas.bulkAdd(newDupas);
             }
             if (data.changeOrderDupas && data.changeOrderDupas.length > 0) {
-                const newCoDupas = data.changeOrderDupas.map(d => ({ ...d, id: undefined, changeOrderItemId: changeOrderItemIdMap.get(d.changeOrderItemId) }));
+                const newCoDupas = data.changeOrderDupas.map(d => {
+                    const newCoItemIdStr = oldToNewTaskIdMap.get(`co-${d.changeOrderItemId}`);
+                    return newCoItemIdStr ? { ...d, id: undefined, changeOrderItemId: parseInt(newCoItemIdStr.split('-')[1]) } : null;
+                }).filter(Boolean);
                 if(newCoDupas.length > 0) await db.changeOrderDupas.bulkAdd(newCoDupas);
             }
             
             if (data.accomplishments && data.accomplishments.length > 0) {
                 const newAccomplishments = data.accomplishments.map(a => {
-                    const newRecord = {
-                        date: a.date,
-                        percentComplete: a.percentComplete,
-                        subIndex: a.subIndex,
-                        type: a.type
+                    const oldUniqueId = a.type === 'changeOrderItem' ? `co-${a.taskId}` : 
+                                       (a.subIndex !== null ? `sub-${a.taskId}-${a.subIndex}` : `qty-${a.taskId}`);
+                    const newUniqueId = oldToNewTaskIdMap.get(oldUniqueId.split('-').slice(0, 2).join('-')); // map parent task
+                    if (!newUniqueId) return null;
+                    return {
+                        ...a,
+                        id: undefined,
+                        taskId: parseInt(newUniqueId.split('-')[1])
                     };
-                    if (a.type === 'changeOrderItem') {
-                        newRecord.taskId = changeOrderItemIdMap.get(a.taskId);
-                    } else {
-                        newRecord.taskId = quantityIdMap.get(a.taskId);
-                    }
-                    return newRecord;
-                });
+                }).filter(Boolean);
                 if(newAccomplishments.length > 0) await db.accomplishments.bulkAdd(newAccomplishments);
             }
             
             if (data.boq) {
-                // Remap quantityIds within the boqData object before saving
                 for (const category in data.boq.boqData) {
                     data.boq.boqData[category].forEach(item => {
-                        if (item.quantityId && quantityIdMap.has(item.quantityId)) {
-                            item.quantityId = quantityIdMap.get(item.quantityId);
-                        }
+                        const newQtyIdStr = oldToNewTaskIdMap.get(`qty-${item.quantityId}`);
+                        if (newQtyIdStr) item.quantityId = parseInt(newQtyIdStr.split('-')[1]);
                     });
                 }
                 delete data.boq.id;

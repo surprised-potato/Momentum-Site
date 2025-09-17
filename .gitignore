@@ -7,3 +7,5 @@ desktop.ini
 
 # Build output folder
 /.dist
+
+/.Oauth

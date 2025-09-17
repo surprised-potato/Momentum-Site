@@ -9,8 +9,7 @@ let currentDupaQuantityId = null;
 let currentSequencingProjectId = null;
 let currentBoqProjectId = null;
 let currentHubProjectId = null;
-
-// --- End of app.js ---
+let appInitialized = false;
 
 const populateInitialDataIfNeeded = async () => {
     try {
@@ -72,43 +71,52 @@ const populateInitialDataIfNeeded = async () => {
     }
 };
 
+function startApp() {
+    // This function will be called by gdrive.js once Google APIs are ready
+    if (appInitialized) return;
+    appInitialized = true;
+
+    initializeViewsModule();
+    initializeProjectsModule();
+    initializeTakeoffModule();
+    initializeDupaModule();
+    initializeSequencingModule();
+    initializeConstructionModule();
+    initializeReportsModule();
+    initializeChangeOrdersModule();
+    initializeDashboardModule();
+    initializeMaterialsLibraryModule();
+    initializeDupaLibraryModule();
+    initializeLibraryManagementModule();
+
+    const authButton = document.getElementById('google-auth-btn');
+    if (authButton) {
+        authButton.addEventListener('click', handleAuthClick);
+    }
+    
+    window.addEventListener('click', (event) => {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+            return;
+        }
+        const closeButton = event.target.closest('.close-button');
+        if (closeButton) {
+            const modal = closeButton.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
+
+    showDashboard();
+}
+
 window.addEventListener('load', () => {
     db.open().then(async () => {
         console.log("Database opened successfully.");
-        
         await populateInitialDataIfNeeded();
-        
         mermaid.initialize({ startOnLoad: false });
-        
-        initializeViewsModule();
-        initializeProjectsModule();
-        initializeTakeoffModule();
-        initializeDupaModule();
-        initializeSequencingModule();
-        initializeConstructionModule();
-        initializeReportsModule();
-        initializeChangeOrdersModule();
-        initializeDashboardModule();
-        initializeMaterialsLibraryModule();
-        initializeDupaLibraryModule();
-        initializeLibraryManagementModule();
-
-        window.addEventListener('click', (event) => {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                return;
-            }
-            const closeButton = event.target.closest('.close-button');
-            if (closeButton) {
-                const modal = closeButton.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-            }
-        });
-
-        showDashboard();
-
+        // The Google scripts' onload attributes will now trigger the startApp() function correctly.
     }).catch(err => {
         console.error("Failed to open db: ", err.stack || err);
     });

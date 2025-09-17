@@ -75,8 +75,19 @@ function tryStartApp() {
  */
 function updateSigninStatus(isSignedIn) {
     const authButton = document.getElementById('google-auth-btn');
-    if (authButton) {
-        authButton.textContent = isSignedIn ? 'Sign Out' : 'Sign In with Google';
+    if (!authButton) return;
+
+    const buttonTextSpan = authButton.querySelector('.google-btn-text');
+    const buttonIconSvg = authButton.querySelector('.google-icon');
+
+    if (buttonTextSpan && buttonIconSvg) {
+        if (isSignedIn) {
+            buttonIconSvg.style.display = 'none'; // Hide the Google logo when signed in
+            buttonTextSpan.textContent = 'Sign Out';
+        } else {
+            buttonIconSvg.style.display = 'block'; // Show the Google logo when signed out
+            buttonTextSpan.textContent = 'Sign In with Google';
+        }
     }
 }
 

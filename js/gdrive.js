@@ -236,7 +236,7 @@ function createPicker() {
 
     const picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .setAppId(CLIENT_ID.split('-')[0])
+        .setAppId('994807186446')
         .setOAuthToken(token.access_token)
         .addView(view)
         .setDeveloperKey(API_KEY)

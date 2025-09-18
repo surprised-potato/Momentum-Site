@@ -11,7 +11,7 @@ let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, c
 let navDashboard, navProjects, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
 let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
 let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
-let settingsView, navSyncSettings;
+let settingsView, navSyncSettings, dataManagementView, navDataManagement;
 
 const openDupaReportModal = () => dupaReportModal.style.display = 'block';
 const closeDupaReportModal = () => dupaReportModal.style.display = 'none';
@@ -228,12 +228,13 @@ function initializeViewsModule() {
     libraryManagementView = document.getElementById('library-management-view');
     documentationView = document.getElementById('documentation-view');
     settingsView = document.getElementById('settings-view');
+    dataManagementView = document.getElementById('data-management-view');
     navSyncSettings = document.getElementById('nav-sync-settings');
     
     revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
     revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
 
-    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, revisedPertCpmNetworkView, revisedResourceScheduleView];
+    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, dataManagementView, revisedPertCpmNetworkView, revisedResourceScheduleView];
 
     takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
     dupaQuantityListView = document.getElementById('dupa-quantity-list-view');
@@ -274,7 +275,15 @@ function initializeViewsModule() {
     navLibraryManagement = document.getElementById('nav-library-management');
     navDocumentation = document.getElementById('nav-documentation');
     navBrandLink = document.getElementById('nav-brand-link');
+    navDataManagement = document.getElementById('nav-data-management');
+
+    const showDataManagement = () => {
+        showView(dataManagementView);
+        setActiveNav(navDataManagement);
+    };
+
     navSyncSettings.addEventListener('click', (e) => { e.preventDefault(); showSyncSettings(); });
+    navDataManagement.addEventListener('click', (e) => { e.preventDefault(); showDataManagement(); });
 
     navDashboard.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
     navProjects.addEventListener('click', (e) => { e.preventDefault(); showProjects(); });

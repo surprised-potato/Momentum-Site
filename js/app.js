@@ -89,6 +89,7 @@ function startApp() {
     initializeDupaLibraryModule();
     initializeLibraryManagementModule();
     initializeSettingsModule(); 
+    initializeDataManagementModule();
 
     const authButton = document.getElementById('google-auth-btn');
     if (authButton) {

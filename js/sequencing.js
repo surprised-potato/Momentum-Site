@@ -193,6 +193,9 @@ function initializeSequencingModule() {
     // Add the missing event listeners for the dropdowns
     document.getElementById('sequence-sort').addEventListener('change', displaySequencesOverview);
     document.getElementById('sequence-group').addEventListener('change', displaySequencesOverview);
+    document.getElementById('ai-sequence-btn').addEventListener('click', () => {
+    runAiSequencing(currentSequencingProjectId);
+});
 
     sequenceModalClose.addEventListener('click', closeSequenceEditModal);
 

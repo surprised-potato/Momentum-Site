@@ -58,7 +58,22 @@ const showDupaQuantitiesForProject = async (projectId, projectName) => {
 
 const addLaborRow = (data = {}) => {
     const row = laborTbody.insertRow();
-    row.innerHTML = `<td><input type="text" class="labor-type" value="${data.laborType || ''}" required></td><td><input type="number" class="labor-mandays" value="${data.mandays || ''}" step="any" min="0" required></td><td><input type="number" class="labor-rate" value="${data.rate || ''}" step="any" min="0" required></td><td class="row-total" style="text-align:right;"></td><td><button type="button" class="btn-remove">X</button></td>`;
+    const costType = data.amount !== undefined ? 'lot' : 'mandays';
+    const amount = data.rate !== undefined ? data.rate : (data.amount !== undefined ? data.amount : '');
+
+    row.innerHTML = `
+        <td><input type="text" class="labor-type" value="${data.laborType || ''}" required></td>
+        <td><input type="number" class="labor-mandays" value="${data.mandays || 1}" step="any" min="0" required ${costType === 'lot' ? 'readonly' : ''}></td>
+        <td>
+            <select class="labor-cost-type">
+                <option value="mandays" ${costType === 'mandays' ? 'selected' : ''}>Manday</option>
+                <option value="lot" ${costType === 'lot' ? 'selected' : ''}>Lot</option>
+            </select>
+        </td>
+        <td><input type="number" class="labor-rate" value="${amount}" step="any" min="0" required></td>
+        <td class="row-total" style="text-align:right;"></td>
+        <td><button type="button" class="btn-remove">X</button></td>
+    `;
 };
 
 const addMaterialRow = (data = {}) => {
@@ -76,9 +91,10 @@ const calculateAndDisplayDupaTotals = async () => {
 
     let laborSubtotal = 0;
     document.querySelectorAll('#labor-tbody tr').forEach(row => {
-        const mandays = parseFloat(row.querySelector('.labor-mandays').value) || 0;
+        const type = row.querySelector('.labor-cost-type').value;
+        const quantity = parseFloat(row.querySelector('.labor-mandays').value) || 0;
         const rate = parseFloat(row.querySelector('.labor-rate').value) || 0;
-        const rowTotal = mandays * rate;
+        const rowTotal = (type === 'lot') ? rate : quantity * rate;
         laborSubtotal += rowTotal;
         row.querySelector('.row-total').textContent = formatCurrency(rowTotal);
     });
@@ -310,20 +326,39 @@ function initializeDupaModule() {
     dupaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const directCosts = [];
-        laborTbody.querySelectorAll('tr').forEach(row => directCosts.push({ type: 'labor', laborType: row.querySelector('.labor-type').value, mandays: parseFloat(row.querySelector('.labor-mandays').value), rate: parseFloat(row.querySelector('.labor-rate').value) }));
-        materialTbody.querySelectorAll('tr').forEach(row => directCosts.push({ type: 'material', name: row.querySelector('.material-name').value, quantity: parseFloat(row.querySelector('.material-qty').value), unit: row.querySelector('.material-unit').value, unitPrice: parseFloat(row.querySelector('.material-price').value) }));
-        equipmentTbody.querySelectorAll('tr').forEach(row => directCosts.push({ type: 'equipment', name: row.querySelector('.equipment-name').value, hours: parseFloat(row.querySelector('.equipment-hours').value), rate: parseFloat(row.querySelector('.equipment-rate').value) }));
-        const dupaData = {
-            quantityId: parseInt(dupaQuantityIdInput.value),
-            duration: parseInt(dupaDurationInput.value),
-            directCosts: directCosts,
-            indirectCosts: { ocm: parseFloat(ocmPercentInput.value) || 0, profit: parseFloat(profitPercentInput.value) || 0, taxes: parseFloat(taxesPercentInput.value) || 0 }
-        };
+        laborTbody.querySelectorAll('tr').forEach(row => {
+            const type = row.querySelector('.labor-cost-type').value;
+            const laborData = {
+                type: 'labor',
+                laborType: row.querySelector('.labor-type').value,
+                costType: type
+            };
+            if (type === 'lot') {
+                laborData.amount = parseFloat(row.querySelector('.labor-rate').value);
+            } else {
+                laborData.mandays = parseFloat(row.querySelector('.labor-mandays').value);
+                laborData.rate = parseFloat(row.querySelector('.labor-rate').value);
+            }
+            directCosts.push(laborData);
+        });
         if (dupaIdInput.value) { dupaData.id = parseInt(dupaIdInput.value); }
         await db.dupas.put(dupaData);
         alert('DUPA saved successfully!');
         showDupaQuantitiesForProject(currentDupaProjectId, dupaProjectName.textContent);
     });
+    dupaForm.addEventListener('change', (e) => {
+    if (e.target.classList.contains('labor-cost-type')) {
+        const row = e.target.closest('tr');
+        const quantityInput = row.querySelector('.labor-mandays');
+        if (e.target.value === 'lot') {
+            quantityInput.value = 1;
+            quantityInput.readOnly = true;
+        } else {
+            quantityInput.readOnly = false;
+        }
+    }
+});
 
     dupaModuleInitialized = true;
+    
 }

@@ -83,38 +83,32 @@ const showAccomplishmentDetail = (projectId, date) => {
 const calculateDupaTotalCost = (dupa) => {
     if (!dupa || !dupa.directCosts || !Array.isArray(dupa.directCosts) || dupa.directCosts.length === 0) return 0;
     
-    let finalTotal = 0;
-
-    if (dupa.changeOrderItemId) {
-        const firstDirectCost = dupa.directCosts[0];
-        if (firstDirectCost?.type === 'calculated') {
-            finalTotal = firstDirectCost.total;
-        } else if (firstDirectCost?.type === 'total') {
-            const directCost = firstDirectCost.total;
-            const ocm = directCost * (dupa.indirectCosts.ocm / 100);
-            const profit = directCost * (dupa.indirectCosts.profit / 100);
-            const subtotal = directCost + ocm + profit;
-            const taxes = subtotal * (dupa.indirectCosts.taxes / 100);
-            finalTotal = subtotal + taxes;
+    const directCostsTotal = dupa.directCosts.reduce((total, dc) => {
+        if (!dc) return total;
+        switch (dc.type) {
+            case 'labor':
+                if (dc.costType === 'lot') {
+                    return total + (dc.amount || 0);
+                }
+                return total + ((dc.mandays || 0) * (dc.rate || 0));
+            case 'material':
+                return total + ((dc.quantity || 0) * (dc.unitPrice || 0));
+            case 'equipment':
+                return total + ((dc.hours || 0) * (dc.rate || 0));
+            default:
+                return total;
         }
-    }
-    
-    if (finalTotal === 0) {
-        const directCosts = dupa.directCosts.reduce((total, dc) => {
-            if (!dc) return total;
-            switch (dc.type) {
-                case 'labor': return total + (dc.mandays * dc.rate);
-                case 'material': return total + (dc.quantity * dc.unitPrice);
-                case 'equipment': return total + (dc.hours * dc.rate);
-                default: return total;
-            }
-        }, 0);
-        const ocmCost = directCosts * (dupa.indirectCosts.ocm / 100);
-        const profitCost = directCosts * (dupa.indirectCosts.profit / 100);
-        const totalBeforeTax = directCosts + ocmCost + profitCost;
-        const taxCost = totalBeforeTax * (dupa.indirectCosts.taxes / 100);
-        finalTotal = totalBeforeTax + taxCost;
-    }
+    }, 0);
+
+    const ocmPercent = dupa.indirectCosts?.ocm || 0;
+    const profitPercent = dupa.indirectCosts?.profit || 0;
+    const taxesPercent = dupa.indirectCosts?.taxes || 0;
+
+    const ocmCost = directCostsTotal * (ocmPercent / 100);
+    const profitCost = directCostsTotal * (profitPercent / 100);
+    const totalBeforeTax = directCostsTotal + ocmCost + profitCost;
+    const taxCost = totalBeforeTax * (taxesPercent / 100);
+    const finalTotal = totalBeforeTax + taxCost;
 
     return Math.round(finalTotal * 100) / 100;
 };

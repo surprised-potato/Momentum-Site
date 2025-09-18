@@ -588,15 +588,18 @@ body {
     text-align: center;
 }
 
-#resource-schedule-table th, #resource-schedule-table td {
+#resource-schedule-table th, #resource-schedule-table td,
+#revised-resource-schedule-table th, #revised-resource-schedule-table td {
     white-space: nowrap;
     min-width: 50px;
     text-align: center;
 }
 
-#resource-schedule-table .sticky-col {
+#resource-schedule-table .sticky-col,
+#revised-resource-schedule-table .sticky-col {
     text-align: left;
     min-width: 200px;
+    white-space: nowrap;
 }
 
 .sticky-col {

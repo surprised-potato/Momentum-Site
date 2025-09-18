@@ -534,33 +534,61 @@ const showManpowerEquipmentSchedule = async () => {
 
         const numericId = parseInt(taskId.split('-')[1]);
         const dupa = dupaMap.get(numericId);
-        if (!dupa) continue;
+        if (!dupa || !dupa.directCosts) continue;
 
-        const totalTaskCost = calculateDupaTotalCost(dupa);
-        if (totalTaskCost > 0) {
-            const costPerDay = totalTaskCost / task.duration;
-            const resourceName = "Cash Flow (Daily Cost)";
-            if (!dailyResources[resourceName]) {
-                dailyResources[resourceName] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
-            }
-            for (let day = task.es; day < task.ef; day++) {
-                if (day < projectDuration) {
-                    dailyResources[resourceName].schedule[day] += costPerDay;
+        const totalLaborCost = dupa.directCosts
+            .filter(dc => dc.type === 'labor')
+            .reduce((sum, item) => sum + (item.costType === 'lot' ? (item.amount || 0) : ((item.mandays || 0) * (item.rate || 0))), 0);
+        
+        const totalMaterialCost = dupa.directCosts
+            .filter(dc => dc.type === 'material')
+            .reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
+
+        const totalEquipmentCost = dupa.directCosts
+            .filter(dc => dc.type === 'equipment')
+            .reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
+
+        const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
+        const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
+        const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
+        const subtotal = totalDirectCost + ocmCost + profitCost;
+        const taxCost = subtotal * ((dupa.indirectCosts?.taxes || 0) / 100);
+        const totalIndirectCost = ocmCost + profitCost + taxCost;
+        
+        const costItems = [
+            { name: 'Labor Cost', total: totalLaborCost },
+            { name: 'Material Cost', total: totalMaterialCost },
+            { name: 'Equipment Cost', total: totalEquipmentCost },
+            { name: 'Indirect Costs', total: totalIndirectCost }
+        ];
+
+        costItems.forEach(item => {
+            if (item.total > 0) {
+                const dailyAmount = item.total / task.duration;
+                if (!dailyResources[item.name]) {
+                    dailyResources[item.name] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
+                }
+                for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) dailyResources[item.name].schedule[day] += dailyAmount;
                 }
             }
-        }
+        });
         
-        if (!dupa.directCosts) continue;
-
         dupa.directCosts.forEach(dc => {
             let resourceName = '';
             let dailyAmount = 0;
             let unit = '';
 
             if (dc.type === 'labor') {
-                resourceName = dc.laborType;
-                dailyAmount = dc.mandays / task.duration;
-                unit = 'md';
+                if (dc.costType === 'lot') {
+                    resourceName = dc.laborType;
+                    dailyAmount = (dc.amount || 0) / task.duration;
+                    unit = 'PHP/day';
+                } else {
+                    resourceName = dc.laborType;
+                    dailyAmount = (dc.mandays || 0) / task.duration;
+                    unit = 'md';
+                }
             } else if (dc.type === 'equipment') {
                 resourceName = dc.name;
                 dailyAmount = dc.hours / task.duration;
@@ -584,7 +612,7 @@ const showManpowerEquipmentSchedule = async () => {
     }
 
     if (Object.keys(dailyResources).length === 0) {
-        scheduleContainer.innerHTML = '<p>No labor or equipment resources found in DUPAs.</p>';
+        scheduleContainer.innerHTML = '<p>No resources found in DUPAs.</p>';
         return;
     }
 
@@ -596,25 +624,38 @@ const showManpowerEquipmentSchedule = async () => {
 
     const laborResources = [];
     const equipmentResources = [];
-    const financialResources = [];
+    const subcontractorResources = [];
+    const financialResources = ['Labor Cost', 'Material Cost', 'Equipment Cost', 'Indirect Costs'].filter(name => dailyResources[name]);
 
     Object.keys(dailyResources).sort().forEach(name => {
+        if (financialResources.includes(name)) return;
         const unit = dailyResources[name].unit;
         if (unit === 'md') laborResources.push(name);
         else if (unit === 'hrs') equipmentResources.push(name);
-        else if (unit === 'PHP') financialResources.push(name);
+        else if (unit === 'PHP/day') subcontractorResources.push(name);
     });
 
     const renderGroup = (groupName, resources) => {
         if (resources.length > 0) {
-            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${groupName}</td></tr>`;
+            let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
+            if (groupName === 'Financials') {
+                 const groupTotal = resources.reduce((total, resourceName) => {
+                    return total + dailyResources[resourceName].schedule.reduce((sum, daily) => sum + daily, 0);
+                }, 0);
+                headerHtml += `<td colspan="${projectDuration}" style="text-align: right;"><strong>Total: ${groupTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong></td>`;
+            } else {
+                 headerHtml += `<td colspan="${projectDuration}"></td>`;
+            }
+            headerHtml += `</tr>`;
+            tableHtml += headerHtml;
+
             resources.forEach(resourceName => {
                 const data = dailyResources[resourceName];
                 tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
                 data.schedule.forEach(amount => {
                     let displayAmount = '-';
                     if (amount > 0) {
-                        displayAmount = (data.unit === 'PHP')
+                        displayAmount = (data.unit.startsWith('PHP'))
                             ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
                             : amount.toFixed(2);
                     }
@@ -622,11 +663,30 @@ const showManpowerEquipmentSchedule = async () => {
                 });
                 tableHtml += '</tr>';
             });
+
+            if (groupName === 'Financials') {
+                const dailyTotals = new Array(projectDuration).fill(0);
+                resources.forEach(resourceName => {
+                    const schedule = dailyResources[resourceName].schedule;
+                    for (let i = 0; i < projectDuration; i++) {
+                        dailyTotals[i] += schedule[i];
+                    }
+                });
+
+                tableHtml += `<tr style="font-weight: bold; border-top: 2px solid var(--dark-color);">
+                                <td class="sticky-col">Daily Total (PHP)</td>`;
+                dailyTotals.forEach(total => {
+                    const displayTotal = total > 0 ? total.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '-';
+                    tableHtml += `<td>${displayTotal}</td>`;
+                });
+                tableHtml += `</tr>`;
+            }
         }
     };
 
     renderGroup('Labor', laborResources);
     renderGroup('Equipment', equipmentResources);
+    renderGroup('Subcontractors', subcontractorResources);
     renderGroup('Financials', financialResources);
 
     tableHtml += '</tbody></table>';
@@ -650,11 +710,16 @@ const showDupaDetails = async (quantityId) => {
 
     let laborSubtotal = 0;
     if (laborCosts.length > 0) {
-        laborSubtotal = laborCosts.reduce((sum, item) => sum + (item.mandays * item.rate), 0);
+        laborSubtotal = laborCosts.reduce((sum, item) => {
+            return sum + (item.costType === 'lot' ? (item.amount || 0) : (item.mandays * item.rate));
+        }, 0);
         content += `<tr class="category-header-row"><td style="font-weight:bold;">Labor</td><td style="text-align:right; font-weight:bold;">${laborSubtotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
         laborCosts.forEach(item => {
-            const itemTotal = item.mandays * item.rate;
-            const description = `${item.laborType} (${item.mandays} md @ ${item.rate.toFixed(2)})`;
+            const isLot = item.costType === 'lot';
+            const itemTotal = isLot ? (item.amount || 0) : (item.mandays * item.rate);
+            const description = isLot 
+                ? `${item.laborType} (1 Lot)`
+                : `${item.laborType} (${item.mandays} md @ ${item.rate.toFixed(2)})`;
             content += `<tr><td>${description}</td><td style="text-align:right;">${itemTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</td></tr>`;
         });
     }
@@ -847,40 +912,73 @@ const showRevisedResourceSchedule = async () => {
 
         const numericId = parseInt(taskId.split('-')[1]);
         const dupa = dupaMap.get(numericId);
-        if (!dupa) continue;
+        if (!dupa || !dupa.directCosts) continue;
 
-        const totalTaskCost = calculateDupaTotalCost(dupa);
-        if (totalTaskCost > 0) {
-            const costPerDay = totalTaskCost / task.duration;
-            const resourceName = "Cash Flow (Daily Cost)";
-            if (!dailyResources[resourceName]) {
-                dailyResources[resourceName] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
-            }
-            for (let day = task.es; day < task.ef; day++) {
-                if (day < projectDuration) {
-                    dailyResources[resourceName].schedule[day] += costPerDay;
+        const totalLaborCost = dupa.directCosts
+            .filter(dc => dc.type === 'labor')
+            .reduce((sum, item) => sum + (item.costType === 'lot' ? (item.amount || 0) : ((item.mandays || 0) * (item.rate || 0))), 0);
+        
+        const totalMaterialCost = dupa.directCosts
+            .filter(dc => dc.type === 'material')
+            .reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
+
+        const totalEquipmentCost = dupa.directCosts
+            .filter(dc => dc.type === 'equipment')
+            .reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
+
+        const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
+        const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
+        const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
+        const subtotal = totalDirectCost + ocmCost + profitCost;
+        const taxCost = subtotal * ((dupa.indirectCosts?.taxes || 0) / 100);
+        const totalIndirectCost = ocmCost + profitCost + taxCost;
+        
+        const costItems = [
+            { name: 'Labor Cost', total: totalLaborCost },
+            { name: 'Material Cost', total: totalMaterialCost },
+            { name: 'Equipment Cost', total: totalEquipmentCost },
+            { name: 'Indirect Costs', total: totalIndirectCost }
+        ];
+
+        costItems.forEach(item => {
+            if (item.total > 0) {
+                const dailyAmount = item.total / task.duration;
+                if (!dailyResources[item.name]) {
+                    dailyResources[item.name] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
+                }
+                for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) dailyResources[item.name].schedule[day] += dailyAmount;
                 }
             }
-        }
+        });
         
-        if (!dupa.directCosts) continue;
-
         dupa.directCosts.forEach(dc => {
             let resourceName = '';
             let dailyAmount = 0;
             let unit = '';
+
             if (dc.type === 'labor') {
-                resourceName = dc.laborType;
-                dailyAmount = dc.mandays / task.duration;
-                unit = 'md';
+                if (dc.costType === 'lot') {
+                    resourceName = dc.laborType;
+                    dailyAmount = (dc.amount || 0) / task.duration;
+                    unit = 'PHP/day';
+                } else {
+                    resourceName = dc.laborType;
+                    dailyAmount = (dc.mandays || 0) / task.duration;
+                    unit = 'md';
+                }
             } else if (dc.type === 'equipment') {
                 resourceName = dc.name;
                 dailyAmount = dc.hours / task.duration;
                 unit = 'hrs';
             }
+
             if (resourceName) {
                 if (!dailyResources[resourceName]) {
-                    dailyResources[resourceName] = { unit: unit, schedule: new Array(projectDuration).fill(0) };
+                    dailyResources[resourceName] = {
+                        unit: unit,
+                        schedule: new Array(projectDuration).fill(0)
+                    };
                 }
                 for (let day = task.es; day < task.ef; day++) {
                     if (day < projectDuration) {
@@ -892,7 +990,7 @@ const showRevisedResourceSchedule = async () => {
     }
 
     if (Object.keys(dailyResources).length === 0) {
-        scheduleContainer.innerHTML = '<p>No labor or equipment resources found in DUPAs.</p>';
+        scheduleContainer.innerHTML = '<p>No resources found in DUPAs.</p>';
         return;
     }
 
@@ -904,25 +1002,38 @@ const showRevisedResourceSchedule = async () => {
 
     const laborResources = [];
     const equipmentResources = [];
-    const financialResources = [];
+    const subcontractorResources = [];
+    const financialResources = ['Labor Cost', 'Material Cost', 'Equipment Cost', 'Indirect Costs'].filter(name => dailyResources[name]);
 
     Object.keys(dailyResources).sort().forEach(name => {
+        if (financialResources.includes(name)) return;
         const unit = dailyResources[name].unit;
         if (unit === 'md') laborResources.push(name);
         else if (unit === 'hrs') equipmentResources.push(name);
-        else if (unit === 'PHP') financialResources.push(name);
+        else if (unit === 'PHP/day') subcontractorResources.push(name);
     });
 
     const renderGroup = (groupName, resources) => {
         if (resources.length > 0) {
-            tableHtml += `<tr class="category-header-row"><td class="sticky-col" colspan="${projectDuration + 1}">${groupName}</td></tr>`;
+            let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
+            if (groupName === 'Financials') {
+                 const groupTotal = resources.reduce((total, resourceName) => {
+                    return total + dailyResources[resourceName].schedule.reduce((sum, daily) => sum + daily, 0);
+                }, 0);
+                headerHtml += `<td colspan="${projectDuration}" style="text-align: right;"><strong>Total: ${groupTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong></td>`;
+            } else {
+                 headerHtml += `<td colspan="${projectDuration}"></td>`;
+            }
+            headerHtml += `</tr>`;
+            tableHtml += headerHtml;
+
             resources.forEach(resourceName => {
                 const data = dailyResources[resourceName];
                 tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
                 data.schedule.forEach(amount => {
                     let displayAmount = '-';
                     if (amount > 0) {
-                        displayAmount = (data.unit === 'PHP')
+                        displayAmount = (data.unit.startsWith('PHP'))
                             ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
                             : amount.toFixed(2);
                     }
@@ -930,11 +1041,30 @@ const showRevisedResourceSchedule = async () => {
                 });
                 tableHtml += '</tr>';
             });
+            
+            if (groupName === 'Financials') {
+                const dailyTotals = new Array(projectDuration).fill(0);
+                resources.forEach(resourceName => {
+                    const schedule = dailyResources[resourceName].schedule;
+                    for (let i = 0; i < projectDuration; i++) {
+                        dailyTotals[i] += schedule[i];
+                    }
+                });
+
+                tableHtml += `<tr style="font-weight: bold; border-top: 2px solid var(--dark-color);">
+                                <td class="sticky-col">Daily Total (PHP)</td>`;
+                dailyTotals.forEach(total => {
+                    const displayTotal = total > 0 ? total.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '-';
+                    tableHtml += `<td>${displayTotal}</td>`;
+                });
+                tableHtml += `</tr>`;
+            }
         }
     };
 
     renderGroup('Labor', laborResources);
     renderGroup('Equipment', equipmentResources);
+    renderGroup('Subcontractors', subcontractorResources);
     renderGroup('Financials', financialResources);
 
     tableHtml += '</tbody></table>';

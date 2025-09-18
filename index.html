@@ -447,7 +447,7 @@
                             <button type="button" id="add-labor-from-library-btn" class="btn btn-secondary btn-sm">Add Labor from Library</button>
                             <button type="button" id="add-crew-from-library-btn" class="btn btn-secondary btn-sm">Add Crew from Library</button>
                         </div>
-                        <table class="dupa-table"><thead><tr><th>Labor Type</th><th>Mandays</th><th>Rate (PHP)</th><th>Total</th><th></th></tr></thead><tbody id="labor-tbody"></tbody></table>
+                        <table class="dupa-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Cost / Amount</th><th>Total</th><th></th></tr></thead><tbody id="labor-tbody"></tbody></table>
 
                         <h4 style="display: flex; justify-content: space-between; align-items: center;">
                             <span>Materials</span>
@@ -527,23 +527,23 @@
                     </header>
                     <div class="sequencing-layout">
                         <div class="sequencing-main-panel">
-                            <div class="sequencing-section">
-                                <h3>Project Sequence Overview</h3>
-                                <div class="table-container">
-                                    <table id="sequences-overview-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Predecessors</th>
-                                                <th>Task</th>
-                                                <th>Successors</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="sequences-overview-tbody"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+    <div class="sequencing-section">
+        <h3>Project Sequence Overview</h3>
+        <div class="table-container">
+            <table id="sequences-overview-table">
+                <thead>
+                    <tr>
+                        <th>Predecessors</th>
+                        <th>Task</th>
+                        <th>Successors</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sequences-overview-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
                         <aside class="sequencing-side-panel">
                             <div class="sequencing-section">
                                 <h4>Unsequenced Tasks</h4>
@@ -1174,6 +1174,7 @@
                     <input type="hidden" id="editingTaskId">
                     <div class="sequencing-section">
                         <p>Select one or more tasks that must happen <strong>before</strong> or <strong>after</strong> this task.</p>
+                        <p>Use ctrl+click to select multiple tasks.</p>
                         <div class="sequence-links-grid">
                             <div>
                                 <label for="modal-predecessors-multiselect">Precedents (come before)</label>
@@ -1251,7 +1252,7 @@
                      <div class="dupa-section">
                         <h4 style="margin-top: 0;">Direct Costs</h4>
                         <h5>Labor <button type="button" id="co-add-labor-btn" class="btn-add">+</button></h5>
-                        <table class="dupa-table"><thead><tr><th>Labor Type</th><th>Mandays</th><th>Rate (PHP)</th><th></th></tr></thead><tbody id="co-labor-tbody"></tbody></table>
+                        <table class="dupa-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Cost / Amount</th><th>Total</th><th></th></tr></thead><tbody id="co-labor-tbody"></tbody></table>
                         <h5>Materials <button type="button" id="co-add-material-btn" class="btn-add">+</button></h5>
                         <table class="dupa-table"><thead><tr><th>Material Name</th><th>Qty</th><th>Unit</th><th>Unit Price (PHP)</th><th></th></tr></thead><tbody id="co-material-tbody"></tbody></table>
                         <h5>Equipment <button type="button" id="co-add-equipment-btn" class="btn-add">+</button></h5>

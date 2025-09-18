@@ -45,7 +45,21 @@ const closeCoItemDupaModal = () => coItemDupaModal.style.display = 'none';
 
 const addCoLaborRow = (data = {}) => {
     const row = coLaborTbody.insertRow();
-    row.innerHTML = `<td><input type="text" class="co-labor-type" value="${data.laborType || ''}" required></td><td><input type="number" class="co-labor-mandays" value="${data.mandays || ''}" step="any" required></td><td><input type="number" class="co-labor-rate" value="${data.rate || ''}" step="any" min="0" required></td><td><button type="button" class="btn-remove">X</button></td>`;
+    const costType = data.amount !== undefined ? 'lot' : 'mandays';
+    const amount = data.rate !== undefined ? data.rate : (data.amount !== undefined ? data.amount : '');
+
+    row.innerHTML = `
+        <td><input type="text" class="co-labor-type" value="${data.laborType || ''}" required></td>
+        <td><input type="number" class="co-labor-mandays" value="${data.mandays || 1}" step="any" required ${costType === 'lot' ? 'readonly' : ''}></td>
+        <td>
+            <select class="co-labor-cost-type">
+                <option value="mandays" ${costType === 'mandays' ? 'selected' : ''}>Manday</option>
+                <option value="lot" ${costType === 'lot' ? 'selected' : ''}>Lot</option>
+            </select>
+        </td>
+        <td><input type="number" class="co-labor-rate" value="${amount}" step="any" min="0" required></td>
+        <td><button type="button" class="btn-remove">X</button></td>
+    `;
 };
 
 const addCoMaterialRow = (data = {}) => {
@@ -58,38 +72,36 @@ const addCoEquipmentRow = (data = {}) => {
 };
 
 const calculateChangeOrderDupaTotal = (dupa) => {
-    if (!dupa || !dupa.directCosts) return 0;
+    if (!dupa || !dupa.directCosts || !Array.isArray(dupa.directCosts)) return 0;
 
-    // Case 1: DUPA from "Modify Existing Item"
-    if (dupa.directCosts[0]?.type === 'calculated') {
-        return dupa.directCosts[0].total;
-    }
-
-    // Case 2: DUPA from old simplified "New Item" (for backward compatibility)
-    if (dupa.directCosts[0]?.type === 'total') {
-        const directCost = dupa.directCosts[0].total;
-        const ocm = directCost * (dupa.indirectCosts.ocm / 100);
-        const profit = directCost * (dupa.indirectCosts.profit / 100);
-        const subtotal = directCost + ocm + profit;
-        const taxes = subtotal * (dupa.indirectCosts.taxes / 100);
-        return subtotal + taxes;
-    }
-    
-    // Case 3: Detailed DUPA from "New Item" (the new detailed way)
-    const directCostsTotal = dupa.directCosts.reduce((total, item) => {
-        switch (item.type) {
-            case 'labor': return total + (item.mandays * item.rate);
-            case 'material': return total + (item.quantity * item.unitPrice);
-            case 'equipment': return total + (item.hours * item.rate);
-            default: return total;
+    const directCostsTotal = dupa.directCosts.reduce((total, dc) => {
+        if (!dc) return total;
+        switch (dc.type) {
+            case 'labor':
+                if (dc.costType === 'lot') {
+                    return total + (dc.amount || 0);
+                }
+                return total + ((dc.mandays || 0) * (dc.rate || 0));
+            case 'material':
+                return total + ((dc.quantity || 0) * (dc.unitPrice || 0));
+            case 'equipment':
+                return total + ((dc.hours || 0) * (dc.rate || 0));
+            default:
+                return total;
         }
     }, 0);
 
-    const ocmCost = directCostsTotal * (dupa.indirectCosts.ocm / 100);
-    const profitCost = directCostsTotal * (dupa.indirectCosts.profit / 100);
+    const ocmPercent = dupa.indirectCosts?.ocm || 0;
+    const profitPercent = dupa.indirectCosts?.profit || 0;
+    const taxesPercent = dupa.indirectCosts?.taxes || 0;
+
+    const ocmCost = directCostsTotal * (ocmPercent / 100);
+    const profitCost = directCostsTotal * (profitPercent / 100);
     const totalBeforeTax = directCostsTotal + ocmCost + profitCost;
-    const taxCost = totalBeforeTax * (dupa.indirectCosts.taxes / 100);
-    return totalBeforeTax + taxCost;
+    const taxCost = totalBeforeTax * (taxesPercent / 100);
+    const finalTotal = totalBeforeTax + taxCost;
+
+    return Math.round(finalTotal * 100) / 100;
 };
 
 
@@ -209,9 +221,16 @@ function initializeChangeOrdersModule() {
     document.getElementById('co-add-material-btn').addEventListener('click', () => addCoMaterialRow());
     document.getElementById('co-add-equipment-btn').addEventListener('click', () => addCoEquipmentRow());
 
-    coItemDupaModal.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-remove')) {
-            e.target.closest('tr').remove();
+    coItemDupaModal.addEventListener('change', (e) => {
+        if (e.target.classList.contains('co-labor-cost-type')) {
+            const row = e.target.closest('tr');
+            const quantityInput = row.querySelector('.co-labor-mandays');
+            if (e.target.value === 'lot') {
+                quantityInput.value = 1;
+                quantityInput.readOnly = true;
+            } else {
+                quantityInput.readOnly = false;
+            }
         }
     });
 
@@ -407,7 +426,21 @@ function initializeChangeOrdersModule() {
         }
 
         const directCosts = [];
-        coLaborTbody.querySelectorAll('tr').forEach(row => directCosts.push({ type: 'labor', laborType: row.querySelector('.co-labor-type').value, mandays: parseFloat(row.querySelector('.co-labor-mandays').value), rate: parseFloat(row.querySelector('.co-labor-rate').value) }));
+        coLaborTbody.querySelectorAll('tr').forEach(row => {
+            const type = row.querySelector('.co-labor-cost-type').value;
+            const laborData = {
+                type: 'labor',
+                laborType: row.querySelector('.co-labor-type').value,
+                costType: type
+            };
+            if (type === 'lot') {
+                laborData.amount = parseFloat(row.querySelector('.co-labor-rate').value);
+            } else {
+                laborData.mandays = parseFloat(row.querySelector('.co-labor-mandays').value);
+                laborData.rate = parseFloat(row.querySelector('.co-labor-rate').value);
+            }
+            directCosts.push(laborData);
+        });
         coMaterialTbody.querySelectorAll('tr').forEach(row => directCosts.push({ type: 'material', name: row.querySelector('.co-material-name').value, quantity: parseFloat(row.querySelector('.co-material-qty').value), unit: row.querySelector('.co-material-unit').value, unitPrice: parseFloat(row.querySelector('.co-material-price').value) }));
         coEquipmentTbody.querySelectorAll('tr').forEach(row => directCosts.push({ type: 'equipment', name: row.querySelector('.co-equipment-name').value, hours: parseFloat(row.querySelector('.co-equipment-hours').value), rate: parseFloat(row.querySelector('.co-equipment-rate').value) }));
 

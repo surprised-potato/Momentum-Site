@@ -1,13 +1,6 @@
-const sequencingProjectName = document.getElementById('sequencing-project-name');
-const sequencesOverviewTbody = document.querySelector('#sequences-overview-tbody');
-const unsequencedTasksList = document.getElementById('unsequenced-tasks-list');
-const sequenceEditModal = document.getElementById('sequence-edit-modal');
-const sequenceModalClose = document.querySelector('.sequence-modal-close');
-const sequenceModalTitle = document.getElementById('sequence-modal-title');
-const sequenceEditForm = document.getElementById('sequence-edit-form');
-const editingTaskIdInput = document.getElementById('editingTaskId');
-const modalPredecessorsSelect = document.getElementById('modal-predecessors-multiselect');
-const modalSuccessorsSelect = document.getElementById('modal-successors-multiselect');
+let sequencingProjectName, sequencesOverviewTbody, unsequencedTasksList, sequenceEditModal, 
+    sequenceModalClose, sequenceModalTitle, sequenceEditForm, editingTaskIdInput, 
+    modalPredecessorsSelect, modalSuccessorsSelect;
 
 const openSequenceEditModal = () => sequenceEditModal.style.display = 'block';
 const closeSequenceEditModal = () => sequenceEditModal.style.display = 'none';
@@ -173,6 +166,17 @@ const showSequencesForProject = async (projectId, projectName) => {
 };
 
 function initializeSequencingModule() {
+    sequencingProjectName = document.getElementById('sequencing-project-name');
+    sequencesOverviewTbody = document.querySelector('#sequences-overview-tbody');
+    unsequencedTasksList = document.getElementById('unsequenced-tasks-list');
+    sequenceEditModal = document.getElementById('sequence-edit-modal');
+    sequenceModalClose = document.querySelector('.sequence-modal-close');
+    sequenceModalTitle = document.getElementById('sequence-modal-title');
+    sequenceEditForm = document.getElementById('sequence-edit-form');
+    editingTaskIdInput = document.getElementById('editingTaskId');
+    modalPredecessorsSelect = document.getElementById('modal-predecessors-multiselect');
+    modalSuccessorsSelect = document.getElementById('modal-successors-multiselect');
+
     sequencesOverviewTbody.addEventListener('click', (e) => {
         const button = e.target.closest('.edit-sequence-btn');
         if (button) {

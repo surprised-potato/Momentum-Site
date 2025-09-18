@@ -47,22 +47,24 @@ const populateInitialDataIfNeeded = async () => {
         });
 
         // Fetch all three sample project files concurrently
-        const [projectResponse1, projectResponse2, projectResponse3] = await Promise.all([
+        const [projectResponse1, projectResponse2, projectResponse3, projectResponse4] = await Promise.all([
             fetch('import samples/sample projects/default multistory.json'),
             fetch('import samples/sample projects/commercial_cafe.json'),
-            fetch('import samples/sample projects/warehouse_project.json')
+            fetch('import samples/sample projects/warehouse_project.json'),
+            fetch('import samples/sample projects/new_office_project.json')
         ]);
 
         const projectData1 = await projectResponse1.json();
         const projectData2 = await projectResponse2.json();
         const projectData3 = await projectResponse3.json();
+        const projectData4 = await projectResponse4.json();
 
-        // Import the projects
         await importProjectData(projectData1);
         await importProjectData(projectData2);
         await importProjectData(projectData3);
+        await importProjectData(projectData4);
 
-        alert('Welcome! Three sample projects and an expanded library have been loaded.');
+        alert('Welcome! Four sample projects and an expanded library have been loaded.');
         window.location.reload();
 
     } catch (error) {

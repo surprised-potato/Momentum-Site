@@ -1,0 +1,75 @@
+{
+  "project": {
+    "projectName": "Momentum Office Renovation",
+    "address": "123 Business Avenue, Bacolod City",
+    "clientName": "Innovate Solutions Inc.",
+    "projectDescription": "Complete interior fit-out for a 250 sq.m corporate office. This project showcases advanced DUPA, parallel workstreams, and progress tracking features.",
+    "startDate": "2025-09-01",
+    "lotArea": 250,
+    "floorArea": 250,
+    "numFloors": 1,
+    "contractAmount": 2800000,
+    "contractDate": "2025-08-15",
+    "projectStatus": "On-Going",
+    "targetStartDate": "2025-09-01",
+    "contractDuration": 60,
+    "projectManager": "Engr. Jane Doe",
+    "clientContact": "john.smith@innovate.com"
+  },
+  "quantities": [
+    { "id": 1, "scopeOfWork": "Demolition and Hauling", "quantity": 1, "unit": "lot", "category": "A. General Works" },
+    { "id": 2, "scopeOfWork": "Drywall Framing", "quantity": 120, "unit": "sq.m", "category": "B. Architectural Works" },
+    { "id": 3, "scopeOfWork": "Electrical Rough-ins", "quantity": 1, "unit": "lot", "category": "C. MEPF Works" },
+    { "id": 4, "scopeOfWork": "Plumbing & Sanitary Rough-ins", "quantity": 1, "unit": "lot", "category": "C. MEPF Works" },
+    { "id": 5, "scopeOfWork": "HVAC System Installation", "quantity": 1, "unit": "lot", "category": "C. MEPF Works" },
+    { "id": 6, "scopeOfWork": "Drywall Closing & Finishing", "quantity": 120, "unit": "sq.m", "category": "B. Architectural Works" },
+    { "id": 7, "scopeOfWork": "Ceiling Works", "quantity": 250, "unit": "sq.m", "category": "B. Architectural Works" },
+    { "id": 8, "scopeOfWork": "Flooring Works (Vinyl Planks)", "quantity": 250, "unit": "sq.m", "category": "D. Finishes" },
+    { "id": 9, "scopeOfWork": "Painting Works", "quantity": 370, "unit": "sq.m", "category": "D. Finishes" },
+    { "id": 10, "scopeOfWork": "Glass Partition Installation", "quantity": 40, "unit": "sq.m", "category": "B. Architectural Works" },
+    { "id": 11, "scopeOfWork": "Final MEPF Fixture Installation", "quantity": 1, "unit": "lot", "category": "C. MEPF Works" }
+  ],
+  "dupas": [
+    { "id": 1, "quantityId": 1, "duration": 3, "directCosts": [{"type": "labor", "laborType": "Demolition Crew", "mandays": 15, "rate": 500}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 2, "quantityId": 2, "duration": 5, "directCosts": [{"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 10, "rate": 650}, {"type": "material", "name": "Metal Furring", "quantity": 120, "unit": "pc", "unitPrice": 150}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 3, "quantityId": 3, "duration": 7, "directCosts": [{"type": "labor", "costType": "lot", "laborType": "Subcontract - Electrical", "amount": 180000}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 4, "quantityId": 4, "duration": 4, "directCosts": [{"type": "labor", "costType": "lot", "laborType": "Subcontract - Plumbing", "amount": 95000}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 5, "quantityId": 5, "duration": 8, "directCosts": [{"type": "labor", "costType": "lot", "laborType": "Subcontract - HVAC", "amount": 350000}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 6, "quantityId": 6, "duration": 6, "directCosts": [{"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 12, "rate": 650}, {"type": "material", "name": "Gypsum Board", "quantity": 45, "unit": "pc", "unitPrice": 400}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 7, "quantityId": 7, "duration": 7, "directCosts": [{"type": "labor", "laborType": "Ceiling Installers", "mandays": 21, "rate": 650}, {"type": "material", "name": "3.5mm Hardiflex Lite", "quantity": 90, "unit": "Sheets", "unitPrice": 585}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 8, "quantityId": 8, "duration": 5, "directCosts": [{"type": "labor", "laborType": "Tile Setter", "mandays": 15, "rate": 600}, {"type": "material", "name": "Vinyl Floor Planks", "quantity": 250, "unit": "sq.m", "unitPrice": 550}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 9, "quantityId": 9, "duration": 6, "directCosts": [{"type": "labor", "laborType": "Painter", "mandays": 18, "rate": 550}, {"type": "material", "name": "Latex Paint", "quantity": 30, "unit": "gal", "unitPrice": 800}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 10, "quantityId": 10, "duration": 3, "directCosts": [{"type": "labor", "costType": "lot", "laborType": "Subcontract - Glass & Aluminum", "amount": 150000}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } },
+    { "id": 11, "quantityId": 11, "duration": 4, "directCosts": [{"type": "labor", "laborType": "Master Electrician", "mandays": 8, "rate": 750}, {"type": "labor", "laborType": "Master Plumber", "mandays": 4, "rate": 750}], "indirectCosts": { "ocm": 10, "profit": 12, "taxes": 5 } }
+  ],
+  "tasks": [
+    { "predecessorId": "PROJECT_START", "successorId": 1 },
+    { "predecessorId": 1, "successorId": 2 },
+    { "predecessorId": 2, "successorId": 3 },
+    { "predecessorId": 2, "successorId": 4 },
+    { "predecessorId": 2, "successorId": 5 },
+    { "predecessorId": 3, "successorId": 6 },
+    { "predecessorId": 4, "successorId": 6 },
+    { "predecessorId": 5, "successorId": 6 },
+    { "predecessorId": 6, "successorId": 7 },
+    { "predecessorId": 7, "successorId": 9 },
+    { "predecessorId": 7, "successorId": 8 },
+    { "predecessorId": 8, "successorId": 10 },
+    { "predecessorId": 9, "successorId": 10 },
+    { "predecessorId": 10, "successorId": 11 },
+    { "predecessorId": 11, "successorId": "PROJECT_END" }
+  ],
+  "changeOrders": [
+    { "id": 201, "projectId": 1, "description": "Add 10 additional data outlets", "date": "2025-09-10", "status": "Approved" }
+  ],
+  "changeOrderItems": [
+    { "id": 201, "changeOrderId": 201, "scopeOfWork": "Additional Data Cabling & Outlets", "quantity": 1, "unit": "lot", "originalQuantityId": null }
+  ],
+  "changeOrderDupas": [
+    { "id": 201, "changeOrderItemId": 201, "duration": 2, "directCosts": [{"type": "labor", "costType": "lot", "laborType": "Subcontract - Data", "amount": 45000}], "indirectCosts": { "ocm": 10, "profit": 15, "taxes": 5 } }
+  ],
+  "accomplishments": [
+    { "type": "quantity", "taskId": 1, "date": "2025-09-03", "percentComplete": 100 },
+    { "type": "quantity", "taskId": 2, "date": "2025-09-08", "percentComplete": 100 }
+  ]
+}

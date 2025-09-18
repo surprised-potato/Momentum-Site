@@ -306,7 +306,7 @@ async function createPicker() {
 
     const picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .setAppId('PASTE_YOUR_PROJECT_NUMBER_HERE')
+        .setAppId('994807186446')
         .setOAuthToken(token.access_token)
         .addView(view)
         .setDeveloperKey(API_KEY)
@@ -446,23 +446,28 @@ async function libraryPickerCallback(data) {
 /**
  * Triggers the Google Drive import process for the library.
  */
-function handleLibraryImportClick() {
+async function handleLibraryImportClick() {
      if (gapi.client.getToken() === null) {
         alert('Please sign in to import a library.');
         handleAuthClick();
         return;
     }
     
-    // This is the same as the project picker, but with a different callback
     const token = gapi.client.getToken();
     if (token === null) return;
+
+    // First, get the ID of the dedicated app folder.
+    const folderId = await getOrCreateFolderId();
+
     const view = new google.picker.View(google.picker.ViewId.DOCS);
     view.setMimeTypes("application/json");
-    view.setParent(getOrCreateFolderId());
+
+    // Tell the Picker to start inside our specific folder.
+    view.setParent(folderId);
 
     const picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .setAppId('PASTE_YOUR_PROJECT_NUMBER_HERE')
+        .setAppId('994807186446')
         .setOAuthToken(token.access_token)
         .addView(view)
         .setDeveloperKey(API_KEY)

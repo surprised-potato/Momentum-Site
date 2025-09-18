@@ -248,8 +248,15 @@ const importProjectData = async (data) => {
             // Rebuild tasks using the complete ID map
             if (data.tasks && data.tasks.length > 0) {
                 const newTasks = data.tasks.map(t => {
-                    const newPredecessorId = oldToNewTaskIdMap.get(t.predecessorId) || t.predecessorId;
-                    const newSuccessorId = oldToNewTaskIdMap.get(t.successorId) || t.successorId;
+                    const getNewId = (oldId) => {
+                        if (typeof oldId === 'number') {
+                            return oldToNewTaskIdMap.get(`qty-${oldId}`) || oldToNewTaskIdMap.get(`co-${oldId}`) || oldId;
+                        }
+                        return oldToNewTaskIdMap.get(oldId) || oldId;
+                    };
+
+                    const newPredecessorId = getNewId(t.predecessorId);
+                    const newSuccessorId = getNewId(t.successorId);
 
                     return {
                         projectId: newProjectId,

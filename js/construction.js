@@ -245,10 +245,26 @@ const getPertCpmData = async (projectId, isRevised = false) => {
     tasks.set('PROJECT_START', { id: 'PROJECT_START', name: 'Start', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
     tasks.set('PROJECT_END', { id: 'PROJECT_END', name: 'End', duration: 0, es: 0, ef: 0, ls: 0, lf: 0, predecessors: new Set(), successors: new Set() });
 
+    const subtaskParentMap = new Map();
+    allTasks.forEach(task => {
+        if (task.type === 'subquantity') {
+            const parentId = `qty-${task.quantityId}`;
+            if (!subtaskParentMap.has(parentId)) subtaskParentMap.set(parentId, []);
+            subtaskParentMap.get(parentId).push(task.uniqueId);
+        }
+    });
+
     links.forEach(link => {
-        if (tasks.has(link.predecessorId) && tasks.has(link.successorId)) {
-            tasks.get(link.successorId).predecessors.add(link.predecessorId);
-            tasks.get(link.predecessorId).successors.add(link.successorId);
+        const predecessors = subtaskParentMap.get(link.predecessorId) || [link.predecessorId];
+        const successors = subtaskParentMap.get(link.successorId) || [link.successorId];
+
+        for (const pred of predecessors) {
+            for (const succ of successors) {
+                if (tasks.has(pred) && tasks.has(succ)) {
+                    tasks.get(succ).predecessors.add(pred);
+                    tasks.get(pred).successors.add(succ);
+                }
+            }
         }
     });
     

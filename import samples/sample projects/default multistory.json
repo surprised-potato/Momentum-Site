@@ -26,7 +26,7 @@
     { "id": 7, "scopeOfWork": "Plastering Works", "quantity": 560, "unit": "sq.m", "category": "C. Architectural Works" },
     { "id": 8, "scopeOfWork": "Roof Framing & Sheeting", "quantity": 110, "unit": "sq.m", "category": "C. Architectural Works" },
     { "id": 9, "scopeOfWork": "Ceiling Installation", "quantity": 180, "unit": "sq.m", "category": "C. Architectural Works" },
-    { "id": 10, "scopeOfWork": "Interior Painting", "quantity": 650, "unit": "sq.m", "category": "E. Finishes", "subquantities": [{ "name": "Ground Floor Painting", "quantity": 350 }, { "name": "Second Floor Painting", "quantity": 300 }] },
+    { "id": 10, "scopeOfWork": "Interior Painting", "quantity": 650, "unit": "sq.m", "category": "E. Finishes" },
     { "id": 11, "scopeOfWork": "Tiling Works", "quantity": 150, "unit": "sq.m", "category": "E. Finishes" },
     { "id": 12, "scopeOfWork": "Plumbing & Electrical Rough-ins", "quantity": 1, "unit": "lot", "category": "D. MEPF Works" },
     { "id": 13, "scopeOfWork": "Landscaping & Site Finishing", "quantity": 1, "unit": "lot", "category": "A. General Requirements" }

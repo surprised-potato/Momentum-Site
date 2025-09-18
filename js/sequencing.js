@@ -44,14 +44,30 @@ const displaySequencesOverview = async () => {
     taskMap.set('PROJECT_START', { uniqueId: 'PROJECT_START', displayName: '-- Project Start --', successors: [] });
     taskMap.set('PROJECT_END', { uniqueId: 'PROJECT_END', displayName: '-- Project End --', predecessors: [] });
 
-    allLinks.forEach(link => {
-        const predTask = taskMap.get(link.predecessorId);
-        const succTask = taskMap.get(link.successorId);
-        if (predTask && succTask) {
-            succTask.predecessors.push(predTask.displayName);
-            predTask.successors.push(succTask.displayName);
+    const subtaskParentMap = new Map();
+allTasks.forEach(task => {
+    if (task.type === 'subquantity') {
+        const parentId = `qty-${task.quantityId}`;
+        if (!subtaskParentMap.has(parentId)) subtaskParentMap.set(parentId, []);
+        subtaskParentMap.get(parentId).push(task.uniqueId);
+    }
+});
+
+allLinks.forEach(link => {
+    const predecessors = subtaskParentMap.get(link.predecessorId) || [link.predecessorId];
+    const successors = subtaskParentMap.get(link.successorId) || [link.successorId];
+
+    for (const predId of predecessors) {
+        for (const succId of successors) {
+            const predTask = taskMap.get(predId);
+            const succTask = taskMap.get(succId);
+            if (predTask && succTask) {
+                succTask.predecessors.push(predTask.displayName);
+                predTask.successors.push(succTask.displayName);
+            }
         }
-    });
+    }
+});
     
     displayUnsequencedTasks(allTasks, allLinks);
 

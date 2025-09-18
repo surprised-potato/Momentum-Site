@@ -25,10 +25,7 @@
     { "id": 6, "scopeOfWork": "Roof Framing and Installation", "quantity": 130, "unit": "sq.m", "category": "Architectural Works" },
     { "id": 7, "scopeOfWork": "Window & Door Installation", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
     { "id": 8, "scopeOfWork": "MEPF Rough-ins (Commercial)", "quantity": 1, "unit": "lot", "category": "MEPF Works" },
-    { "id": 9, "scopeOfWork": "Interior & Exterior Wall Finishes", "quantity": 300, "unit": "sq.m", "category": "Finishes", "subquantities": [
-        { "name": "Exterior Wall Finish", "quantity": 120 },
-        { "name": "Interior Wall Finish", "quantity": 180 }
-    ]},
+    { "id": 9, "scopeOfWork": "Interior & Exterior Wall Finishes", "quantity": 300, "unit": "sq.m", "category": "Finishes" },
     { "id": 10, "scopeOfWork": "Floor Tiling (Main & Kitchen)", "quantity": 110, "unit": "sq.m", "category": "Finishes" },
     { "id": 11, "scopeOfWork": "Fabricate & Install Service Counter", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
     { "id": 12, "scopeOfWork": "Custom Millwork (Shelves & Benches)", "quantity": 1, "unit": "lot", "category": "Architectural Works" },

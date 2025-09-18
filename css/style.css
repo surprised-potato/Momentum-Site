@@ -1366,3 +1366,222 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
+/* --- Dark Mode Theme --- */
+body.dark-theme {
+    --light-color: #2a2a2e;
+    --dark-color: #f1f1f1;
+    --grey-color: #9a9a9e;
+    --background-color: #1c1c1e;
+    --nav-background: #2a2a2e;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+body.dark-theme .gantt-popup-wrapper {
+    background: #f1f1f1 !important;
+    color: #1c1c1e !important;
+}
+body.dark-theme .gantt-popup-wrapper .pointer {
+    border-top-color: #f1f1f1 !important;
+}
+
+/* --- Theme Picker Styles --- */
+#theme-picker-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+.theme-preview-card {
+    border: 2px solid #eee;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.theme-preview-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+}
+.theme-preview-card.active {
+    border-color: var(--primary-color);
+    border-width: 3px;
+}
+.theme-preview-card h4 {
+    margin: 0 0 1rem 0;
+    text-align: center;
+}
+.theme-color-swatches {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.theme-color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+/* --- Comprehensive Dark Mode Overrides --- */
+body.dark-theme .summary-card,
+body.dark-theme .table-container,
+body.dark-theme .dashboard-chart-container,
+body.dark-theme .dashboard-list-container,
+body.dark-theme .dashboard-gantt-container,
+body.dark-theme .project-dashboard-header,
+body.dark-theme .summary-secondary-details,
+body.dark-theme .manual-card,
+body.dark-theme .modal-content,
+body.dark-theme .sequencing-section,
+body.dark-theme .dupa-section,
+body.dark-theme .lookahead-task,
+body.dark-theme .report-controls,
+body.dark-theme .kpi-card,
+body.dark-theme #lookahead-kpi-container {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content a:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table tbody tr:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table thead th {
+    background-color: #343a40; /* A slightly darker header for tables */
+}
+
+body.dark-theme .category-header-row td {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+body.dark-theme .list-item {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .list-item:hover {
+    background-color: var(--background-color);
+}
+/* --- Comprehensive Dark Mode Overrides --- */
+body.dark-theme .summary-card,
+body.dark-theme .table-container,
+body.dark-theme .dashboard-chart-container,
+body.dark-theme .dashboard-list-container,
+body.dark-theme .dashboard-gantt-container,
+body.dark-theme .project-dashboard-header,
+body.dark-theme .summary-secondary-details,
+body.dark-theme .manual-card,
+body.dark-theme .modal-content,
+body.dark-theme .sequencing-section,
+body.dark-theme .dupa-section,
+body.dark-theme .lookahead-task,
+body.dark-theme .report-controls,
+body.dark-theme .kpi-card,
+body.dark-theme #lookahead-kpi-container,
+body.dark-theme .chart-container,
+body.dark-theme .gantt-chart-container {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content a:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table tbody tr:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table thead th,
+body.dark-theme .dupa-table thead th,
+body.dark-theme #sequences-overview-table thead th,
+body.dark-theme #boq-table thead th,
+body.dark-theme #pert-cpm-table thead th,
+body.dark-theme #co-table thead th,
+body.dark-theme #revised-boq-table thead th,
+body.dark-theme #revised-pert-cpm-table thead th,
+body.dark-theme #accomplishment-table thead th,
+body.dark-theme #accomplishment-history-table thead th,
+body.dark-theme #accomplishment-detail-table thead th,
+body.dark-theme #materials-table thead th,
+body.dark-theme #resources-table thead th,
+body.dark-theme #crews-table thead th,
+body.dark-theme #crew-composition-table thead th {
+    background-color: #343a40;
+}
+
+body.dark-theme .category-header-row td {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+body.dark-theme .list-item {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .list-item:hover {
+    background-color: var(--background-color);
+}
+
+/* --- Dark Mode Gantt Chart Specific Styles --- */
+body.dark-theme .gantt .grid-background {
+    fill: var(--background-color);
+}
+
+body.dark-theme .gantt .grid-header,
+body.dark-theme .gantt .grid-row {
+    fill: var(--nav-background);
+}
+
+body.dark-theme .gantt .grid-row:nth-child(even) {
+    fill: var(--background-color);
+}
+
+body.dark-theme .gantt .tick, 
+body.dark-theme .gantt .grid-row line,
+body.dark-theme .gantt .upper-head .grid-header-line,
+body.dark-theme .gantt .lower-head .grid-header-line {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .gantt .upper-text, 
+body.dark-theme .gantt .lower-text,
+body.dark-theme .gantt .bar-label,
+body.dark-theme .gantt .gantt-container .bar-group .bar-label {
+    fill: var(--dark-color);
+}
+/* --- Dark Mode Table Specifics --- */
+body.dark-theme #pert-cpm-table tr.critical-path td,
+body.dark-theme #revised-pert-cpm-table tr.critical-path td {
+    background-color: rgba(220, 53, 69, 0.3); /* Translucent red for critical path */
+}
+
+body.dark-theme .sticky-col {
+    background-color: var(--nav-background);
+}
+
+body.dark-theme #resource-schedule-table thead .sticky-col,
+body.dark-theme #revised-resource-schedule-table thead .sticky-col {
+    background-color: #343a40;
+}
+
+body.dark-theme .category-header-row .sticky-col {
+    background-color: #343a40;
+}
+body.dark-theme .mermaid-container {
+    background-color: var(--background-color);
+    border-color: rgba(255, 255, 255, 0.1);
+}

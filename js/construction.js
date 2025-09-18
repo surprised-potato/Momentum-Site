@@ -819,6 +819,14 @@ const showTrackingGanttChart = async (projectId, projectName) => {
 }, 100);
 };
 
+function getChartColors() {
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    return {
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkMode ? '#f1f1f1' : '#212529',
+    };
+}
+
 const renderTrackingSCurve = async (projectId, projectName) => {
     currentConstructionProjectId = projectId;
     trackingSCurveChartView.classList.remove('hidden');
@@ -932,6 +940,8 @@ const renderTrackingSCurve = async (projectId, projectName) => {
         }
     }
 
+    const colors = getChartColors();
+
     if (trackingSCurveChart) trackingSCurveChart.destroy();
     trackingSCurveChart = new Chart(trackingSCurveCanvas, {
         type: 'line',
@@ -951,9 +961,47 @@ const renderTrackingSCurve = async (projectId, projectName) => {
             ]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
-            plugins: { title: { display: true, text: 'Planned vs. Actual S-Curve (As-Built)' } }
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: value => value + '%',
+                        color: colors.textColor
+                    },
+                    grid: {
+                        color: colors.gridColor
+                    },
+                    title: {
+                        color: colors.textColor
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: colors.textColor
+                    },
+                    grid: {
+                        color: colors.gridColor
+                    },
+                    title: {
+                        color: colors.textColor
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Planned vs. Actual S-Curve (As-Built)',
+                    color: colors.textColor
+                },
+                legend: {
+                    labels: {
+                        color: colors.textColor
+                    }
+                }
+            }
         }
     });
 };

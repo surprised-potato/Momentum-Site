@@ -11,7 +11,8 @@ let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, c
 let navDashboard, navProjects, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
 let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
 let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
-let settingsView, navSyncSettings, dataManagementView, navDataManagement;
+let settingsView, navSyncSettings, dataManagementView, navDataManagement, themeManagerView, navThemeManager;
+
 
 const openDupaReportModal = () => dupaReportModal.style.display = 'block';
 const closeDupaReportModal = () => dupaReportModal.style.display = 'none';
@@ -87,7 +88,36 @@ const setActiveNav = (activeLink) => {
         }
     }
 };
-const showView = (activeView) => allViews.forEach(v => v.classList.toggle('hidden', v !== activeView));
+const showView = (activeView) => {
+    if (!activeView) {
+        console.error("DEBUG: showView was called with a null or undefined view. All views will be hidden.");
+    } else {
+        console.log(`%cDEBUG: Attempting to switch view to: ${activeView.id}`, 'color: blue; font-weight: bold;');
+    }
+    
+    console.log(`DEBUG: Managing ${allViews.length} total views found in allViews array.`);
+
+    allViews.forEach((viewElement, index) => {
+        if (!viewElement) {
+            console.warn(`DEBUG: The view at index ${index} in the allViews array is null or undefined.`);
+            return;
+        }
+
+        const shouldBeHidden = viewElement !== activeView;
+        
+        if (shouldBeHidden) {
+            if (!viewElement.classList.contains('hidden')) {
+                console.log(`- Hiding: ${viewElement.id}`);
+            }
+            viewElement.classList.add('hidden');
+        } else {
+            if (viewElement.classList.contains('hidden')) {
+                console.log(`+ Showing: ${viewElement.id}`);
+            }
+            viewElement.classList.remove('hidden');
+        }
+    });
+};
 const showSyncSettings = () => {
     showView(settingsView);
     setActiveNav(navSyncSettings);
@@ -234,8 +264,6 @@ function initializeViewsModule() {
     revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
     revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
 
-    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, dataManagementView, revisedPertCpmNetworkView, revisedResourceScheduleView];
-
     takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
     dupaQuantityListView = document.getElementById('dupa-quantity-list-view');
     dupaFormView = document.getElementById('dupa-form-view');
@@ -276,14 +304,25 @@ function initializeViewsModule() {
     navDocumentation = document.getElementById('nav-documentation');
     navBrandLink = document.getElementById('nav-brand-link');
     navDataManagement = document.getElementById('nav-data-management');
+    themeManagerView = document.getElementById('theme-manager-view');
+    navThemeManager = document.getElementById('nav-theme-manager');
 
     const showDataManagement = () => {
         showView(dataManagementView);
         setActiveNav(navDataManagement);
     };
+    const showThemeManager = () => {
+        if (!themeManagerView) {
+            alert("Error: The HTML element for the Theme Manager view could not be found. Please check your index.html file.");
+            return;
+        }
+        showView(themeManagerView);
+        setActiveNav(navThemeManager);
+    };
 
     navSyncSettings.addEventListener('click', (e) => { e.preventDefault(); showSyncSettings(); });
     navDataManagement.addEventListener('click', (e) => { e.preventDefault(); showDataManagement(); });
+    navThemeManager.addEventListener('click', (e) => { e.preventDefault(); showThemeManager(); });
 
     navDashboard.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
     navProjects.addEventListener('click', (e) => { e.preventDefault(); showProjects(); });
@@ -432,4 +471,7 @@ function initializeViewsModule() {
                 break;
         }
     });
+
+    // THIS IS THE FIX: Move the allViews array initialization to the END of the function.
+    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, dataManagementView, themeManagerView, revisedPertCpmNetworkView, revisedResourceScheduleView];
 }

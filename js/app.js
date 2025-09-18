@@ -74,7 +74,6 @@ const populateInitialDataIfNeeded = async () => {
 };
 
 function startApp() {
-    // This function will be called by gdrive.js once Google APIs are ready
     if (appInitialized) return;
     appInitialized = true;
 
@@ -92,7 +91,8 @@ function startApp() {
     initializeLibraryManagementModule();
     initializeSettingsModule(); 
     initializeDataManagementModule();
-
+    initializeThemeManagerModule();
+    
     const authButton = document.getElementById('google-auth-btn');
     if (authButton) {
         authButton.addEventListener('click', handleAuthClick);
@@ -115,12 +115,18 @@ function startApp() {
     showDashboard();
 }
 
+
+
 window.addEventListener('load', () => {
     db.open().then(async () => {
         console.log("Database opened successfully.");
+        loadAndApplyTheme(); 
         await populateInitialDataIfNeeded();
-        mermaid.initialize({ startOnLoad: false });
-        // The Google scripts' onload attributes will now trigger the startApp() function correctly.
+        const isDarkMode = document.body.classList.contains('dark-theme');
+        mermaid.initialize({ 
+            startOnLoad: false,
+            theme: isDarkMode ? 'dark' : 'default'
+        });
     }).catch(err => {
         console.error("Failed to open db: ", err.stack || err);
     });

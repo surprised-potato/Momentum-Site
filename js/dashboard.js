@@ -85,6 +85,14 @@ const updateSummaryCards = (projects, changeOrders) => {
     document.getElementById('active-contract-value').textContent = totalActiveValue.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
 };
 
+function getChartColors() {
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    return {
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkMode ? '#f1f1f1' : '#212529',
+    };
+}
+
 const updateStatusChart = (projects) => {
     const statusCounts = projects.reduce((acc, p) => {
         const status = p.projectStatus || 'On-Going';
@@ -96,6 +104,10 @@ const updateStatusChart = (projects) => {
     if (projectStatusChart) {
         projectStatusChart.destroy();
     }
+    
+    const colors = getChartColors();
+    const isDarkMode = document.body.classList.contains('dark-theme');
+
     projectStatusChart = new Chart(chartCanvas, {
         type: 'pie',
         data: {
@@ -107,13 +119,20 @@ const updateStatusChart = (projects) => {
                     'rgba(13, 110, 253, 0.7)', 'rgba(25, 135, 84, 0.7)',
                     'rgba(255, 193, 7, 0.7)', 'rgba(108, 117, 125, 0.7)', 'rgba(220, 53, 69, 0.7)'
                 ],
-                borderColor: '#fff',
+                borderColor: isDarkMode ? '#2a2a2e' : '#fff',
                 borderWidth: 2
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        color: colors.textColor
+                    } 
+                } 
+            }
         }
     });
 };
@@ -237,6 +256,8 @@ const updateDashboardGanttChart = async (projects) => {
         }
     });
 };
+
+
 function initializeDashboardModule() {
     // Add these three event listeners
     document.getElementById('dashboard-gantt-view-day').addEventListener('click', () => {

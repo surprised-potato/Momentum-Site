@@ -360,6 +360,14 @@ const showGanttChartForProject = async () => {
 };
 
 
+function getChartColors() {
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    return {
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkMode ? '#f1f1f1' : '#212529',
+    };
+}
+
 const showSCurveForProject = async () => {
     pertCpmDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.add('hidden');
@@ -379,6 +387,8 @@ const showSCurveForProject = async () => {
         alert("Could not generate S-Curve. Ensure the project has tasks with durations and costs.");
         return;
     }
+
+    const colors = getChartColors();
 
     sCurveChart = new Chart(sCurveChartCanvas, {
         type: 'line',
@@ -401,25 +411,43 @@ const showSCurveForProject = async () => {
                     max: 100,
                     title: {
                         display: true,
-                        text: 'Cumulative Completion (%)'
+                        text: 'Cumulative Completion (%)',
+                        color: colors.textColor
                     },
                     ticks: {
                         callback: function(value) {
                             return value + '%';
-                        }
+                        },
+                        color: colors.textColor
+                    },
+                    grid: {
+                        color: colors.gridColor
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Project Day'
+                        text: 'Project Day',
+                        color: colors.textColor
+                    },
+                    ticks: {
+                        color: colors.textColor
+                    },
+                    grid: {
+                        color: colors.gridColor
                     }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: `Planned S-Curve (Total Project Cost: PHP ${data.grandTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`
+                    text: `Planned S-Curve (Total Project Cost: PHP ${data.grandTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`,
+                    color: colors.textColor
+                },
+                legend: {
+                    labels: {
+                        color: colors.textColor
+                    }
                 },
                 tooltip: {
                         callbacks: {
@@ -458,6 +486,11 @@ const showNetworkDiagram = async () => {
         return;
     }
 
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    const criticalPathStyle = isDarkMode
+        ? 'fill:#5e2a2e,stroke:#dc3545,stroke-width:2px,color:#f1f1f1'
+        : 'fill:#f8d7da,stroke:#c00,stroke-width:2px,color:#212529';
+
     let mermaidSyntax = 'graph TD;\n';
 
     data.quantities.forEach(q => {
@@ -471,7 +504,7 @@ const showNetworkDiagram = async () => {
         
         mermaidSyntax += `    ${nodeId}[${nodeText}];\n`;
         if (isCritical) {
-            mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
+            mermaidSyntax += `    style ${nodeId} ${criticalPathStyle};\n`;
         }
     });
 
@@ -847,6 +880,11 @@ const showRevisedNetworkDiagram = async () => {
         return;
     }
 
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    const criticalPathStyle = isDarkMode
+        ? 'fill:#5e2a2e,stroke:#dc3545,stroke-width:2px,color:#f1f1f1'
+        : 'fill:#f8d7da,stroke:#c00,stroke-width:2px,color:#212529';
+
     let mermaidSyntax = 'graph TD;\n';
     data.quantities.forEach(q => {
         const task = data.tasks.get(q.uniqueId);
@@ -857,7 +895,7 @@ const showRevisedNetworkDiagram = async () => {
         const nodeText = `"${task.name}<br/>D:${task.duration} ES:${task.es} EF:${task.ef}<br/>LS:${task.ls} LF:${task.lf} S:${slack}"`;
         mermaidSyntax += `    ${nodeId}[${nodeText}];\n`;
         if (isCritical) {
-            mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
+            mermaidSyntax += `    style ${nodeId} ${criticalPathStyle};\n`;
         }
     });
 

@@ -104,8 +104,15 @@ const showProjectSummary = async (projectId) => {
         const lockedBoq = await db.boqs.get({ projectId });
         const approvedCOs = await db.changeOrders.where({ projectId, status: 'Approved' }).count();
 
-        const boqDependentButtons = document.querySelectorAll('.construction-phase-btn');
-        boqDependentButtons.forEach(btn => {
+        // Baseline reports are always enabled
+        document.querySelectorAll('.baseline-report-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.title = '';
+        });
+
+        // Construction buttons depend on the BOQ lock state
+        const constructionButtons = document.querySelectorAll('.construction-phase-btn');
+        constructionButtons.forEach(btn => {
             if (lockedBoq) {
                 btn.disabled = false;
                 btn.title = '';
@@ -114,17 +121,18 @@ const showProjectSummary = async (projectId) => {
                 btn.title = 'This module requires a locked Bill of Quantities (BOQ).';
             }
         });
-
-        const revisedReportsBtn = document.getElementById('hub-btn-revised-reports');
-        if (lockedBoq && approvedCOs > 0) {
-            revisedReportsBtn.disabled = false;
-            revisedReportsBtn.title = '';
-        } else {
-            revisedReportsBtn.disabled = true;
-            if (lockedBoq) {
-                 revisedReportsBtn.title = 'This module requires at least one approved change order.';
+        
+        // Revised Report buttons require a locked BOQ AND approved change orders
+        const revisedReportButtons = document.querySelectorAll('.revised-report-btn');
+        revisedReportButtons.forEach(btn => {
+            if (lockedBoq && approvedCOs > 0) {
+                btn.disabled = false;
+                btn.title = '';
+            } else {
+                btn.disabled = true;
+                btn.title = 'Requires a locked BOQ and at least one approved change order.';
             }
-        }
+        });
 
     } catch (error) {
         console.error('Failed to show project summary:', error);

@@ -107,6 +107,7 @@ const generateAndLockBoq = async () => {
         boqData: boqData
     });
     await showBoqForProject(currentBoqProjectId, boqProjectName.textContent.replace('Bill of Quantities: ', ''));
+    showProjectSummary(currentBoqProjectId); // Refresh hub to enable buttons
 };
 
 const promptToGenerateBoq = () => {
@@ -155,28 +156,45 @@ const showBoqForProject = async (projectId, projectName) => {
     resourceScheduleView.classList.add('hidden');
     boqDisplayView.classList.remove('hidden');
 
+    const lockToggleBtn = document.getElementById('boq-lock-toggle-btn');
     const lockedBoq = await db.boqs.where({ projectId: projectId }).first();
 
     if (lockedBoq) {
-        boqStatusMessage.textContent = `This BOQ was generated and locked on ${lockedBoq.generatedAt.toLocaleString()}. Data can no longer be edited.`;
-        deleteBoqBtn.classList.remove('hidden');
+        boqStatusMessage.textContent = `This BOQ was generated and locked on ${lockedBoq.generatedAt.toLocaleString()}. Construction modules are enabled.`;
+        lockToggleBtn.textContent = 'Unlock Data & Delete BOQ';
+        lockToggleBtn.className = 'btn btn-danger';
         viewPertCpmBtn.classList.remove('hidden');
         displayBoqFromData(lockedBoq.boqData);
     } else {
-        boqStatusMessage.textContent = '';
-        deleteBoqBtn.classList.add('hidden');
-        viewPertCpmBtn.classList.add('hidden');
-        boqTbody.innerHTML = '<tr><td colspan="6">No locked BOQ found for this project.</td></tr>';
-        boqTfoot.innerHTML = '';
-        promptToGenerateBoq();
+        boqStatusMessage.textContent = `This is a PRELIMINARY report based on live data. Lock the BOQ to enable construction modules.`;
+        lockToggleBtn.textContent = 'Lock BOQ & Enable Construction';
+        lockToggleBtn.className = 'btn btn-primary';
+        viewPertCpmBtn.classList.remove('hidden');
+
+        // Generate and display a temporary, unlocked BOQ for viewing
+        const quantities = await db.quantities.where('projectId').equals(projectId).toArray();
+        const dupas = await db.dupas.where('quantityId').anyOf(quantities.map(q => q.id)).toArray();
+        const dupaMap = new Map(dupas.map(d => [d.quantityId, d]));
+        const boqData = quantities.reduce((acc, q) => {
+            const category = q.category || 'Uncategorized';
+            if (!acc[category]) acc[category] = [];
+            const dupa = dupaMap.get(q.id);
+            const totalAmount = calculateDupaTotalCost(dupa);
+            const unitPrice = (q.quantity > 0) ? (totalAmount / q.quantity) : 0;
+            acc[category].push({
+                quantityId: q.id, scopeOfWork: q.scopeOfWork, quantity: q.quantity,
+                unit: q.unit, unitPrice: unitPrice, totalAmount: totalAmount
+            });
+            return acc;
+        }, {});
+        displayBoqFromData(boqData);
     }
 };
 
-const handleDeleteBoq = () => {
+const handleDeleteBoq = async () => {
     const modal = document.getElementById('delete-boq-modal');
     if (!modal) {
-        console.error('Delete Confirmation Modal not found in the HTML file.');
-        alert('Error: Could not find the confirmation dialog. Please ensure the HTML is up to date.');
+        alert('Error: Could not find the confirmation dialog.');
         return;
     }
 
@@ -186,69 +204,63 @@ const handleDeleteBoq = () => {
 
     const confirmHandler = async () => {
         confirmBtn.removeEventListener('click', confirmHandler);
-        cancelBtn.removeEventListener('click', cancelHandler);
-        closeBtn.removeEventListener('click', cancelHandler);
-
         modal.style.display = 'none';
-
-        if (!currentBoqProjectId) {
-            alert('Error: No project selected.');
-            return;
-        }
 
         try {
             await db.transaction('rw', db.tables.map(t => t.name), async () => {
-                // Delete the BOQ record itself
                 const boqToDelete = await db.boqs.where({ projectId: currentBoqProjectId }).first();
-                if (boqToDelete) {
-                    await db.boqs.delete(boqToDelete.id);
-                }
-
-                // Reset progress for original quantities
-                const quantitiesToReset = await db.quantities.where({ projectId: currentBoqProjectId }).toArray();
-                const quantityIds = quantitiesToReset.map(q => q.id);
+                if (boqToDelete) await db.boqs.delete(boqToDelete.id);
+                
+                const quantities = await db.quantities.where({ projectId: currentBoqProjectId }).toArray();
+                const quantityIds = quantities.map(q => q.id);
                 if (quantityIds.length > 0) {
-                    await db.accomplishments.where('taskId').anyOf(quantityIds).and(record => record.type === 'quantity').delete();
+                    await db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').delete();
                     await db.quantities.where('projectId').equals(currentBoqProjectId).modify({ percentComplete: null });
                 }
 
-                // --- NEW: Find and reset progress for change order items ---
                 const changeOrders = await db.changeOrders.where({ projectId: currentBoqProjectId }).toArray();
                 const changeOrderIds = changeOrders.map(co => co.id);
                 if (changeOrderIds.length > 0) {
                     const changeOrderItems = await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray();
-                    const changeOrderItemIds = changeOrderItems.map(item => item.id);
-
-                    if (changeOrderItemIds.length > 0) {
-                        await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(record => record.type === 'changeOrderItem').delete();
-                        await db.changeOrderItems.where('id').anyOf(changeOrderItemIds).modify({ percentComplete: null });
+                    const coItemIds = changeOrderItems.map(item => item.id);
+                    if (coItemIds.length > 0) {
+                        await db.accomplishments.where('taskId').anyOf(coItemIds).and(r => r.type === 'changeOrderItem').delete();
+                        await db.changeOrderItems.where('id').anyOf(coItemIds).modify({ percentComplete: null });
                     }
                 }
                 
-                // Reset the project's start date
                 await db.projects.update(currentBoqProjectId, { startDate: null });
             });
 
-            alert("BOQ and all construction progress deleted successfully. Pre-construction data is now unlocked.");
-            showProjectSummary(currentBoqProjectId);
+            alert("BOQ unlocked and all construction progress deleted.");
+            showBoqForProject(currentBoqProjectId, boqProjectName.textContent.replace('Bill of Quantities: ', ''));
+            showProjectSummary(currentBoqProjectId); // Refresh hub to disable buttons
         } catch (error) {
-            console.error("Failed to delete BOQ and related data:", error);
-            alert("An error occurred during the deletion process. Please check the console for details.");
+            console.error("Failed to delete BOQ:", error);
+            alert("An error occurred during deletion.");
         }
     };
 
     const cancelHandler = () => {
         confirmBtn.removeEventListener('click', confirmHandler);
-        cancelBtn.removeEventListener('click', cancelHandler);
-        closeBtn.removeEventListener('click', cancelHandler);
         modal.style.display = 'none';
     };
 
     confirmBtn.addEventListener('click', confirmHandler);
     cancelBtn.addEventListener('click', cancelHandler);
     closeBtn.addEventListener('click', cancelHandler);
-
     modal.style.display = 'block';
+};
+
+const handleBoqLockToggle = async () => {
+    const lockedBoq = await db.boqs.where({ projectId: currentBoqProjectId }).first();
+    if (lockedBoq) {
+        handleDeleteBoq(); // This function already contains a confirmation modal
+    } else {
+        if (confirm("Are you sure you want to lock this BOQ? All pre-construction data will be locked and cannot be edited unless the BOQ is unlocked.")) {
+            generateAndLockBoq();
+        }
+    }
 };
 
 const showPertCpmForProject = async () => {
@@ -289,6 +301,7 @@ const showGanttChartForProject = async () => {
     sCurveDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.add('hidden');
     resourceScheduleView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.remove('hidden');
     ganttChartProjectName.textContent = `Gantt Chart: ${boqProjectName.textContent.replace('Bill of Quantities: ', '')}`;
     
@@ -373,6 +386,7 @@ const showSCurveForProject = async () => {
     ganttChartDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.add('hidden');
     resourceScheduleView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.remove('hidden');
     sCurveProjectName.textContent = `S-Curve: ${boqProjectName.textContent.replace('Bill of Quantities: ', '')}`;
 
@@ -387,8 +401,6 @@ const showSCurveForProject = async () => {
         alert("Could not generate S-Curve. Ensure the project has tasks with durations and costs.");
         return;
     }
-
-    const colors = getChartColors();
 
     sCurveChart = new Chart(sCurveChartCanvas, {
         type: 'line',
@@ -411,43 +423,25 @@ const showSCurveForProject = async () => {
                     max: 100,
                     title: {
                         display: true,
-                        text: 'Cumulative Completion (%)',
-                        color: colors.textColor
+                        text: 'Cumulative Completion (%)'
                     },
                     ticks: {
                         callback: function(value) {
                             return value + '%';
-                        },
-                        color: colors.textColor
-                    },
-                    grid: {
-                        color: colors.gridColor
+                        }
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Project Day',
-                        color: colors.textColor
-                    },
-                    ticks: {
-                        color: colors.textColor
-                    },
-                    grid: {
-                        color: colors.gridColor
+                        text: 'Project Day'
                     }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: `Planned S-Curve (Total Project Cost: PHP ${data.grandTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`,
-                    color: colors.textColor
-                },
-                legend: {
-                    labels: {
-                        color: colors.textColor
-                    }
+                    text: `Planned S-Curve (Total Project Cost: PHP ${data.grandTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`
                 },
                 tooltip: {
                         callbacks: {
@@ -474,6 +468,7 @@ const showNetworkDiagram = async () => {
     ganttChartDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.add('hidden');
     resourceScheduleView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.remove('hidden');
     networkDiagramProjectName.textContent = `Network Diagram: ${boqProjectName.textContent.replace('Bill of Quantities: ', '')}`;
 
@@ -485,11 +480,6 @@ const showNetworkDiagram = async () => {
         diagramContainer.innerHTML = 'No data to display.';
         return;
     }
-
-    const isDarkMode = document.body.classList.contains('dark-theme');
-    const criticalPathStyle = isDarkMode
-        ? 'fill:#5e2a2e,stroke:#dc3545,stroke-width:2px,color:#f1f1f1'
-        : 'fill:#f8d7da,stroke:#c00,stroke-width:2px,color:#212529';
 
     let mermaidSyntax = 'graph TD;\n';
 
@@ -504,7 +494,7 @@ const showNetworkDiagram = async () => {
         
         mermaidSyntax += `    ${nodeId}[${nodeText}];\n`;
         if (isCritical) {
-            mermaidSyntax += `    style ${nodeId} ${criticalPathStyle};\n`;
+            mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
         }
     });
 
@@ -534,10 +524,12 @@ const showNetworkDiagram = async () => {
 };
 
 const showManpowerEquipmentSchedule = async () => {
+    boqDisplayView.classList.add('hidden');
     pertCpmDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     resourceScheduleView.classList.remove('hidden');
 
     const resourceScheduleProjectName = document.getElementById('resource-schedule-project-name');
@@ -546,184 +538,353 @@ const showManpowerEquipmentSchedule = async () => {
     const scheduleContainer = document.getElementById('resource-schedule-container');
     scheduleContainer.innerHTML = 'Loading schedule...';
 
+    const pertData = await getPertCpmData(currentBoqProjectId, false);
+    if (!pertData || pertData.projectDuration === 0) {
+        scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
+        return;
+    }
+
+    const { tasks, projectDuration, allDupas } = pertData;
+    const dupaMap = new Map(allDupas.map(d => [d.quantityId || d.changeOrderItemId, d]));
+    
+    const dailyQuantities = {};
+    const dailySubcontracts = {};
+    const dailyCosts = {
+        Labor: new Array(projectDuration).fill(0),
+        Equipment: new Array(projectDuration).fill(0),
+        Materials: new Array(projectDuration).fill(0),
+        Subcontracted: new Array(projectDuration).fill(0),
+    };
+
+    for (const [taskId, task] of tasks.entries()) {
+        if (!task.duration || task.duration <= 0) continue;
+        const dupa = dupaMap.get(parseInt(taskId.split('-')[1]));
+        if (!dupa || !dupa.directCosts) continue;
+
+        dupa.directCosts.forEach(dc => {
+            if (dc.type === 'labor') {
+                const dailyCost = (dc.mandays * dc.rate) / task.duration;
+                const isSubcontract = dc.unit && dc.unit.trim().toLowerCase() === 'lot';
+
+                if (isSubcontract) {
+                    if (!dailySubcontracts[dc.laborType]) {
+                        dailySubcontracts[dc.laborType] = { schedule: new Array(projectDuration).fill(0) };
+                    }
+                    for (let day = task.es; day < task.ef; day++) {
+                        if (day < projectDuration) {
+                            dailySubcontracts[dc.laborType].schedule[day] += dailyCost;
+                            dailyCosts.Subcontracted[day] += dailyCost;
+                        }
+                    }
+                } else {
+                    const dailyMandays = dc.mandays / task.duration;
+                    if (!dailyQuantities[dc.laborType]) {
+                        dailyQuantities[dc.laborType] = { type: 'labor', unit: 'md', schedule: new Array(projectDuration).fill(0) };
+                    }
+                    for (let day = task.es; day < task.ef; day++) {
+                        if (day < projectDuration) {
+                            dailyQuantities[dc.laborType].schedule[day] += dailyMandays;
+                            dailyCosts.Labor[day] += dailyCost;
+                        }
+                    }
+                }
+            } else if (dc.type === 'equipment') {
+                const dailyHours = dc.hours / task.duration;
+                const dailyCost = (dc.hours * dc.rate) / task.duration;
+                if (!dailyQuantities[dc.name]) {
+                    dailyQuantities[dc.name] = { type: 'equipment', unit: 'hrs', schedule: new Array(projectDuration).fill(0) };
+                }
+                 for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) {
+                        dailyQuantities[dc.name].schedule[day] += dailyHours;
+                        dailyCosts.Equipment[day] += dailyCost;
+                    }
+                }
+            } else if (dc.type === 'material') {
+                const dailyCost = (dc.quantity * dc.unitPrice) / task.duration;
+                 for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) {
+                        dailyCosts.Materials[day] += dailyCost;
+                    }
+                }
+            }
+        });
+    }
+    
+    const renderScheduleTable = (title, data, isCost = false) => {
+        let tableHtml = `<div class="dupa-section"><h3>${title}</h3><div class="table-container"><table class="resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>`;
+        for (let i = 1; i <= projectDuration; i++) tableHtml += `<th>${i}</th>`;
+        tableHtml += '</tr></thead><tbody>';
+
+        const sortedKeys = Object.keys(data).sort();
+        for (const key of sortedKeys) {
+            const resource = data[key];
+            const unitLabel = resource.unit ? ` (${resource.unit})` : '';
+            tableHtml += `<tr><td class="sticky-col">${key}${unitLabel}</td>`;
+            resource.schedule.forEach(amount => {
+                let displayAmount = '-';
+                if (amount > 0) {
+                    displayAmount = isCost ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : amount.toFixed(2);
+                }
+                tableHtml += `<td>${displayAmount}</td>`;
+            });
+            tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table></div></div>';
+        return tableHtml;
+    };
+
+    scheduleContainer.innerHTML = '';
+
+    const manpowerData = Object.fromEntries(Object.entries(dailyQuantities).filter(([, val]) => val.type === 'labor'));
+    if (Object.keys(manpowerData).length > 0) {
+        scheduleContainer.innerHTML += renderScheduleTable('Manpower Schedule', manpowerData, false);
+    }
+    
+    const equipmentData = Object.fromEntries(Object.entries(dailyQuantities).filter(([, val]) => val.type === 'equipment'));
+    if (Object.keys(equipmentData).length > 0) {
+        scheduleContainer.innerHTML += renderScheduleTable('Equipment Schedule', equipmentData, false);
+    }
+
+    if (Object.keys(dailySubcontracts).length > 0) {
+        scheduleContainer.innerHTML += renderScheduleTable('Subcontractor Schedule (Cost)', dailySubcontracts, true);
+    } else {
+        scheduleContainer.innerHTML += `<div class="dupa-section"><h3>Subcontractor Schedule (Cost)</h3><p><em>No "lot"-based labor items found to classify as subcontracts.</em></p></div>`;
+    }
+
+    const totalLaborAndSubconCost = dailyCosts.Labor.map((cost, i) => cost + dailyCosts.Subcontracted[i]);
+    const financialData = {
+        'Labor (Manpower + Subcon)': { schedule: totalLaborAndSubconCost },
+        'Equipment': { schedule: dailyCosts.Equipment },
+        'Materials': { schedule: dailyCosts.Materials }
+    };
+    scheduleContainer.innerHTML += renderScheduleTable('Financial Schedule (Daily Costs in PHP)', financialData, true);
+};
+
+const showRevisedResourceSchedule = async () => {
+    revisedBoqDisplayView.classList.add('hidden');
+    revisedPertCpmDisplayView.classList.add('hidden');
+    revisedResourceScheduleView.classList.remove('hidden');
+    document.getElementById('revised-resource-schedule-project-name').textContent = `Revised Resource Schedule: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
+    const scheduleContainer = document.getElementById('revised-resource-schedule-container');
+    scheduleContainer.innerHTML = 'Loading schedule...';
+
     const pertData = await getPertCpmData(currentBoqProjectId, true);
     if (!pertData || pertData.projectDuration === 0) {
         scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
         return;
     }
 
-    const { tasks, projectDuration } = pertData;
-    const { allDupas } = await getAllTasksForReport(currentBoqProjectId, true);
+    const { tasks, projectDuration, allDupas } = pertData;
+    const dupaMap = new Map(allDupas.map(d => [d.quantityId || d.changeOrderItemId, d]));
+
+    const dailyQuantities = {};
+    const dailySubcontracts = {};
+    const dailyCosts = {
+        Labor: new Array(projectDuration).fill(0),
+        Equipment: new Array(projectDuration).fill(0),
+        Materials: new Array(projectDuration).fill(0),
+        Subcontracted: new Array(projectDuration).fill(0),
+    };
+
+    for (const [taskId, task] of tasks.entries()) {
+        if (!task.duration || task.duration <= 0) continue;
+        const dupa = dupaMap.get(parseInt(taskId.split('-')[1]));
+        if (!dupa || !dupa.directCosts) continue;
+
+        dupa.directCosts.forEach(dc => {
+            if (dc.type === 'labor') {
+                const dailyCost = (dc.mandays * dc.rate) / task.duration;
+                const isSubcontract = dc.laborType && dc.laborType.trim().toLowerCase().startsWith('subcontract');
+
+                if (isSubcontract) {
+                    if (!dailySubcontracts[dc.laborType]) {
+                        dailySubcontracts[dc.laborType] = { schedule: new Array(projectDuration).fill(0) };
+                    }
+                    for (let day = task.es; day < task.ef; day++) {
+                        if (day < projectDuration) {
+                            dailySubcontracts[dc.laborType].schedule[day] += dailyCost;
+                            dailyCosts.Subcontracted[day] += dailyCost;
+                        }
+                    }
+                } else {
+                    const dailyMandays = dc.mandays / task.duration;
+                    if (!dailyQuantities[dc.laborType]) {
+                        dailyQuantities[dc.laborType] = { type: 'labor', unit: 'md', schedule: new Array(projectDuration).fill(0) };
+                    }
+                    for (let day = task.es; day < task.ef; day++) {
+                        if (day < projectDuration) {
+                            dailyQuantities[dc.laborType].schedule[day] += dailyMandays;
+                            dailyCosts.Labor[day] += dailyCost;
+                        }
+                    }
+                }
+            } else if (dc.type === 'equipment') {
+                const dailyHours = dc.hours / task.duration;
+                const dailyCost = (dc.hours * dc.rate) / task.duration;
+                if (!dailyQuantities[dc.name]) {
+                    dailyQuantities[dc.name] = { type: 'equipment', unit: 'hrs', schedule: new Array(projectDuration).fill(0) };
+                }
+                 for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) {
+                        dailyQuantities[dc.name].schedule[day] += dailyHours;
+                        dailyCosts.Equipment[day] += dailyCost;
+                    }
+                }
+            } else if (dc.type === 'material') {
+                const dailyCost = (dc.quantity * dc.unitPrice) / task.duration;
+                 for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) {
+                        dailyCosts.Materials[day] += dailyCost;
+                    }
+                }
+            }
+        });
+    }
+
+    const renderScheduleTable = (title, data, isCost = false) => {
+        let tableHtml = `<div class="dupa-section"><h3>${title}</h3><div class="table-container"><table class="resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>`;
+        for (let i = 1; i <= projectDuration; i++) tableHtml += `<th>${i}</th>`;
+        tableHtml += '</tr></thead><tbody>';
+
+        const sortedKeys = Object.keys(data).sort();
+        for (const key of sortedKeys) {
+            const resource = data[key];
+            const unitLabel = resource.unit ? ` (${resource.unit})` : '';
+            tableHtml += `<tr><td class="sticky-col">${key}${unitLabel}</td>`;
+            resource.schedule.forEach(amount => {
+                let displayAmount = '-';
+                if (amount > 0) {
+                    displayAmount = isCost ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : amount.toFixed(2);
+                }
+                tableHtml += `<td>${displayAmount}</td>`;
+            });
+            tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table></div></div>';
+        return tableHtml;
+    };
+
+    scheduleContainer.innerHTML = '';
+
+    const manpowerData = Object.fromEntries(Object.entries(dailyQuantities).filter(([, val]) => val.type === 'labor'));
+    if (Object.keys(manpowerData).length > 0) {
+        scheduleContainer.innerHTML += renderScheduleTable('Manpower Schedule', manpowerData, false);
+    }
+    
+    const equipmentData = Object.fromEntries(Object.entries(dailyQuantities).filter(([, val]) => val.type === 'equipment'));
+    if (Object.keys(equipmentData).length > 0) {
+        scheduleContainer.innerHTML += renderScheduleTable('Equipment Schedule', equipmentData, false);
+    }
+    
+    if (Object.keys(dailySubcontracts).length > 0) {
+        scheduleContainer.innerHTML += renderScheduleTable('Subcontractor Schedule (Cost)', dailySubcontracts, true);
+    } else {
+        scheduleContainer.innerHTML += `<div class="dupa-section"><h3>Subcontractor Schedule (Cost)</h3><p><em>No subcontract items found.</em></p></div>`;
+    }
+
+    const totalLaborAndSubconCost = dailyCosts.Labor.map((cost, i) => cost + dailyCosts.Subcontracted[i]);
+    const financialData = {
+        'Labor (Manpower + Subcon)': { schedule: totalLaborAndSubconCost },
+        'Equipment': { schedule: dailyCosts.Equipment },
+        'Materials': { schedule: dailyCosts.Materials }
+    };
+    scheduleContainer.innerHTML += renderScheduleTable('Financial Schedule (Daily Costs in PHP)', financialData, true);
+};
+
+const showRevisedBoqForProject = async (projectId, projectName, showTheView = true) => {
+    currentBoqProjectId = projectId;
+    revisedBoqProjectName.textContent = `Revised BOQ: ${projectName}`;
+    
+    // Always fetch and render the data in the background
+    const { allTasks, allDupas } = await getAllTasksForReport(projectId, true);
     const dupaMap = new Map();
     allDupas.forEach(d => {
         const key = d.quantityId || d.changeOrderItemId;
         dupaMap.set(key, d);
     });
 
-    const dailyResources = {};
+    const originalItems = allTasks.filter(task => !task.changeOrderId);
+    const changeOrderItems = allTasks.filter(task => task.changeOrderId);
 
-    for (const [taskId, task] of tasks.entries()) {
-        if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
+    const groupedOriginals = originalItems.reduce((acc, task) => {
+        const category = task.category || 'Uncategorized';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(task);
+        return acc;
+    }, {});
 
-        const numericId = parseInt(taskId.split('-')[1]);
-        const dupa = dupaMap.get(numericId);
-        if (!dupa || !dupa.directCosts) continue;
+    let tableHtml = '<table id="revised-boq-table"><thead><tr><th>Scope of Work</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th>Total Amount</th><th>Actions</th></tr></thead><tbody>';
+    let grandTotal = 0;
 
-        const totalLaborCost = dupa.directCosts
-            .filter(dc => dc.type === 'labor')
-            .reduce((sum, item) => sum + (item.costType === 'lot' ? (item.amount || 0) : ((item.mandays || 0) * (item.rate || 0))), 0);
-        
-        const totalMaterialCost = dupa.directCosts
-            .filter(dc => dc.type === 'material')
-            .reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
+    const sortedCategories = Object.keys(groupedOriginals).sort();
+    for (const category of sortedCategories) {
+        const categoryTasks = groupedOriginals[category];
+        const categorySubtotal = categoryTasks.reduce((sum, task) => {
+            const dupa = dupaMap.get(task.id);
+            return sum + calculateDupaTotalCost(dupa);
+        }, 0);
+        grandTotal += categorySubtotal;
 
-        const totalEquipmentCost = dupa.directCosts
-            .filter(dc => dc.type === 'equipment')
-            .reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
+        tableHtml += `<tr class="category-header-row">
+                        <td colspan="5"><strong>${category}</strong></td>
+                        <td style="text-align: right;"><strong>${categorySubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
+                      </tr>`;
 
-        const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
-        const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
-        const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
-        const subtotal = totalDirectCost + ocmCost + profitCost;
-        const taxCost = subtotal * ((dupa.indirectCosts?.taxes || 0) / 100);
-        const totalIndirectCost = ocmCost + profitCost + taxCost;
-        
-        const costItems = [
-            { name: 'Labor Cost', total: totalLaborCost },
-            { name: 'Material Cost', total: totalMaterialCost },
-            { name: 'Equipment Cost', total: totalEquipmentCost },
-            { name: 'Indirect Costs', total: totalIndirectCost }
-        ];
-
-        costItems.forEach(item => {
-            if (item.total > 0) {
-                const dailyAmount = item.total / task.duration;
-                if (!dailyResources[item.name]) {
-                    dailyResources[item.name] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
-                }
-                for (let day = task.es; day < task.ef; day++) {
-                    if (day < projectDuration) dailyResources[item.name].schedule[day] += dailyAmount;
-                }
-            }
-        });
-        
-        dupa.directCosts.forEach(dc => {
-            let resourceName = '';
-            let dailyAmount = 0;
-            let unit = '';
-
-            if (dc.type === 'labor') {
-                if (dc.costType === 'lot') {
-                    resourceName = dc.laborType;
-                    dailyAmount = (dc.amount || 0) / task.duration;
-                    unit = 'PHP/day';
-                } else {
-                    resourceName = dc.laborType;
-                    dailyAmount = (dc.mandays || 0) / task.duration;
-                    unit = 'md';
-                }
-            } else if (dc.type === 'equipment') {
-                resourceName = dc.name;
-                dailyAmount = dc.hours / task.duration;
-                unit = 'hrs';
-            }
-
-            if (resourceName) {
-                if (!dailyResources[resourceName]) {
-                    dailyResources[resourceName] = {
-                        unit: unit,
-                        schedule: new Array(projectDuration).fill(0)
-                    };
-                }
-                for (let day = task.es; day < task.ef; day++) {
-                    if (day < projectDuration) {
-                        dailyResources[resourceName].schedule[day] += dailyAmount;
-                    }
-                }
-            }
+        categoryTasks.forEach(task => {
+            const dupa = dupaMap.get(task.id);
+            const totalAmount = calculateDupaTotalCost(dupa);
+            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
+            tableHtml += `
+                <tr>
+                    <td>${task.displayName}</td>
+                    <td>${task.quantity.toLocaleString()}</td>
+                    <td>${task.unit}</td>
+                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td></td>
+                </tr>
+            `;
         });
     }
 
-    if (Object.keys(dailyResources).length === 0) {
-        scheduleContainer.innerHTML = '<p>No resources found in DUPAs.</p>';
-        return;
+    if (changeOrderItems.length > 0) {
+        const coSubtotal = changeOrderItems.reduce((sum, task) => {
+            const dupa = dupaMap.get(task.id);
+            return sum + calculateDupaTotalCost(dupa);
+        }, 0);
+        grandTotal += coSubtotal;
+
+        tableHtml += `<tr class="category-header-row">
+                        <td colspan="5"><strong>Change Orders</strong></td>
+                        <td style="text-align: right;"><strong>${coSubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
+                      </tr>`;
+
+        changeOrderItems.forEach(task => {
+            const dupa = dupaMap.get(task.id);
+            const totalAmount = calculateDupaTotalCost(dupa);
+            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
+            tableHtml += `
+                <tr>
+                    <td>${task.displayName}</td>
+                    <td>${task.quantity.toLocaleString()}</td>
+                    <td>${task.unit}</td>
+                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td class="actions-cell"><button class="btn btn-secondary view-co-dupa-details-btn" data-co-item-id="${task.id}">View DUPA</button></td>
+                </tr>
+            `;
+        });
     }
 
-    let tableHtml = '<table id="resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
-    for (let i = 1; i <= projectDuration; i++) {
-        tableHtml += `<th>${i}</th>`;
+    tableHtml += `</tbody><tfoot><tr class="boq-summary-row"><td colspan="5" style="text-align:right;">Revised Grand Total</td><td style="text-align: right;">${grandTotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td></tr></tfoot></table>`;
+    revisedBoqTableContainer.innerHTML = tableHtml;
+
+    // Only manage view visibility if this function was called to be shown
+    if (showTheView) {
+        revisedPertCpmDisplayView.classList.add('hidden');
+        revisedBoqDisplayView.classList.remove('hidden');
     }
-    tableHtml += '</tr></thead><tbody>';
-
-    const laborResources = [];
-    const equipmentResources = [];
-    const subcontractorResources = [];
-    const financialResources = ['Labor Cost', 'Material Cost', 'Equipment Cost', 'Indirect Costs'].filter(name => dailyResources[name]);
-
-    Object.keys(dailyResources).sort().forEach(name => {
-        if (financialResources.includes(name)) return;
-        const unit = dailyResources[name].unit;
-        if (unit === 'md') laborResources.push(name);
-        else if (unit === 'hrs') equipmentResources.push(name);
-        else if (unit === 'PHP/day') subcontractorResources.push(name);
-    });
-
-    const renderGroup = (groupName, resources) => {
-        if (resources.length > 0) {
-            let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
-            if (groupName === 'Financials') {
-                 const groupTotal = resources.reduce((total, resourceName) => {
-                    return total + dailyResources[resourceName].schedule.reduce((sum, daily) => sum + daily, 0);
-                }, 0);
-                headerHtml += `<td colspan="${projectDuration}" style="text-align: right;"><strong>Total: ${groupTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong></td>`;
-            } else {
-                 headerHtml += `<td colspan="${projectDuration}"></td>`;
-            }
-            headerHtml += `</tr>`;
-            tableHtml += headerHtml;
-
-            resources.forEach(resourceName => {
-                const data = dailyResources[resourceName];
-                tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
-                data.schedule.forEach(amount => {
-                    let displayAmount = '-';
-                    if (amount > 0) {
-                        displayAmount = (data.unit.startsWith('PHP'))
-                            ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-                            : amount.toFixed(2);
-                    }
-                    tableHtml += `<td>${displayAmount}</td>`;
-                });
-                tableHtml += '</tr>';
-            });
-
-            if (groupName === 'Financials') {
-                const dailyTotals = new Array(projectDuration).fill(0);
-                resources.forEach(resourceName => {
-                    const schedule = dailyResources[resourceName].schedule;
-                    for (let i = 0; i < projectDuration; i++) {
-                        dailyTotals[i] += schedule[i];
-                    }
-                });
-
-                tableHtml += `<tr style="font-weight: bold; border-top: 2px solid var(--dark-color);">
-                                <td class="sticky-col">Daily Total (PHP)</td>`;
-                dailyTotals.forEach(total => {
-                    const displayTotal = total > 0 ? total.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '-';
-                    tableHtml += `<td>${displayTotal}</td>`;
-                });
-                tableHtml += `</tr>`;
-            }
-        }
-    };
-
-    renderGroup('Labor', laborResources);
-    renderGroup('Equipment', equipmentResources);
-    renderGroup('Subcontractors', subcontractorResources);
-    renderGroup('Financials', financialResources);
-
-    tableHtml += '</tbody></table>';
-    scheduleContainer.innerHTML = tableHtml;
 };
 
 const showDupaDetails = async (quantityId) => {
@@ -868,6 +1029,7 @@ const showCoItemDupaDetails = async (coItemId) => {
 
 
 const showRevisedNetworkDiagram = async () => {
+    revisedBoqDisplayView.classList.add('hidden');
     revisedPertCpmDisplayView.classList.add('hidden');
     revisedPertCpmNetworkView.classList.remove('hidden');
     document.getElementById('revised-network-diagram-project-name').textContent = `Revised Network Diagram: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
@@ -880,11 +1042,6 @@ const showRevisedNetworkDiagram = async () => {
         return;
     }
 
-    const isDarkMode = document.body.classList.contains('dark-theme');
-    const criticalPathStyle = isDarkMode
-        ? 'fill:#5e2a2e,stroke:#dc3545,stroke-width:2px,color:#f1f1f1'
-        : 'fill:#f8d7da,stroke:#c00,stroke-width:2px,color:#212529';
-
     let mermaidSyntax = 'graph TD;\n';
     data.quantities.forEach(q => {
         const task = data.tasks.get(q.uniqueId);
@@ -895,7 +1052,7 @@ const showRevisedNetworkDiagram = async () => {
         const nodeText = `"${task.name}<br/>D:${task.duration} ES:${task.es} EF:${task.ef}<br/>LS:${task.ls} LF:${task.lf} S:${slack}"`;
         mermaidSyntax += `    ${nodeId}[${nodeText}];\n`;
         if (isCritical) {
-            mermaidSyntax += `    style ${nodeId} ${criticalPathStyle};\n`;
+            mermaidSyntax += `    style ${nodeId} fill:#f8d7da,stroke:#c00,stroke-width:2px;\n`;
         }
     });
 
@@ -922,282 +1079,7 @@ const showRevisedNetworkDiagram = async () => {
     }
 };
 
-const showRevisedResourceSchedule = async () => {
-    revisedPertCpmDisplayView.classList.add('hidden');
-    revisedResourceScheduleView.classList.remove('hidden');
-    document.getElementById('revised-resource-schedule-project-name').textContent = `Revised Resource Schedule: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
-    const scheduleContainer = document.getElementById('revised-resource-schedule-container');
-    scheduleContainer.innerHTML = 'Loading schedule...';
 
-    const pertData = await getPertCpmData(currentBoqProjectId, true);
-    if (!pertData || pertData.projectDuration === 0) {
-        scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
-        return;
-    }
-
-    const { tasks, projectDuration } = pertData;
-    const { allDupas } = await getAllTasksForReport(currentBoqProjectId, true);
-    const dupaMap = new Map();
-    allDupas.forEach(d => {
-        const key = d.quantityId || d.changeOrderItemId;
-        dupaMap.set(key, d);
-    });
-
-    const dailyResources = {};
-
-    for (const [taskId, task] of tasks.entries()) {
-        if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
-
-        const numericId = parseInt(taskId.split('-')[1]);
-        const dupa = dupaMap.get(numericId);
-        if (!dupa || !dupa.directCosts) continue;
-
-        const totalLaborCost = dupa.directCosts
-            .filter(dc => dc.type === 'labor')
-            .reduce((sum, item) => sum + (item.costType === 'lot' ? (item.amount || 0) : ((item.mandays || 0) * (item.rate || 0))), 0);
-        
-        const totalMaterialCost = dupa.directCosts
-            .filter(dc => dc.type === 'material')
-            .reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
-
-        const totalEquipmentCost = dupa.directCosts
-            .filter(dc => dc.type === 'equipment')
-            .reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
-
-        const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
-        const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
-        const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
-        const subtotal = totalDirectCost + ocmCost + profitCost;
-        const taxCost = subtotal * ((dupa.indirectCosts?.taxes || 0) / 100);
-        const totalIndirectCost = ocmCost + profitCost + taxCost;
-        
-        const costItems = [
-            { name: 'Labor Cost', total: totalLaborCost },
-            { name: 'Material Cost', total: totalMaterialCost },
-            { name: 'Equipment Cost', total: totalEquipmentCost },
-            { name: 'Indirect Costs', total: totalIndirectCost }
-        ];
-
-        costItems.forEach(item => {
-            if (item.total > 0) {
-                const dailyAmount = item.total / task.duration;
-                if (!dailyResources[item.name]) {
-                    dailyResources[item.name] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
-                }
-                for (let day = task.es; day < task.ef; day++) {
-                    if (day < projectDuration) dailyResources[item.name].schedule[day] += dailyAmount;
-                }
-            }
-        });
-        
-        dupa.directCosts.forEach(dc => {
-            let resourceName = '';
-            let dailyAmount = 0;
-            let unit = '';
-
-            if (dc.type === 'labor') {
-                if (dc.costType === 'lot') {
-                    resourceName = dc.laborType;
-                    dailyAmount = (dc.amount || 0) / task.duration;
-                    unit = 'PHP/day';
-                } else {
-                    resourceName = dc.laborType;
-                    dailyAmount = (dc.mandays || 0) / task.duration;
-                    unit = 'md';
-                }
-            } else if (dc.type === 'equipment') {
-                resourceName = dc.name;
-                dailyAmount = dc.hours / task.duration;
-                unit = 'hrs';
-            }
-
-            if (resourceName) {
-                if (!dailyResources[resourceName]) {
-                    dailyResources[resourceName] = {
-                        unit: unit,
-                        schedule: new Array(projectDuration).fill(0)
-                    };
-                }
-                for (let day = task.es; day < task.ef; day++) {
-                    if (day < projectDuration) {
-                        dailyResources[resourceName].schedule[day] += dailyAmount;
-                    }
-                }
-            }
-        });
-    }
-
-    if (Object.keys(dailyResources).length === 0) {
-        scheduleContainer.innerHTML = '<p>No resources found in DUPAs.</p>';
-        return;
-    }
-
-    let tableHtml = '<table id="revised-resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
-    for (let i = 1; i <= projectDuration; i++) {
-        tableHtml += `<th>${i}</th>`;
-    }
-    tableHtml += '</tr></thead><tbody>';
-
-    const laborResources = [];
-    const equipmentResources = [];
-    const subcontractorResources = [];
-    const financialResources = ['Labor Cost', 'Material Cost', 'Equipment Cost', 'Indirect Costs'].filter(name => dailyResources[name]);
-
-    Object.keys(dailyResources).sort().forEach(name => {
-        if (financialResources.includes(name)) return;
-        const unit = dailyResources[name].unit;
-        if (unit === 'md') laborResources.push(name);
-        else if (unit === 'hrs') equipmentResources.push(name);
-        else if (unit === 'PHP/day') subcontractorResources.push(name);
-    });
-
-    const renderGroup = (groupName, resources) => {
-        if (resources.length > 0) {
-            let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
-            if (groupName === 'Financials') {
-                 const groupTotal = resources.reduce((total, resourceName) => {
-                    return total + dailyResources[resourceName].schedule.reduce((sum, daily) => sum + daily, 0);
-                }, 0);
-                headerHtml += `<td colspan="${projectDuration}" style="text-align: right;"><strong>Total: ${groupTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong></td>`;
-            } else {
-                 headerHtml += `<td colspan="${projectDuration}"></td>`;
-            }
-            headerHtml += `</tr>`;
-            tableHtml += headerHtml;
-
-            resources.forEach(resourceName => {
-                const data = dailyResources[resourceName];
-                tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
-                data.schedule.forEach(amount => {
-                    let displayAmount = '-';
-                    if (amount > 0) {
-                        displayAmount = (data.unit.startsWith('PHP'))
-                            ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-                            : amount.toFixed(2);
-                    }
-                    tableHtml += `<td>${displayAmount}</td>`;
-                });
-                tableHtml += '</tr>';
-            });
-            
-            if (groupName === 'Financials') {
-                const dailyTotals = new Array(projectDuration).fill(0);
-                resources.forEach(resourceName => {
-                    const schedule = dailyResources[resourceName].schedule;
-                    for (let i = 0; i < projectDuration; i++) {
-                        dailyTotals[i] += schedule[i];
-                    }
-                });
-
-                tableHtml += `<tr style="font-weight: bold; border-top: 2px solid var(--dark-color);">
-                                <td class="sticky-col">Daily Total (PHP)</td>`;
-                dailyTotals.forEach(total => {
-                    const displayTotal = total > 0 ? total.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '-';
-                    tableHtml += `<td>${displayTotal}</td>`;
-                });
-                tableHtml += `</tr>`;
-            }
-        }
-    };
-
-    renderGroup('Labor', laborResources);
-    renderGroup('Equipment', equipmentResources);
-    renderGroup('Subcontractors', subcontractorResources);
-    renderGroup('Financials', financialResources);
-
-    tableHtml += '</tbody></table>';
-    scheduleContainer.innerHTML = tableHtml;
-};
-
-const showRevisedBoqForProject = async (projectId, projectName) => {
-    currentBoqProjectId = projectId;
-    revisedBoqProjectName.textContent = `Revised BOQ: ${projectName}`;
-    revisedPertCpmDisplayView.classList.add('hidden');
-    revisedBoqDisplayView.classList.remove('hidden');
-
-    const { allTasks, allDupas } = await getAllTasksForReport(projectId, true);
-    const dupaMap = new Map();
-    allDupas.forEach(d => {
-        const key = d.quantityId || d.changeOrderItemId;
-        dupaMap.set(key, d);
-    });
-
-    const originalItems = allTasks.filter(task => !task.changeOrderId);
-    const changeOrderItems = allTasks.filter(task => task.changeOrderId);
-
-    const groupedOriginals = originalItems.reduce((acc, task) => {
-        const category = task.category || 'Uncategorized';
-        if (!acc[category]) acc[category] = [];
-        acc[category].push(task);
-        return acc;
-    }, {});
-
-    let tableHtml = '<table id="revised-boq-table"><thead><tr><th>Scope of Work</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th>Total Amount</th><th>Actions</th></tr></thead><tbody>';
-    let grandTotal = 0;
-
-    const sortedCategories = Object.keys(groupedOriginals).sort();
-    for (const category of sortedCategories) {
-        const categoryTasks = groupedOriginals[category];
-        const categorySubtotal = categoryTasks.reduce((sum, task) => {
-            const dupa = dupaMap.get(task.id);
-            return sum + calculateDupaTotalCost(dupa);
-        }, 0);
-        grandTotal += categorySubtotal;
-
-        tableHtml += `<tr class="category-header-row">
-                        <td colspan="5"><strong>${category}</strong></td>
-                        <td style="text-align: right;"><strong>${categorySubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
-                      </tr>`;
-
-        categoryTasks.forEach(task => {
-            const dupa = dupaMap.get(task.id);
-            const totalAmount = calculateDupaTotalCost(dupa);
-            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
-            tableHtml += `
-                <tr>
-                    <td>${task.displayName}</td>
-                    <td>${task.quantity.toLocaleString()}</td>
-                    <td>${task.unit}</td>
-                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td></td>
-                </tr>
-            `;
-        });
-    }
-
-    if (changeOrderItems.length > 0) {
-        const coSubtotal = changeOrderItems.reduce((sum, task) => {
-            const dupa = dupaMap.get(task.id);
-            return sum + calculateDupaTotalCost(dupa);
-        }, 0);
-        grandTotal += coSubtotal;
-
-        tableHtml += `<tr class="category-header-row">
-                        <td colspan="5"><strong>Change Orders</strong></td>
-                        <td style="text-align: right;"><strong>${coSubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
-                      </tr>`;
-
-        changeOrderItems.forEach(task => {
-            const dupa = dupaMap.get(task.id);
-            const totalAmount = calculateDupaTotalCost(dupa);
-            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
-            tableHtml += `
-                <tr>
-                    <td>${task.displayName}</td>
-                    <td>${task.quantity.toLocaleString()}</td>
-                    <td>${task.unit}</td>
-                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td class="actions-cell"><button class="btn btn-secondary view-co-dupa-details-btn" data-co-item-id="${task.id}">View DUPA</button></td>
-                </tr>
-            `;
-        });
-    }
-
-    tableHtml += `</tbody><tfoot><tr class="boq-summary-row"><td colspan="5" style="text-align:right;">Revised Grand Total</td><td style="text-align: right;">${grandTotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td></tr></tfoot></table>`;
-    revisedBoqTableContainer.innerHTML = tableHtml;
-};
 
 const showRevisedPertCpmForProject = async () => {
     revisedBoqDisplayView.classList.add('hidden');
@@ -1232,8 +1114,7 @@ const showRevisedPertCpmForProject = async () => {
     revisedPertCpmTableContainer.innerHTML = tableHtml;
 };
 function initializeReportsModule() {
-
-    deleteBoqBtn.addEventListener('click', handleDeleteBoq);
+    document.getElementById('boq-lock-toggle-btn').addEventListener('click', handleBoqLockToggle);
     viewPertCpmBtn.addEventListener('click', showPertCpmForProject);
     viewSCurveBtn.addEventListener('click', showSCurveForProject);
     viewGanttChartBtn.addEventListener('click', showGanttChartForProject);
@@ -1271,7 +1152,6 @@ function initializeReportsModule() {
             showCoItemDupaDetails(coItemId);
         }
     });
-
     
     viewRevisedPertCpmBtn.addEventListener('click', showRevisedPertCpmForProject);
     

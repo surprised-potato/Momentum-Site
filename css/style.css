@@ -607,12 +607,29 @@ body {
     position: sticky;
     left: 0;
     z-index: 10;
-    background-color: #f8f9fa;
+    background-color: #fff;
+    white-space: nowrap;
+}
+
+#resource-schedule-table tbody tr:not(.category-header-row):nth-child(even),
+#revised-resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) {
+    background-color: var(--light-color);
+}
+
+#resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) .sticky-col,
+#revised-resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) .sticky-col {
+    background-color: var(--light-color);
 }
 
 #resource-schedule-table thead .sticky-col {
     z-index: 20;
     background-color: var(--light-color);
+}
+
+#resource-schedule-table,
+#revised-resource-schedule-table {
+    table-layout: fixed;
+    width: 100%;
 }
 
 .category-header-row .sticky-col {
@@ -1584,4 +1601,10 @@ body.dark-theme .category-header-row .sticky-col {
 body.dark-theme .mermaid-container {
     background-color: var(--background-color);
     border-color: rgba(255, 255, 255, 0.1);
+}
+.hub-main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+    align-items: start;
 }

@@ -362,54 +362,29 @@ function initializeViewsModule() {
     backToSequencingProjectsBtn.addEventListener('click', backToHub);
     backToBoqProjectsBtn.addEventListener('click', backToHub);
     
-    backToBoqViewBtn.addEventListener('click', () => {
-        pertCpmDisplayView.classList.add('hidden');
-        ganttChartDisplayView.classList.add('hidden');
-        sCurveDisplayView.classList.add('hidden');
-        pertCpmNetworkView.classList.add('hidden');
-        resourceScheduleView.classList.add('hidden');
-        boqDisplayView.classList.remove('hidden');
-    });
+    // All baseline report "Back" buttons now point to the hub
+    backToBoqViewBtn.addEventListener('click', backToHub);
+    backToPertCpmViewBtn.addEventListener('click', backToHub);
+    backToPertCpmViewFromSCurveBtn.addEventListener('click', backToHub);
+    backToPertCpmFromNetworkBtn.addEventListener('click', backToHub);
+    backToPertCpmFromResourceBtn.addEventListener('click', backToHub);
 
-    const goBackToPertCpm = () => {
-        ganttChartDisplayView.classList.add('hidden');
-        sCurveDisplayView.classList.add('hidden');
-        pertCpmNetworkView.classList.add('hidden');
-        resourceScheduleView.classList.add('hidden');
-        pertCpmDisplayView.classList.remove('hidden');
-    };
-
-    backToPertCpmViewBtn.addEventListener('click', goBackToPertCpm);
-    backToPertCpmViewFromSCurveBtn.addEventListener('click', goBackToPertCpm);
-    backToPertCpmFromNetworkBtn.addEventListener('click', goBackToPertCpm);
-    backToPertCpmFromResourceBtn.addEventListener('click', goBackToPertCpm);
-
+    // All revised report "Back" buttons now point to the hub
     backToRevisedBoqProjectsBtn.addEventListener('click', backToHub);
-    backToRevisedBoqViewBtn.addEventListener('click', () => {
-        revisedPertCpmDisplayView.classList.add('hidden');
-        revisedBoqDisplayView.classList.remove('hidden');
-    });
-
-    const goBackToRevisedPertCpm = () => {
-        revisedPertCpmNetworkView.classList.add('hidden');
-        revisedResourceScheduleView.classList.add('hidden');
-        revisedPertCpmDisplayView.classList.remove('hidden');
-    };
-    if (backToRevisedPertCpmBtn) backToRevisedPertCpmBtn.addEventListener('click', () => {
-        revisedPertCpmDisplayView.classList.add('hidden');
-        revisedBoqDisplayView.classList.remove('hidden');
-    });
-    if (backToRevisedPertCpmFromNetworkBtn) backToRevisedPertCpmFromNetworkBtn.addEventListener('click', goBackToRevisedPertCpm);
-    if (backToRevisedPertCpmFromResourceBtn) backToRevisedPertCpmFromResourceBtn.addEventListener('click', goBackToRevisedPertCpm);
+    backToRevisedBoqViewBtn.addEventListener('click', backToHub);
+    backToRevisedPertCpmFromNetworkBtn.addEventListener('click', backToHub);
+    if (backToRevisedPertCpmFromResourceBtn) backToRevisedPertCpmFromResourceBtn.addEventListener('click', backToHub);
 
     document.getElementById('back-to-co-projects').addEventListener('click', backToHub);
     document.getElementById('back-to-accomplishment-projects').addEventListener('click', backToHub);
     document.getElementById('back-to-tracking-gantt-projects').addEventListener('click', backToHub);
     document.getElementById('back-to-tracking-s-curve-projects').addEventListener('click', backToHub);
     document.getElementById('back-to-lookahead-projects').addEventListener('click', backToHub);
+
+
     
     
-    projectSummaryView.addEventListener('click', (e) => {
+    projectSummaryView.addEventListener('click', async (e) => {
         const target = e.target.closest('.hub-buttons button');
         if (!target) return;
 
@@ -434,10 +409,40 @@ function initializeViewsModule() {
                 showView(sequencingView);
                 showSequencesForProject(projectId, projectName);
                 break;
-            case 'hub-btn-reports':
+            case 'hub-btn-boq':
                 setActiveNav(navProjects);
                 showView(reportsView);
-                showBoqForProject(projectId, projectName);
+                showBoqForProject(projectId, projectName, true);
+                break;
+            case 'hub-btn-pert':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showPertCpmForProject();
+                break;
+            case 'hub-btn-gantt':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showGanttChartForProject();
+                break;
+            case 'hub-btn-scurve':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showSCurveForProject();
+                break;
+            case 'hub-btn-network':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showNetworkDiagram();
+                break;
+            case 'hub-btn-resource-schedule':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showManpowerEquipmentSchedule();
                 break;
             case 'hub-btn-change-orders':
                 setActiveNav(navProjects);
@@ -459,10 +464,28 @@ function initializeViewsModule() {
                 showView(trackingSCurveView);
                 renderTrackingSCurve(projectId, projectName);
                 break;
-            case 'hub-btn-revised-reports':
+            case 'hub-btn-revised-boq':
                 setActiveNav(navProjects);
                 showView(revisedReportsView);
-                showRevisedBoqForProject(projectId, projectName);
+                showRevisedBoqForProject(projectId, projectName, true);
+                break;
+            case 'hub-btn-revised-pert':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                await showRevisedBoqForProject(projectId, projectName, false);
+                showRevisedPertCpmForProject();
+                break;
+            case 'hub-btn-revised-network':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                await showRevisedBoqForProject(projectId, projectName, false);
+                showRevisedNetworkDiagram();
+                break;
+            case 'hub-btn-revised-resources':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                await showRevisedBoqForProject(projectId, projectName, false);
+                showRevisedResourceSchedule();
                 break;
             case 'hub-btn-lookahead':
                 setActiveNav(navProjects);

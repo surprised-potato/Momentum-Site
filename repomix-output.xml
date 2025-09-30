@@ -78,122 +78,6 @@ readme.md
 <files>
 This section contains the contents of the repository's files.
 
-<file path="js/theme_manager.js">
-/*
-- Author: Gemini
-- OS support: Cross-platform
-- Description: Handles theme switching, dark mode, and custom colors.
-*/
-
-let themeManagerModuleInitialized = false;
-
-const THEMES = {
-    default: {
-        name: 'Momentum Blue',
-        colors: {
-            '--primary-color': '#0d6efd',
-        }
-    },
-    forest: {
-        name: 'Forest Green',
-        colors: {
-            '--primary-color': '#198754',
-        }
-    },
-    slate: {
-        name: 'Industrial Slate',
-        colors: {
-            '--primary-color': '#ffc107',
-        }
-    }
-};
-
-const applyTheme = (themeName) => {
-    const theme = THEMES[themeName];
-    if (!theme) return;
-    for (const [variable, value] of Object.entries(theme.colors)) {
-        document.documentElement.style.setProperty(variable, value);
-    }
-    document.getElementById('custom-color-picker').value = theme.colors['--primary-color'];
-};
-
-const applyCustomColor = (color) => {
-    document.documentElement.style.setProperty('--primary-color', color);
-};
-
-const applyDarkMode = (isDark) => {
-    document.body.classList.toggle('dark-theme', isDark);
-};
-
-const loadAndApplyTheme = () => {
-    const savedDarkMode = localStorage.getItem('momentum-dark-mode') === 'true';
-    const savedTheme = localStorage.getItem('momentum-theme') || 'default';
-    const savedCustomColor = localStorage.getItem('momentum-custom-color');
-    
-    applyDarkMode(savedDarkMode);
-    document.getElementById('dark-mode-toggle').checked = savedDarkMode;
-    
-    if (savedTheme === 'custom' && savedCustomColor) {
-        applyCustomColor(savedCustomColor);
-        document.getElementById('custom-color-picker').value = savedCustomColor;
-    } else {
-        applyTheme(savedTheme);
-    }
-};
-
-function initializeThemeManagerModule() {
-    if (themeManagerModuleInitialized) return;
-
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const themePickerContainer = document.getElementById('theme-picker-container');
-    const customColorPicker = document.getElementById('custom-color-picker');
-
-    Object.entries(THEMES).forEach(([key, theme]) => {
-        const card = document.createElement('div');
-        card.className = 'theme-preview-card';
-        card.dataset.theme = key;
-        card.innerHTML = `
-            <h4>${theme.name}</h4>
-            <div class="theme-color-swatches">
-                <div class="theme-color-swatch" style="background-color: ${theme.colors['--primary-color']};"></div>
-            </div>
-        `;
-        themePickerContainer.appendChild(card);
-    });
-
-    darkModeToggle.addEventListener('change', (e) => {
-        const isDark = e.target.checked;
-        applyDarkMode(isDark);
-        localStorage.setItem('momentum-dark-mode', isDark);
-    });
-
-    themePickerContainer.addEventListener('click', (e) => {
-        const card = e.target.closest('.theme-preview-card');
-        if (!card) return;
-        
-        const themeName = card.dataset.theme;
-        applyTheme(themeName);
-        localStorage.setItem('momentum-theme', themeName);
-        localStorage.removeItem('momentum-custom-color');
-
-        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
-        card.classList.add('active');
-    });
-
-    customColorPicker.addEventListener('input', (e) => {
-        const color = e.target.value;
-        applyCustomColor(color);
-        localStorage.setItem('momentum-theme', 'custom');
-        localStorage.setItem('momentum-custom-color', color);
-        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
-    });
-    
-    themeManagerModuleInitialized = true;
-}
-
-// --- End of theme_manager.js ---
-</file>
-
 <file path="import samples/Sample Libraries/comprehensive_library.json">
 {
   "materials": [
@@ -7646,6 +7530,123 @@ function initializeSettingsModule() {
 }
 </file>
 
+<file path="js/theme_manager.js">
+/*
+- Author: Gemini
+- OS support: Cross-platform
+- Description: Handles theme switching, dark mode, and custom colors.
+*/
+
+let themeManagerModuleInitialized = false;
+
+const THEMES = {
+    default: {
+        name: 'Momentum Blue',
+        colors: {
+            '--primary-color': '#0d6efd',
+        }
+    },
+    forest: {
+        name: 'Forest Green',
+        colors: {
+            '--primary-color': '#198754',
+        }
+    },
+    industrial_amber: {
+        name: 'Industrial Amber',
+        colors: {
+            '--primary-color': '#ffc107',
+        }
+    }
+};
+
+const applyTheme = (themeName) => {
+    const theme = THEMES[themeName];
+    if (!theme) return;
+    for (const [variable, value] of Object.entries(theme.colors)) {
+        document.documentElement.style.setProperty(variable, value);
+    }
+    document.getElementById('custom-color-picker').value = theme.colors['--primary-color'];
+};
+
+const applyCustomColor = (color) => {
+    document.documentElement.style.setProperty('--primary-color', color);
+};
+
+const applyDarkMode = (isDark) => {
+    document.body.classList.toggle('dark-theme', isDark);
+};
+
+const loadAndApplyTheme = () => {
+    const savedDarkMode = localStorage.getItem('momentum-dark-mode') === 'true';
+    const savedTheme = localStorage.getItem('momentum-theme') || 'default';
+    const savedCustomColor = localStorage.getItem('momentum-custom-color');
+    
+    applyDarkMode(savedDarkMode);
+    document.getElementById('dark-mode-toggle').checked = savedDarkMode;
+    
+    if (savedTheme === 'custom' && savedCustomColor) {
+        applyCustomColor(savedCustomColor);
+        document.getElementById('custom-color-picker').value = savedCustomColor;
+    } else {
+        applyTheme(savedTheme);
+    }
+};
+
+function initializeThemeManagerModule() {
+    if (themeManagerModuleInitialized) return;
+
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const themePickerContainer = document.getElementById('theme-picker-container');
+    const customColorPicker = document.getElementById('custom-color-picker');
+
+    Object.entries(THEMES).forEach(([key, theme]) => {
+        const card = document.createElement('div');
+        card.className = 'theme-preview-card';
+        card.dataset.theme = key;
+        card.innerHTML = `
+            <h4>${theme.name}</h4>
+            <div class="theme-color-swatches">
+                <div class="theme-color-swatch" style="background-color: ${theme.colors['--primary-color']};"></div>
+            </div>
+        `;
+        themePickerContainer.appendChild(card);
+    });
+
+    darkModeToggle.addEventListener('change', (e) => {
+        const isDark = e.target.checked;
+        applyDarkMode(isDark);
+        localStorage.setItem('momentum-dark-mode', isDark);
+        mermaid.initialize({ startOnLoad: false, theme: isDark ? 'dark' : 'default' });
+    });
+
+    themePickerContainer.addEventListener('click', (e) => {
+        const card = e.target.closest('.theme-preview-card');
+        if (!card) return;
+        
+        const themeName = card.dataset.theme;
+        applyTheme(themeName);
+        localStorage.setItem('momentum-theme', themeName);
+        localStorage.removeItem('momentum-custom-color');
+
+        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+    });
+
+    customColorPicker.addEventListener('input', (e) => {
+        const color = e.target.value;
+        applyCustomColor(color);
+        localStorage.setItem('momentum-theme', 'custom');
+        localStorage.setItem('momentum-custom-color', color);
+        document.querySelectorAll('.theme-preview-card').forEach(c => c.classList.remove('active'));
+    });
+    
+    themeManagerModuleInitialized = true;
+}
+
+// --- End of theme_manager.js ---
+</file>
+
 <file path=".gitignore">
 # System files created by Windows and macOS
 desktop.ini
@@ -9436,6 +9437,83 @@ function initializeChangeOrdersModule() {
 }
 </file>
 
+<file path="import samples/sample projects/commercial_cafe.json">
+{
+  "project": {
+    "projectName": "Boutique Cafe & Roastery Showcase",
+    "address": "Lacson St., Bacolod City",
+    "clientName": "The Daily Grind Co.",
+    "projectDescription": "A commercial project for a boutique cafe, designed to showcase detailed DUPA with multiple resource types, sub-quantities, and a non-linear task sequence.",
+    "startDate": null,
+    "lotArea": 150,
+    "floorArea": 120,
+    "numFloors": 1,
+    "contractAmount": 3500000,
+    "contractDate": "2025-09-15",
+    "projectStatus": "On-Going",
+    "targetStartDate": "2025-09-25",
+    "contractDuration": 90,
+    "projectManager": "Engr. Alex Chen",
+    "clientContact": "contact@dailygrind.com"
+  },
+  "quantities": [
+    { "id": 1, "scopeOfWork": "Site Preparation", "quantity": 1, "unit": "lot", "category": "General & Site Works" },
+    { "id": 2, "scopeOfWork": "Structural Excavation for Foundations", "quantity": 35, "unit": "cu.m", "category": "Structural Works" },
+    { "id": 3, "scopeOfWork": "Foundation Rebar Installation", "quantity": 850, "unit": "kg", "category": "Structural Works" },
+    { "id": 4, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 18, "unit": "cu.m", "category": "Structural Works" },
+    { "id": 5, "scopeOfWork": "CHB Wall Masonry (Exterior & Interior)", "quantity": 150, "unit": "sq.m", "category": "Architectural Works" },
+    { "id": 6, "scopeOfWork": "Roof Framing and Installation", "quantity": 130, "unit": "sq.m", "category": "Architectural Works" },
+    { "id": 7, "scopeOfWork": "Window & Door Installation", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
+    { "id": 8, "scopeOfWork": "MEPF Rough-ins (Commercial)", "quantity": 1, "unit": "lot", "category": "MEPF Works" },
+    { "id": 9, "scopeOfWork": "Interior & Exterior Wall Finishes", "quantity": 300, "unit": "sq.m", "category": "Finishes" },
+    { "id": 10, "scopeOfWork": "Floor Tiling (Main & Kitchen)", "quantity": 110, "unit": "sq.m", "category": "Finishes" },
+    { "id": 11, "scopeOfWork": "Fabricate & Install Service Counter", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
+    { "id": 12, "scopeOfWork": "Custom Millwork (Shelves & Benches)", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
+    { "id": 13, "scopeOfWork": "Final Fixture Installation & Commissioning", "quantity": 1, "unit": "lot", "category": "MEPF Works" }
+  ],
+  "dupas": [
+    { "id": 1, "quantityId": 1, "duration": 2, "directCosts": [
+        { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 6, "rate": 480 },
+        { "type": "material", "name": "Hauling & Disposal Fees", "quantity": 1, "unit": "lot", "unitPrice": 5000 }
+    ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 2, "quantityId": 2, "duration": 3, "directCosts": [
+        { "type": "labor", "laborType": "Construction Foreman", "mandays": 3, "rate": 850 },
+        { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480 }
+    ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 3, "quantityId": 3, "duration": 6, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 6, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Steelman)", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480}, {"type": "material", "name": "Deformed Rebar 16mm", "quantity": 500, "unit": "kg", "unitPrice": 52}, {"type": "material", "name": "Deformed Rebar 10mm", "quantity": 350, "unit": "kg", "unitPrice": 48}, {"type": "material", "name": "G.I. Tie Wire #16", "quantity": 13, "unit": "kg", "unitPrice": 85}, {"type": "equipment", "name": "Bar Cutter", "hours": 24, "rate": 250}, {"type": "equipment", "name": "Bar Bender", "hours": 24, "rate": 250} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 4, "quantityId": 4, "duration": 2, "directCosts": [ { "type": "labor", "laborType": "Construction Foreman", "mandays": 2, "rate": 850 }, { "type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 4, "rate": 650 }, { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 8, "rate": 480 }, { "type": "material", "name": "Portland Cement (40kg)", "quantity": 162, "unit": "bag", "unitPrice": 255 }, { "type": "material", "name": "Washed Sand", "quantity": 9, "unit": "cu.m", "unitPrice": 1350 }, { "type": "material", "name": "Gravel 3/4\"", "quantity": 18, "unit": "cu.m", "unitPrice": 1450 }, { "type": "material", "name": "Phenolic Plywood 1/2\"", "quantity": 10, "unit": "sheet", "unitPrice": 950 }, { "type": "material", "name": "Common Wire Nails", "quantity": 5, "unit": "kg", "unitPrice": 120 }, { "type": "equipment", "name": "Concrete Mixer (1-Bagger)", "hours": 16, "rate": 190 }, { "type": "equipment", "name": "Concrete Vibrator", "hours": 16, "rate": 150 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 5, "quantityId": 5, "duration": 10, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 10, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 30, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}, {"type": "material", "name": "CHB 4\"", "quantity": 1875, "unit": "pc", "unitPrice": 14}, {"type": "material", "name": "Portland Cement (40kg)", "quantity": 40, "unit": "bag", "unitPrice": 255}, {"type": "material", "name": "Washed Sand", "quantity": 3.5, "unit": "cu.m", "unitPrice": 1350}, {"type": "material", "name": "Deformed Rebar 10mm", "quantity": 75, "unit": "kg", "unitPrice": 48} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 6, "quantityId": 6, "duration": 8, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 8, "rate": 480}, {"type": "material", "name": "Metal Roofing System", "quantity": 130, "unit": "sq.m", "unitPrice": 850}, {"type": "material", "name": "Tek screw", "quantity": 800, "unit": "Pcs", "unitPrice": 1.5}, {"type": "material", "name": "Sealant", "quantity": 3, "unit": "Qrt", "unitPrice": 220} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 7, "quantityId": 7, "duration": 5, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 10, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 5, "rate": 480}, {"type": "material", "name": "Panel Door", "quantity": 3, "unit": "Pcs", "unitPrice": 9000}, {"type": "material", "name": "Door Jamb", "quantity": 3, "unit": "Pcs", "unitPrice": 2500}, {"type": "material", "name": "Window Set", "quantity": 1, "unit": "Lot", "unitPrice": 11000} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 8, "quantityId": 8, "duration": 12, "directCosts": [ {"type": "labor", "laborType": "Master Electrician", "mandays": 12, "rate": 750 }, {"type": "labor", "laborType":"Master Plumber", "mandays": 12, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 24, "rate": 480}, {"type": "material", "name": "Wires and Conduits", "quantity": 1, "unit": "lot", "unitPrice": 35000}, {"type": "material", "name": "PPR Pipes", "quantity": 1, "unit": "lot", "unitPrice": 25000} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 9, "quantityId": 9, "duration": 8, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Painter", "mandays": 20, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Skim Coat", "quantity": 15, "unit": "Bags", "unitPrice": 475}, {"type": "material", "name": "Flat White Primer", "quantity": 8, "unit": "Gals", "unitPrice": 577.5}, {"type": "material", "name": "Latex Paint", "quantity": 10, "unit": "gal", "unitPrice": 800} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 10, "quantityId": 10, "duration": 7, "directCosts": [ {"type": "labor", "laborType": "Tile Setter", "mandays": 15, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 7, "rate": 480}, {"type": "material", "name": "Floor Tiles", "quantity": 110, "unit": "sq.m", "unitPrice": 350}, {"type": "material", "name": "Tile Adhesive", "quantity": 22, "unit": "bag", "unitPrice": 250}, {"type": "material", "name": "Tile Grout (White)", "quantity": 5, "unit": "Bags", "unitPrice": 45} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 11, "quantityId": 11, "duration": 4, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 8, "rate": 650 }, {"type": "material", "name": "Tubular Steel 2″ x 2″ x 1.2 mm", "quantity": 4, "unit": "pc", "unitPrice": 830}, {"type": "material", "name": "Welding Rod", "quantity": 2, "unit": "Kilos", "unitPrice": 130}, {"type": "material", "name": "Marine Plywood 3/4\"", "quantity": 5, "unit": "sheet", "unitPrice": 1200}, {"type": "material", "name": "Laminate Sheets", "quantity": 5, "unit": "sheet", "unitPrice": 1500} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 12, "quantityId": 12, "duration": 5, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 10, "rate": 650 }, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 5, "rate": 480}, {"type": "material", "name": "Marine Plywood 3/4\"", "quantity": 8, "unit": "sheet", "unitPrice": 1200}, {"type": "material", "name": "Laminate Sheets", "quantity": 8, "unit": "sheet", "unitPrice": 1500} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
+    { "id": 13, "quantityId": 13, "duration": 6, "directCosts": [ {"type": "labor", "laborType": "Master Electrician", "mandays": 5, "rate": 750 }, {"type": "labor", "laborType": "Master Plumber", "mandays": 5, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Water Closet", "quantity": 1, "unit": "Pcs", "unitPrice": 6500}, {"type": "material", "name": "Lavatory", "quantity": 1, "unit": "Pcs", "unitPrice": 3500}, {"type": "material", "name": "Industrial Kitchen Sink", "quantity": 1, "unit": "Pcs", "unitPrice": 5000}, {"type": "material", "name": "Panel Board", "quantity": 1, "unit": "Pcs", "unitPrice": 3000}, {"type": "material", "name": "Lighting and Outlets", "quantity": 1, "unit": "lot", "unitPrice": 40000} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
+  ],
+  "tasks": [
+    { "predecessorId": "PROJECT_START", "successorId": 1 },
+    { "predecessorId": 1, "successorId": 2 },
+    { "predecessorId": 2, "successorId": 3 },
+    { "predecessorId": 3, "successorId": 4 },
+    { "predecessorId": 4, "successorId": 5 },
+    { "predecessorId": 5, "successorId": 6 },
+    { "predecessorId": 5, "successorId": 8 },
+    { "predecessorId": 6, "successorId": 7 },
+    { "predecessorId": 7, "successorId": 9 },
+    { "predecessorId": 8, "successorId": 9 },
+    { "predecessorId": 9, "successorId": 10 },
+    { "predecessorId": 9, "successorId": 11 },
+    { "predecessorId": 9, "successorId": 12 },
+    { "predecessorId": 10, "successorId": 13 },
+    { "predecessorId": 11, "successorId": 13 },
+    { "predecessorId": 12, "successorId": 13 },
+    { "predecessorId": 13, "successorId": "PROJECT_END" }
+  ]
+}
+</file>
+
 <file path="js/dashboard.js">
 // Author: Gemini
 // OS support: Cross-platform
@@ -9524,6 +9602,14 @@ const updateSummaryCards = (projects, changeOrders) => {
     document.getElementById('active-contract-value').textContent = totalActiveValue.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
 };
 
+function getChartColors() {
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    return {
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkMode ? '#f1f1f1' : '#212529',
+    };
+}
+
 const updateStatusChart = (projects) => {
     const statusCounts = projects.reduce((acc, p) => {
         const status = p.projectStatus || 'On-Going';
@@ -9535,6 +9621,10 @@ const updateStatusChart = (projects) => {
     if (projectStatusChart) {
         projectStatusChart.destroy();
     }
+    
+    const colors = getChartColors();
+    const isDarkMode = document.body.classList.contains('dark-theme');
+
     projectStatusChart = new Chart(chartCanvas, {
         type: 'pie',
         data: {
@@ -9546,13 +9636,20 @@ const updateStatusChart = (projects) => {
                     'rgba(13, 110, 253, 0.7)', 'rgba(25, 135, 84, 0.7)',
                     'rgba(255, 193, 7, 0.7)', 'rgba(108, 117, 125, 0.7)', 'rgba(220, 53, 69, 0.7)'
                 ],
-                borderColor: '#fff',
+                borderColor: isDarkMode ? '#2a2a2e' : '#fff',
                 borderWidth: 2
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        color: colors.textColor
+                    } 
+                } 
+            }
         }
     });
 };
@@ -9676,6 +9773,8 @@ const updateDashboardGanttChart = async (projects) => {
         }
     });
 };
+
+
 function initializeDashboardModule() {
     // Add these three event listeners
     document.getElementById('dashboard-gantt-view-day').addEventListener('click', () => {
@@ -9691,83 +9790,6 @@ function initializeDashboardModule() {
 }
 
 // --- End of dashboard.js ---
-</file>
-
-<file path="import samples/sample projects/commercial_cafe.json">
-{
-  "project": {
-    "projectName": "Boutique Cafe & Roastery Showcase",
-    "address": "Lacson St., Bacolod City",
-    "clientName": "The Daily Grind Co.",
-    "projectDescription": "A commercial project for a boutique cafe, designed to showcase detailed DUPA with multiple resource types, sub-quantities, and a non-linear task sequence.",
-    "startDate": null,
-    "lotArea": 150,
-    "floorArea": 120,
-    "numFloors": 1,
-    "contractAmount": 3500000,
-    "contractDate": "2025-09-15",
-    "projectStatus": "On-Going",
-    "targetStartDate": "2025-09-25",
-    "contractDuration": 90,
-    "projectManager": "Engr. Alex Chen",
-    "clientContact": "contact@dailygrind.com"
-  },
-  "quantities": [
-    { "id": 1, "scopeOfWork": "Site Preparation", "quantity": 1, "unit": "lot", "category": "General & Site Works" },
-    { "id": 2, "scopeOfWork": "Structural Excavation for Foundations", "quantity": 35, "unit": "cu.m", "category": "Structural Works" },
-    { "id": 3, "scopeOfWork": "Foundation Rebar Installation", "quantity": 850, "unit": "kg", "category": "Structural Works" },
-    { "id": 4, "scopeOfWork": "Foundation Concrete Pouring", "quantity": 18, "unit": "cu.m", "category": "Structural Works" },
-    { "id": 5, "scopeOfWork": "CHB Wall Masonry (Exterior & Interior)", "quantity": 150, "unit": "sq.m", "category": "Architectural Works" },
-    { "id": 6, "scopeOfWork": "Roof Framing and Installation", "quantity": 130, "unit": "sq.m", "category": "Architectural Works" },
-    { "id": 7, "scopeOfWork": "Window & Door Installation", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
-    { "id": 8, "scopeOfWork": "MEPF Rough-ins (Commercial)", "quantity": 1, "unit": "lot", "category": "MEPF Works" },
-    { "id": 9, "scopeOfWork": "Interior & Exterior Wall Finishes", "quantity": 300, "unit": "sq.m", "category": "Finishes" },
-    { "id": 10, "scopeOfWork": "Floor Tiling (Main & Kitchen)", "quantity": 110, "unit": "sq.m", "category": "Finishes" },
-    { "id": 11, "scopeOfWork": "Fabricate & Install Service Counter", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
-    { "id": 12, "scopeOfWork": "Custom Millwork (Shelves & Benches)", "quantity": 1, "unit": "lot", "category": "Architectural Works" },
-    { "id": 13, "scopeOfWork": "Final Fixture Installation & Commissioning", "quantity": 1, "unit": "lot", "category": "MEPF Works" }
-  ],
-  "dupas": [
-    { "id": 1, "quantityId": 1, "duration": 2, "directCosts": [
-        { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 6, "rate": 480 },
-        { "type": "material", "name": "Hauling & Disposal Fees", "quantity": 1, "unit": "lot", "unitPrice": 5000 }
-    ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 2, "quantityId": 2, "duration": 3, "directCosts": [
-        { "type": "labor", "laborType": "Construction Foreman", "mandays": 3, "rate": 850 },
-        { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480 }
-    ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 3, "quantityId": 3, "duration": 6, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 6, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Steelman)", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 12, "rate": 480}, {"type": "material", "name": "Deformed Rebar 16mm", "quantity": 500, "unit": "kg", "unitPrice": 52}, {"type": "material", "name": "Deformed Rebar 10mm", "quantity": 350, "unit": "kg", "unitPrice": 48}, {"type": "material", "name": "G.I. Tie Wire #16", "quantity": 13, "unit": "kg", "unitPrice": 85}, {"type": "equipment", "name": "Bar Cutter", "hours": 24, "rate": 250}, {"type": "equipment", "name": "Bar Bender", "hours": 24, "rate": 250} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 4, "quantityId": 4, "duration": 2, "directCosts": [ { "type": "labor", "laborType": "Construction Foreman", "mandays": 2, "rate": 850 }, { "type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 4, "rate": 650 }, { "type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 8, "rate": 480 }, { "type": "material", "name": "Portland Cement (40kg)", "quantity": 162, "unit": "bag", "unitPrice": 255 }, { "type": "material", "name": "Washed Sand", "quantity": 9, "unit": "cu.m", "unitPrice": 1350 }, { "type": "material", "name": "Gravel 3/4\"", "quantity": 18, "unit": "cu.m", "unitPrice": 1450 }, { "type": "material", "name": "Phenolic Plywood 1/2\"", "quantity": 10, "unit": "sheet", "unitPrice": 950 }, { "type": "material", "name": "Common Wire Nails", "quantity": 5, "unit": "kg", "unitPrice": 120 }, { "type": "equipment", "name": "Concrete Mixer (1-Bagger)", "hours": 16, "rate": 190 }, { "type": "equipment", "name": "Concrete Vibrator", "hours": 16, "rate": 150 } ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 5, "quantityId": 5, "duration": 10, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 10, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Mason)", "mandays": 30, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 20, "rate": 480}, {"type": "material", "name": "CHB 4\"", "quantity": 1875, "unit": "pc", "unitPrice": 14}, {"type": "material", "name": "Portland Cement (40kg)", "quantity": 40, "unit": "bag", "unitPrice": 255}, {"type": "material", "name": "Washed Sand", "quantity": 3.5, "unit": "cu.m", "unitPrice": 1350}, {"type": "material", "name": "Deformed Rebar 10mm", "quantity": 75, "unit": "kg", "unitPrice": 48} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 6, "quantityId": 6, "duration": 8, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 18, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 8, "rate": 480}, {"type": "material", "name": "Metal Roofing System", "quantity": 130, "unit": "sq.m", "unitPrice": 850}, {"type": "material", "name": "Tek screw", "quantity": 800, "unit": "Pcs", "unitPrice": 1.5}, {"type": "material", "name": "Sealant", "quantity": 3, "unit": "Qrt", "unitPrice": 220} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 7, "quantityId": 7, "duration": 5, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 10, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 5, "rate": 480}, {"type": "material", "name": "Panel Door", "quantity": 3, "unit": "Pcs", "unitPrice": 9000}, {"type": "material", "name": "Door Jamb", "quantity": 3, "unit": "Pcs", "unitPrice": 2500}, {"type": "material", "name": "Window Set", "quantity": 1, "unit": "Lot", "unitPrice": 11000} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 8, "quantityId": 8, "duration": 12, "directCosts": [ {"type": "labor", "laborType": "Master Electrician", "mandays": 12, "rate": 750 }, {"type": "labor", "laborType":"Master Plumber", "mandays": 12, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 24, "rate": 480}, {"type": "material", "name": "Wires and Conduits", "quantity": 1, "unit": "lot", "unitPrice": 35000}, {"type": "material", "name": "PPR Pipes", "quantity": 1, "unit": "lot", "unitPrice": 25000} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 9, "quantityId": 9, "duration": 8, "directCosts": [ {"type": "labor", "laborType": "Construction Foreman", "mandays": 8, "rate": 850}, {"type": "labor", "laborType": "Painter", "mandays": 20, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Skim Coat", "quantity": 15, "unit": "Bags", "unitPrice": 475}, {"type": "material", "name": "Flat White Primer", "quantity": 8, "unit": "Gals", "unitPrice": 577.5}, {"type": "material", "name": "Latex Paint", "quantity": 10, "unit": "gal", "unitPrice": 800} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 10, "quantityId": 10, "duration": 7, "directCosts": [ {"type": "labor", "laborType": "Tile Setter", "mandays": 15, "rate": 650}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 7, "rate": 480}, {"type": "material", "name": "Floor Tiles", "quantity": 110, "unit": "sq.m", "unitPrice": 350}, {"type": "material", "name": "Tile Adhesive", "quantity": 22, "unit": "bag", "unitPrice": 250}, {"type": "material", "name": "Tile Grout (White)", "quantity": 5, "unit": "Bags", "unitPrice": 45} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 11, "quantityId": 11, "duration": 4, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 8, "rate": 650 }, {"type": "material", "name": "Tubular Steel 2″ x 2″ x 1.2 mm", "quantity": 4, "unit": "pc", "unitPrice": 830}, {"type": "material", "name": "Welding Rod", "quantity": 2, "unit": "Kilos", "unitPrice": 130}, {"type": "material", "name": "Marine Plywood 3/4\"", "quantity": 5, "unit": "sheet", "unitPrice": 1200}, {"type": "material", "name": "Laminate Sheets", "quantity": 5, "unit": "sheet", "unitPrice": 1500} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 12, "quantityId": 12, "duration": 5, "directCosts": [ {"type": "labor", "laborType": "Skilled Labor (Carpenter)", "mandays": 10, "rate": 650 }, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 5, "rate": 480}, {"type": "material", "name": "Marine Plywood 3/4\"", "quantity": 8, "unit": "sheet", "unitPrice": 1200}, {"type": "material", "name": "Laminate Sheets", "quantity": 8, "unit": "sheet", "unitPrice": 1500} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } },
-    { "id": 13, "quantityId": 13, "duration": 6, "directCosts": [ {"type": "labor", "laborType": "Master Electrician", "mandays": 5, "rate": 750 }, {"type": "labor", "laborType": "Master Plumber", "mandays": 5, "rate": 750}, {"type": "labor", "laborType": "Unskilled Labor (Laborer)", "mandays": 10, "rate": 480}, {"type": "material", "name": "Water Closet", "quantity": 1, "unit": "Pcs", "unitPrice": 6500}, {"type": "material", "name": "Lavatory", "quantity": 1, "unit": "Pcs", "unitPrice": 3500}, {"type": "material", "name": "Industrial Kitchen Sink", "quantity": 1, "unit": "Pcs", "unitPrice": 5000}, {"type": "material", "name": "Panel Board", "quantity": 1, "unit": "Pcs", "unitPrice": 3000}, {"type": "material", "name": "Lighting and Outlets", "quantity": 1, "unit": "lot", "unitPrice": 40000} ], "indirectCosts": { "ocm": 12, "profit": 15, "taxes": 5 } }
-  ],
-  "tasks": [
-    { "predecessorId": "PROJECT_START", "successorId": 1 },
-    { "predecessorId": 1, "successorId": 2 },
-    { "predecessorId": 2, "successorId": 3 },
-    { "predecessorId": 3, "successorId": 4 },
-    { "predecessorId": 4, "successorId": 5 },
-    { "predecessorId": 5, "successorId": 6 },
-    { "predecessorId": 5, "successorId": 8 },
-    { "predecessorId": 6, "successorId": 7 },
-    { "predecessorId": 7, "successorId": 9 },
-    { "predecessorId": 8, "successorId": 9 },
-    { "predecessorId": 9, "successorId": 10 },
-    { "predecessorId": 9, "successorId": 11 },
-    { "predecessorId": 9, "successorId": 12 },
-    { "predecessorId": 10, "successorId": 13 },
-    { "predecessorId": 11, "successorId": 13 },
-    { "predecessorId": 12, "successorId": 13 },
-    { "predecessorId": 13, "successorId": "PROJECT_END" }
-  ]
-}
 </file>
 
 <file path="js/dupa.js">
@@ -10457,485 +10479,6 @@ function initializeTakeoffModule() {
     { "type": "quantity", "taskId": 6, "subIndex": null, "date": "2025-08-25", "percentComplete": 25 },
     { "type": "quantity", "taskId": 10, "subIndex": 0, "date": "2025-09-10", "percentComplete": 10 }
   ]
-}
-</file>
-
-<file path="js/views.js">
-// Author: Gemini
-// OS support: Cross-platform
-// Description: Controls view switching and navigation for the SPA.
-
-let dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, changeOrdersView, revisedReportsView, lookaheadView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView;
-let allViews = [];
-
-let takeoffQuantitiesView, dupaQuantityListView, dupaFormView, sequencingTasksView, boqDisplayView, pertCpmDisplayView, ganttChartDisplayView, sCurveDisplayView, pertCpmNetworkView, resourceScheduleView;
-let revisedBoqProjectListView, revisedBoqDisplayView, revisedPertCpmDisplayView, revisedPertCpmNetworkView, revisedResourceScheduleView;
-let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, coItemTypeModal, coItemTypeModalClose, coExistingItemModal, coExistingItemModalClose, importPreviewModal, importPreviewModalClose, libraryPickerModal, libraryPickerModalClose, libraryPickerTitle, libraryPickerSearch, libraryPickerList, libraryPickerCrewMultiplier, libraryPickerCrewCount;
-let navDashboard, navProjects, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
-let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
-let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
-let settingsView, navSyncSettings, dataManagementView, navDataManagement, themeManagerView, navThemeManager;
-
-
-const openDupaReportModal = () => dupaReportModal.style.display = 'block';
-const closeDupaReportModal = () => dupaReportModal.style.display = 'none';
-const openCoItemTypeModal = () => coItemTypeModal.style.display = 'block';
-const closeCoItemTypeModal = () => coItemTypeModal.style.display = 'none';
-const openCoExistingItemModal = () => coExistingItemModal.style.display = 'block';
-const closeCoExistingItemModal = () => coExistingItemModal.style.display = 'none';
-const openImportPreviewModal = () => importPreviewModal.style.display = 'block';
-const closeImportPreviewModal = () => importPreviewModal.style.display = 'none';
-const openLibraryPickerModal = () => libraryPickerModal.style.display = 'block';
-const closeLibraryPickerModal = () => libraryPickerModal.style.display = 'none';
-
-const openLibraryPicker = (config) => {
-    libraryPickerTitle.textContent = config.title;
-    libraryPickerSearch.value = '';
-    libraryPickerCrewMultiplier.classList.toggle('hidden', !config.isCrewPicker);
-    libraryPickerCrewCount.value = 1;
-    
-    const renderList = (items) => {
-        libraryPickerList.innerHTML = '';
-        if (items.length === 0) {
-            libraryPickerList.innerHTML = '<p>No items found.</p>';
-            return;
-        }
-        items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.dataset.id = item.id;
-            div.style.cursor = 'pointer';
-            let itemText = `<h3>${item.name}</h3>`;
-            if (item.type) itemText += `<span>(${item.type})</span>`;
-            if (item.productivityRate) itemText += `<span> - ${item.productivityRate} ${item.productivityUnit}</span>`;
-            div.innerHTML = itemText;
-            libraryPickerList.appendChild(div);
-        });
-    };
-
-    renderList(config.dataSource);
-
-    libraryPickerSearch.oninput = () => {
-        const filter = libraryPickerSearch.value.toLowerCase();
-        const filteredItems = config.dataSource.filter(item => 
-            config.searchKeys.some(key => item[key].toLowerCase().includes(filter))
-        );
-        renderList(filteredItems);
-    };
-
-    libraryPickerList.onclick = (e) => {
-        const itemElement = e.target.closest('.list-item');
-        if (itemElement) {
-            const itemId = parseInt(itemElement.dataset.id);
-            const selectedItem = config.dataSource.find(item => item.id === itemId);
-            if (selectedItem) {
-                const multiplier = config.isCrewPicker ? parseInt(libraryPickerCrewCount.value) : 1;
-                config.onSelect(selectedItem, multiplier);
-                closeLibraryPickerModal();
-            }
-        }
-    };
-    
-    openLibraryPickerModal();
-};
-
-const setActiveNav = (activeLink) => {
-    const allNavLinks = document.querySelectorAll('.navbar ul a');
-    allNavLinks.forEach(l => l.classList.remove('active'));
-
-    if (activeLink) {
-        activeLink.classList.add('active');
-        const parentDropdown = activeLink.closest('.dropdown');
-        if (parentDropdown) {
-            parentDropdown.querySelector('.dropbtn').classList.add('active');
-        }
-    }
-};
-const showView = (activeView) => {
-    if (!activeView) {
-        console.error("DEBUG: showView was called with a null or undefined view. All views will be hidden.");
-    } else {
-        console.log(`%cDEBUG: Attempting to switch view to: ${activeView.id}`, 'color: blue; font-weight: bold;');
-    }
-    
-    console.log(`DEBUG: Managing ${allViews.length} total views found in allViews array.`);
-
-    allViews.forEach((viewElement, index) => {
-        if (!viewElement) {
-            console.warn(`DEBUG: The view at index ${index} in the allViews array is null or undefined.`);
-            return;
-        }
-
-        const shouldBeHidden = viewElement !== activeView;
-        
-        if (shouldBeHidden) {
-            if (!viewElement.classList.contains('hidden')) {
-                console.log(`- Hiding: ${viewElement.id}`);
-            }
-            viewElement.classList.add('hidden');
-        } else {
-            if (viewElement.classList.contains('hidden')) {
-                console.log(`+ Showing: ${viewElement.id}`);
-            }
-            viewElement.classList.remove('hidden');
-        }
-    });
-};
-const showSyncSettings = () => {
-    showView(settingsView);
-    setActiveNav(navSyncSettings);
-};
-
-const showDashboard = () => { showView(dashboardView); setActiveNav(navDashboard); updateDashboard(); };
-const showProjects = () => { showView(projectsView); setActiveNav(navProjects); displayProjects(); };
-const showDocumentation = () => {
-    showView(documentationView);
-    setActiveNav(navDocumentation);
-
-    const diagramContainer = document.getElementById('workflow-diagram-container');
-    if (!diagramContainer) return;
-    
-    diagramContainer.innerHTML = 'Loading Diagram...';
-
-    const mermaidGraph = `
-    graph TD
-        %% Define styles for the different node types
-        classDef actionNode fill:#0d6efd,stroke:#0a58ca,stroke-width:2px,color:#fff,font-weight:bold;
-        classDef criticalNode fill:#ffc107,stroke:#997404,stroke-width:2px,color:#212529,font-weight:bold;
-        classDef descNode fill:none,stroke:none,color:#343a40,font-size:13px,text-align:left;
-
-        %% Phase 1: Setup
-        subgraph Phase 1: Setup
-            A1("Create Project")
-            A1_desc("Start by defining your<br/>project's basic details.")
-            A2("Populate Libraries")
-            A2_desc("Add common materials,<br/>resources, and crews.")
-            
-            A1 ~~~ A1_desc
-            A2 ~~~ A2_desc
-            A1 --> A2
-        end
-
-        %% Phase 2: Pre-construction
-        subgraph Phase 2: Pre-construction
-            B1("Take Off")
-            B1_desc("Define the complete scope of<br/>work and item quantities.")
-            B2("DUPA")
-            B2_desc("Perform a detailed cost<br/>analysis for each work item.")
-            B3("Task Sequencing")
-            B3_desc("Set dependencies between tasks<br/>to create the project's workflow.")
-
-            B1 ~~~ B1_desc
-            B2 ~~~ B2_desc
-            B3 ~~~ B3_desc
-            B1 --> B2 --> B3
-        end
-        
-        %% Phase 3: Locking the Plan
-        subgraph Phase 3: Locking the Plan
-            C1("<b>Generate BOQ</b>")
-            C1_desc("<i>This critical step locks the plan<br/>and enables all construction modules.</i>")
-
-            C1 ~~~ C1_desc
-        end
-
-        %% Phase 4: Construction & Monitoring
-        subgraph Phase 4: Construction & Monitoring
-            D1("File Accomplishment")
-            D1_desc("Set the project start date and<br/>track daily progress.")
-            D2("View Tracking Reports")
-            D2_desc("Monitor health with live<br/>Gantt charts and S-Curves.")
-            D3("Manage Change Orders")
-            D3_desc("Create and approve any<br/>variations to the scope.")
-            
-            D1 ~~~ D1_desc
-            D2 ~~~ D2_desc
-            D3 ~~~ D3_desc
-            D1 --> D2 & D3
-        end
-
-        %% Link Phases
-        A2 --> B1
-        B3 --> C1
-        C1 --> D1
-
-        %% Apply styles to all nodes
-        class A1,A2,B1,B2,B3,D1,D2,D3 actionNode;
-        class C1 criticalNode;
-        class A1_desc,A2_desc,B1_desc,B2_desc,B3_desc,C1_desc,D1_desc,D2_desc,D3_desc descNode;
-    `;
-
-    try {
-        mermaid.render('workflow-diagram-svg', mermaidGraph).then(({ svg }) => {
-            diagramContainer.innerHTML = svg;
-        });
-    } catch (e) {
-        diagramContainer.innerHTML = 'Error rendering diagram.';
-        console.error("Mermaid rendering error:", e);
-    }
-};
-const showTakeOff = () => showProjects();
-const showDupa = () => showProjects();
-const showSequencing = () => showProjects();
-const showReports = () => showProjects();
-const showChangeOrders = () => showProjects();
-const showAccomplishment = () => showProjects();
-const showTrackingGantt = () => showProjects();
-const showTrackingSCurve = () => showProjects();
-const showRevisedReports = () => showProjects();
-const showLookahead = () => showProjects();
-const showMaterialsLibrary = () => {
-    showView(materialsLibraryView);
-    setActiveNav(navMaterialsLibrary);
-    displayMaterials();
-};
-const showDupaLibrary = () => {
-    showView(dupaLibraryView);
-    setActiveNav(navDupaLibrary);
-    displayResources();
-    displayCrews();
-};
-const showLibraryManagement = () => {
-    showView(libraryManagementView);
-    setActiveNav(navLibraryManagement);
-};
-
-function initializeViewsModule() {
-    dashboardView = document.getElementById('dashboard-view');
-    projectsView = document.getElementById('projects-view');
-    projectSummaryView = document.getElementById('project-summary-view');
-    takeoffView = document.getElementById('takeoff-view');
-    dupaView = document.getElementById('dupa-view');
-    sequencingView = document.getElementById('sequencing-view');
-    reportsView = document.getElementById('reports-view');
-    accomplishmentView = document.getElementById('accomplishment-view');
-    accomplishmentListView = document.getElementById('accomplishment-list-view');
-    accomplishmentDetailView = document.getElementById('accomplishment-detail-view');
-    trackingGanttView = document.getElementById('tracking-gantt-view');
-    trackingSCurveView = document.getElementById('tracking-s-curve-view');
-    changeOrdersView = document.getElementById('change-orders-view');
-    revisedReportsView = document.getElementById('revised-reports-view');
-    lookaheadView = document.getElementById('lookahead-view');
-    materialsLibraryView = document.getElementById('materials-library-view');
-    dupaLibraryView = document.getElementById('dupa-library-view');
-    libraryManagementView = document.getElementById('library-management-view');
-    documentationView = document.getElementById('documentation-view');
-    settingsView = document.getElementById('settings-view');
-    dataManagementView = document.getElementById('data-management-view');
-    navSyncSettings = document.getElementById('nav-sync-settings');
-    
-    revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
-    revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
-
-    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, dataManagementView, themeManagerView, revisedPertCpmNetworkView, revisedResourceScheduleView];
-
-    takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
-    dupaQuantityListView = document.getElementById('dupa-quantity-list-view');
-    dupaFormView = document.getElementById('dupa-form-view');
-    sequencingTasksView = document.getElementById('sequencing-tasks-view');
-    boqDisplayView = document.getElementById('boq-display-view');
-    pertCpmDisplayView = document.getElementById('pert-cpm-display-view');
-    ganttChartDisplayView = document.getElementById('gantt-chart-display-view');
-    sCurveDisplayView = document.getElementById('s-curve-display-view');
-    pertCpmNetworkView = document.getElementById('pert-cpm-network-view');
-    resourceScheduleView = document.getElementById('resource-schedule-view');
-
-    revisedBoqDisplayView = document.getElementById('revised-boq-display-view');
-    revisedPertCpmDisplayView = document.getElementById('revised-pert-cpm-display-view');
-
-    dupaReportModal = document.getElementById('dupa-details-modal');
-    dupaReportModalClose = document.querySelector('.dupa-details-modal-close');
-    dupaReportTitle = document.getElementById('dupa-details-title');
-    dupaReportContent = document.getElementById('dupa-details-content');
-    coItemTypeModal = document.getElementById('co-item-type-modal');
-    coItemTypeModalClose = document.querySelector('.co-item-type-modal-close');
-    coExistingItemModal = document.getElementById('co-existing-item-modal');
-    coExistingItemModalClose = document.querySelector('.co-existing-item-modal-close');
-    importPreviewModal = document.getElementById('import-preview-modal');
-    importPreviewModalClose = document.querySelector('.import-preview-modal-close');
-    libraryPickerModal = document.getElementById('library-picker-modal');
-    libraryPickerModalClose = document.getElementById('library-picker-modal-close');
-    libraryPickerTitle = document.getElementById('library-picker-title');
-    libraryPickerSearch = document.getElementById('library-picker-search');
-    libraryPickerList = document.getElementById('library-picker-list');
-    libraryPickerCrewMultiplier = document.getElementById('library-picker-crew-multiplier');
-    libraryPickerCrewCount = document.getElementById('library-picker-crew-count');
-
-    navDashboard = document.getElementById('nav-dashboard');
-    navProjects = document.getElementById('nav-projects');
-    navMaterialsLibrary = document.getElementById('nav-materials-library');
-    navDupaLibrary = document.getElementById('nav-dupa-library');
-    navLibraryManagement = document.getElementById('nav-library-management');
-    navDocumentation = document.getElementById('nav-documentation');
-    navBrandLink = document.getElementById('nav-brand-link');
-    navDataManagement = document.getElementById('nav-data-management');
-    themeManagerView = document.getElementById('theme-manager-view');
-    navThemeManager = document.getElementById('nav-theme-manager');
-
-    const showDataManagement = () => {
-        showView(dataManagementView);
-        setActiveNav(navDataManagement);
-    };
-    const showThemeManager = () => {
-        if (!themeManagerView) {
-            alert("Error: The HTML element for the Theme Manager view could not be found. Please check your index.html file.");
-            return;
-        }
-        showView(themeManagerView);
-        setActiveNav(navThemeManager);
-    };
-
-    navSyncSettings.addEventListener('click', (e) => { e.preventDefault(); showSyncSettings(); });
-    navDataManagement.addEventListener('click', (e) => { e.preventDefault(); showDataManagement(); });
-    navThemeManager.addEventListener('click', (e) => { e.preventDefault(); showThemeManager(); });
-
-    navDashboard.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
-    navProjects.addEventListener('click', (e) => { e.preventDefault(); showProjects(); });
-    navMaterialsLibrary.addEventListener('click', (e) => { e.preventDefault(); showMaterialsLibrary(); });
-    navDupaLibrary.addEventListener('click', (e) => { e.preventDefault(); showDupaLibrary(); });
-    navLibraryManagement.addEventListener('click', (e) => { e.preventDefault(); showLibraryManagement(); });
-    navDocumentation.addEventListener('click', (e) => { e.preventDefault(); showDocumentation(); });
-    navBrandLink.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
-    
-
-    const backToHub = () => { if(currentHubProjectId) showProjectSummary(currentHubProjectId); };
-
-    document.getElementById('back-to-projects-from-summary').addEventListener('click', showProjects);
-    document.getElementById('view-past-reports-btn').addEventListener('click', () => showAccomplishmentList(currentConstructionProjectId));
-    document.getElementById('back-to-accomplishment-list').addEventListener('click', () => showAccomplishmentList(currentConstructionProjectId));
-
-    backToTakeoffListBtn = document.getElementById('back-to-takeoff-list');
-    backToDupaProjectsBtn = document.getElementById('back-to-dupa-projects');
-    backToDupaQuantitiesBtn = document.getElementById('back-to-dupa-quantities');
-    backToSequencingProjectsBtn = document.getElementById('back-to-sequencing-projects');
-    backToBoqProjectsBtn = document.getElementById('back-to-boq-projects');
-    backToBoqViewBtn = document.getElementById('back-to-boq-view');
-    backToPertCpmViewBtn = document.getElementById('back-to-pert-cpm-view');
-    backToPertCpmViewFromSCurveBtn = document.getElementById('back-to-pert-cpm-view-from-s-curve');
-    backToPertCpmFromNetworkBtn = document.getElementById('back-to-pert-cpm-from-network-btn');
-    backToPertCpmFromResourceBtn = document.getElementById('back-to-pert-cpm-from-resource-btn');
-    backToRevisedBoqProjectsBtn = document.getElementById('back-to-revised-boq-projects');
-    backToRevisedBoqViewBtn = document.getElementById('back-to-revised-boq-view');
-    
-    backToRevisedPertCpmBtn = document.getElementById('back-to-revised-boq-view');
-    backToRevisedPertCpmFromNetworkBtn = document.getElementById('back-to-revised-pert-cpm-from-network-btn');
-    backToRevisedPertCpmFromResourceBtn = document.getElementById('back-to-revised-pert-cpm-from-resource-btn');
-    
-    backToTakeoffListBtn.addEventListener('click', backToHub);
-    backToDupaProjectsBtn.addEventListener('click', backToHub);
-    backToDupaQuantitiesBtn.addEventListener('click', () => showDupaQuantitiesForProject(currentDupaProjectId, dupaProjectName.textContent));
-    backToSequencingProjectsBtn.addEventListener('click', backToHub);
-    backToBoqProjectsBtn.addEventListener('click', backToHub);
-    
-    backToBoqViewBtn.addEventListener('click', () => {
-        pertCpmDisplayView.classList.add('hidden');
-        ganttChartDisplayView.classList.add('hidden');
-        sCurveDisplayView.classList.add('hidden');
-        pertCpmNetworkView.classList.add('hidden');
-        resourceScheduleView.classList.add('hidden');
-        boqDisplayView.classList.remove('hidden');
-    });
-
-    const goBackToPertCpm = () => {
-        ganttChartDisplayView.classList.add('hidden');
-        sCurveDisplayView.classList.add('hidden');
-        pertCpmNetworkView.classList.add('hidden');
-        resourceScheduleView.classList.add('hidden');
-        pertCpmDisplayView.classList.remove('hidden');
-    };
-
-    backToPertCpmViewBtn.addEventListener('click', goBackToPertCpm);
-    backToPertCpmViewFromSCurveBtn.addEventListener('click', goBackToPertCpm);
-    backToPertCpmFromNetworkBtn.addEventListener('click', goBackToPertCpm);
-    backToPertCpmFromResourceBtn.addEventListener('click', goBackToPertCpm);
-
-    backToRevisedBoqProjectsBtn.addEventListener('click', backToHub);
-    backToRevisedBoqViewBtn.addEventListener('click', () => {
-        revisedPertCpmDisplayView.classList.add('hidden');
-        revisedBoqDisplayView.classList.remove('hidden');
-    });
-
-    const goBackToRevisedPertCpm = () => {
-        revisedPertCpmNetworkView.classList.add('hidden');
-        revisedResourceScheduleView.classList.add('hidden');
-        revisedPertCpmDisplayView.classList.remove('hidden');
-    };
-    if (backToRevisedPertCpmBtn) backToRevisedPertCpmBtn.addEventListener('click', () => {
-        revisedPertCpmDisplayView.classList.add('hidden');
-        revisedBoqDisplayView.classList.remove('hidden');
-    });
-    if (backToRevisedPertCpmFromNetworkBtn) backToRevisedPertCpmFromNetworkBtn.addEventListener('click', goBackToRevisedPertCpm);
-    if (backToRevisedPertCpmFromResourceBtn) backToRevisedPertCpmFromResourceBtn.addEventListener('click', goBackToRevisedPertCpm);
-
-    document.getElementById('back-to-co-projects').addEventListener('click', backToHub);
-    document.getElementById('back-to-accomplishment-projects').addEventListener('click', backToHub);
-    document.getElementById('back-to-tracking-gantt-projects').addEventListener('click', backToHub);
-    document.getElementById('back-to-tracking-s-curve-projects').addEventListener('click', backToHub);
-    document.getElementById('back-to-lookahead-projects').addEventListener('click', backToHub);
-    
-    
-    projectSummaryView.addEventListener('click', (e) => {
-        const target = e.target.closest('.hub-buttons button');
-        if (!target) return;
-
-        const projectId = parseInt(target.dataset.id);
-        const projectName = target.dataset.name;
-
-        if (!projectId || !projectName) return;
-
-        switch (target.id) {
-            case 'hub-btn-takeoff':
-                setActiveNav(navProjects);
-                showView(takeoffView);
-                showQuantitiesForProject(projectId, projectName);
-                break;
-            case 'hub-btn-dupa':
-                setActiveNav(navProjects);
-                showView(dupaView);
-                showDupaQuantitiesForProject(projectId, projectName);
-                break;
-            case 'hub-btn-sequencing':
-                setActiveNav(navProjects);
-                showView(sequencingView);
-                showSequencesForProject(projectId, projectName);
-                break;
-            case 'hub-btn-reports':
-                setActiveNav(navProjects);
-                showView(reportsView);
-                showBoqForProject(projectId, projectName);
-                break;
-            case 'hub-btn-change-orders':
-                setActiveNav(navProjects);
-                showView(changeOrdersView);
-                showChangeOrdersForProject(projectId, projectName);
-                break;
-            case 'hub-btn-accomplishment':
-                setActiveNav(navProjects);
-                showView(accomplishmentView);
-                showAccomplishmentForm(projectId, projectName);
-                break;
-            case 'hub-btn-tracking-gantt':
-                setActiveNav(navProjects);
-                showView(trackingGanttView);
-                showTrackingGanttChart(projectId, projectName);
-                break;
-            case 'hub-btn-tracking-scurve':
-                setActiveNav(navProjects);
-                showView(trackingSCurveView);
-                renderTrackingSCurve(projectId, projectName);
-                break;
-            case 'hub-btn-revised-reports':
-                setActiveNav(navProjects);
-                showView(revisedReportsView);
-                showRevisedBoqForProject(projectId, projectName);
-                break;
-            case 'hub-btn-lookahead':
-                setActiveNav(navProjects);
-                showView(lookaheadView);
-                showLookAheadReportView(projectId, projectName);
-                break;
-        }
-    });
 }
 </file>
 
@@ -11646,6 +11189,509 @@ function initializeSequencingModule() {
 }
 </file>
 
+<file path="js/views.js">
+// Author: Gemini
+// OS support: Cross-platform
+// Description: Controls view switching and navigation for the SPA.
+
+let dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, changeOrdersView, revisedReportsView, lookaheadView, materialsLibraryView, dupaLibraryView, libraryManagementView, documentationView;
+let allViews = [];
+
+let takeoffQuantitiesView, dupaQuantityListView, dupaFormView, sequencingTasksView, boqDisplayView, pertCpmDisplayView, ganttChartDisplayView, sCurveDisplayView, pertCpmNetworkView, resourceScheduleView;
+let revisedBoqProjectListView, revisedBoqDisplayView, revisedPertCpmDisplayView, revisedPertCpmNetworkView, revisedResourceScheduleView;
+let dupaReportModal, dupaReportModalClose, dupaReportTitle, dupaReportContent, coItemTypeModal, coItemTypeModalClose, coExistingItemModal, coExistingItemModalClose, importPreviewModal, importPreviewModalClose, libraryPickerModal, libraryPickerModalClose, libraryPickerTitle, libraryPickerSearch, libraryPickerList, libraryPickerCrewMultiplier, libraryPickerCrewCount;
+let navDashboard, navProjects, navMaterialsLibrary, navDupaLibrary, navLibraryManagement, navDocumentation;
+let backToTakeoffListBtn, backToDupaProjectsBtn, backToDupaQuantitiesBtn, backToSequencingProjectsBtn, backToBoqProjectsBtn, backToBoqViewBtn, backToPertCpmViewBtn, backToPertCpmViewFromSCurveBtn, backToPertCpmFromNetworkBtn, backToPertCpmFromResourceBtn, backToRevisedBoqProjectsBtn, backToRevisedBoqViewBtn;
+let backToRevisedPertCpmBtn, backToRevisedPertCpmFromNetworkBtn, backToRevisedPertCpmFromResourceBtn;
+let settingsView, navSyncSettings, dataManagementView, navDataManagement, themeManagerView, navThemeManager;
+
+
+const openDupaReportModal = () => dupaReportModal.style.display = 'block';
+const closeDupaReportModal = () => dupaReportModal.style.display = 'none';
+const openCoItemTypeModal = () => coItemTypeModal.style.display = 'block';
+const closeCoItemTypeModal = () => coItemTypeModal.style.display = 'none';
+const openCoExistingItemModal = () => coExistingItemModal.style.display = 'block';
+const closeCoExistingItemModal = () => coExistingItemModal.style.display = 'none';
+const openImportPreviewModal = () => importPreviewModal.style.display = 'block';
+const closeImportPreviewModal = () => importPreviewModal.style.display = 'none';
+const openLibraryPickerModal = () => libraryPickerModal.style.display = 'block';
+const closeLibraryPickerModal = () => libraryPickerModal.style.display = 'none';
+
+const openLibraryPicker = (config) => {
+    libraryPickerTitle.textContent = config.title;
+    libraryPickerSearch.value = '';
+    libraryPickerCrewMultiplier.classList.toggle('hidden', !config.isCrewPicker);
+    libraryPickerCrewCount.value = 1;
+    
+    const renderList = (items) => {
+        libraryPickerList.innerHTML = '';
+        if (items.length === 0) {
+            libraryPickerList.innerHTML = '<p>No items found.</p>';
+            return;
+        }
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.dataset.id = item.id;
+            div.style.cursor = 'pointer';
+            let itemText = `<h3>${item.name}</h3>`;
+            if (item.type) itemText += `<span>(${item.type})</span>`;
+            if (item.productivityRate) itemText += `<span> - ${item.productivityRate} ${item.productivityUnit}</span>`;
+            div.innerHTML = itemText;
+            libraryPickerList.appendChild(div);
+        });
+    };
+
+    renderList(config.dataSource);
+
+    libraryPickerSearch.oninput = () => {
+        const filter = libraryPickerSearch.value.toLowerCase();
+        const filteredItems = config.dataSource.filter(item => 
+            config.searchKeys.some(key => item[key].toLowerCase().includes(filter))
+        );
+        renderList(filteredItems);
+    };
+
+    libraryPickerList.onclick = (e) => {
+        const itemElement = e.target.closest('.list-item');
+        if (itemElement) {
+            const itemId = parseInt(itemElement.dataset.id);
+            const selectedItem = config.dataSource.find(item => item.id === itemId);
+            if (selectedItem) {
+                const multiplier = config.isCrewPicker ? parseInt(libraryPickerCrewCount.value) : 1;
+                config.onSelect(selectedItem, multiplier);
+                closeLibraryPickerModal();
+            }
+        }
+    };
+    
+    openLibraryPickerModal();
+};
+
+const setActiveNav = (activeLink) => {
+    const allNavLinks = document.querySelectorAll('.navbar ul a');
+    allNavLinks.forEach(l => l.classList.remove('active'));
+
+    if (activeLink) {
+        activeLink.classList.add('active');
+        const parentDropdown = activeLink.closest('.dropdown');
+        if (parentDropdown) {
+            parentDropdown.querySelector('.dropbtn').classList.add('active');
+        }
+    }
+};
+const showView = (activeView) => {
+    if (!activeView) {
+        console.error("DEBUG: showView was called with a null or undefined view. All views will be hidden.");
+    } else {
+        console.log(`%cDEBUG: Attempting to switch view to: ${activeView.id}`, 'color: blue; font-weight: bold;');
+    }
+    
+    console.log(`DEBUG: Managing ${allViews.length} total views found in allViews array.`);
+
+    allViews.forEach((viewElement, index) => {
+        if (!viewElement) {
+            console.warn(`DEBUG: The view at index ${index} in the allViews array is null or undefined.`);
+            return;
+        }
+
+        const shouldBeHidden = viewElement !== activeView;
+        
+        if (shouldBeHidden) {
+            if (!viewElement.classList.contains('hidden')) {
+                console.log(`- Hiding: ${viewElement.id}`);
+            }
+            viewElement.classList.add('hidden');
+        } else {
+            if (viewElement.classList.contains('hidden')) {
+                console.log(`+ Showing: ${viewElement.id}`);
+            }
+            viewElement.classList.remove('hidden');
+        }
+    });
+};
+const showSyncSettings = () => {
+    showView(settingsView);
+    setActiveNav(navSyncSettings);
+};
+
+const showDashboard = () => { showView(dashboardView); setActiveNav(navDashboard); updateDashboard(); };
+const showProjects = () => { showView(projectsView); setActiveNav(navProjects); displayProjects(); };
+const showDocumentation = () => {
+    showView(documentationView);
+    setActiveNav(navDocumentation);
+
+    const diagramContainer = document.getElementById('workflow-diagram-container');
+    if (!diagramContainer) return;
+    
+    diagramContainer.innerHTML = 'Loading Diagram...';
+
+    const mermaidGraph = `
+    graph TD
+        %% Define styles for the different node types
+        classDef actionNode fill:#0d6efd,stroke:#0a58ca,stroke-width:2px,color:#fff,font-weight:bold;
+        classDef criticalNode fill:#ffc107,stroke:#997404,stroke-width:2px,color:#212529,font-weight:bold;
+        classDef descNode fill:none,stroke:none,color:#343a40,font-size:13px,text-align:left;
+
+        %% Phase 1: Setup
+        subgraph Phase 1: Setup
+            A1("Create Project")
+            A1_desc("Start by defining your<br/>project's basic details.")
+            A2("Populate Libraries")
+            A2_desc("Add common materials,<br/>resources, and crews.")
+            
+            A1 ~~~ A1_desc
+            A2 ~~~ A2_desc
+            A1 --> A2
+        end
+
+        %% Phase 2: Pre-construction
+        subgraph Phase 2: Pre-construction
+            B1("Take Off")
+            B1_desc("Define the complete scope of<br/>work and item quantities.")
+            B2("DUPA")
+            B2_desc("Perform a detailed cost<br/>analysis for each work item.")
+            B3("Task Sequencing")
+            B3_desc("Set dependencies between tasks<br/>to create the project's workflow.")
+
+            B1 ~~~ B1_desc
+            B2 ~~~ B2_desc
+            B3 ~~~ B3_desc
+            B1 --> B2 --> B3
+        end
+        
+        %% Phase 3: Locking the Plan
+        subgraph Phase 3: Locking the Plan
+            C1("<b>Generate BOQ</b>")
+            C1_desc("<i>This critical step locks the plan<br/>and enables all construction modules.</i>")
+
+            C1 ~~~ C1_desc
+        end
+
+        %% Phase 4: Construction & Monitoring
+        subgraph Phase 4: Construction & Monitoring
+            D1("File Accomplishment")
+            D1_desc("Set the project start date and<br/>track daily progress.")
+            D2("View Tracking Reports")
+            D2_desc("Monitor health with live<br/>Gantt charts and S-Curves.")
+            D3("Manage Change Orders")
+            D3_desc("Create and approve any<br/>variations to the scope.")
+            
+            D1 ~~~ D1_desc
+            D2 ~~~ D2_desc
+            D3 ~~~ D3_desc
+            D1 --> D2 & D3
+        end
+
+        %% Link Phases
+        A2 --> B1
+        B3 --> C1
+        C1 --> D1
+
+        %% Apply styles to all nodes
+        class A1,A2,B1,B2,B3,D1,D2,D3 actionNode;
+        class C1 criticalNode;
+        class A1_desc,A2_desc,B1_desc,B2_desc,B3_desc,C1_desc,D1_desc,D2_desc,D3_desc descNode;
+    `;
+
+    try {
+        mermaid.render('workflow-diagram-svg', mermaidGraph).then(({ svg }) => {
+            diagramContainer.innerHTML = svg;
+        });
+    } catch (e) {
+        diagramContainer.innerHTML = 'Error rendering diagram.';
+        console.error("Mermaid rendering error:", e);
+    }
+};
+const showTakeOff = () => showProjects();
+const showDupa = () => showProjects();
+const showSequencing = () => showProjects();
+const showReports = () => showProjects();
+const showChangeOrders = () => showProjects();
+const showAccomplishment = () => showProjects();
+const showTrackingGantt = () => showProjects();
+const showTrackingSCurve = () => showProjects();
+const showRevisedReports = () => showProjects();
+const showLookahead = () => showProjects();
+const showMaterialsLibrary = () => {
+    showView(materialsLibraryView);
+    setActiveNav(navMaterialsLibrary);
+    displayMaterials();
+};
+const showDupaLibrary = () => {
+    showView(dupaLibraryView);
+    setActiveNav(navDupaLibrary);
+    displayResources();
+    displayCrews();
+};
+const showLibraryManagement = () => {
+    showView(libraryManagementView);
+    setActiveNav(navLibraryManagement);
+};
+
+function initializeViewsModule() {
+    dashboardView = document.getElementById('dashboard-view');
+    projectsView = document.getElementById('projects-view');
+    projectSummaryView = document.getElementById('project-summary-view');
+    takeoffView = document.getElementById('takeoff-view');
+    dupaView = document.getElementById('dupa-view');
+    sequencingView = document.getElementById('sequencing-view');
+    reportsView = document.getElementById('reports-view');
+    accomplishmentView = document.getElementById('accomplishment-view');
+    accomplishmentListView = document.getElementById('accomplishment-list-view');
+    accomplishmentDetailView = document.getElementById('accomplishment-detail-view');
+    trackingGanttView = document.getElementById('tracking-gantt-view');
+    trackingSCurveView = document.getElementById('tracking-s-curve-view');
+    changeOrdersView = document.getElementById('change-orders-view');
+    revisedReportsView = document.getElementById('revised-reports-view');
+    lookaheadView = document.getElementById('lookahead-view');
+    materialsLibraryView = document.getElementById('materials-library-view');
+    dupaLibraryView = document.getElementById('dupa-library-view');
+    libraryManagementView = document.getElementById('library-management-view');
+    documentationView = document.getElementById('documentation-view');
+    settingsView = document.getElementById('settings-view');
+    dataManagementView = document.getElementById('data-management-view');
+    navSyncSettings = document.getElementById('nav-sync-settings');
+    
+    revisedPertCpmNetworkView = document.getElementById('revised-pert-cpm-network-view');
+    revisedResourceScheduleView = document.getElementById('revised-resource-schedule-view');
+
+    takeoffQuantitiesView = document.getElementById('takeoff-quantities-view');
+    dupaQuantityListView = document.getElementById('dupa-quantity-list-view');
+    dupaFormView = document.getElementById('dupa-form-view');
+    sequencingTasksView = document.getElementById('sequencing-tasks-view');
+    boqDisplayView = document.getElementById('boq-display-view');
+    pertCpmDisplayView = document.getElementById('pert-cpm-display-view');
+    ganttChartDisplayView = document.getElementById('gantt-chart-display-view');
+    sCurveDisplayView = document.getElementById('s-curve-display-view');
+    pertCpmNetworkView = document.getElementById('pert-cpm-network-view');
+    resourceScheduleView = document.getElementById('resource-schedule-view');
+
+    revisedBoqDisplayView = document.getElementById('revised-boq-display-view');
+    revisedPertCpmDisplayView = document.getElementById('revised-pert-cpm-display-view');
+
+    dupaReportModal = document.getElementById('dupa-details-modal');
+    dupaReportModalClose = document.querySelector('.dupa-details-modal-close');
+    dupaReportTitle = document.getElementById('dupa-details-title');
+    dupaReportContent = document.getElementById('dupa-details-content');
+    coItemTypeModal = document.getElementById('co-item-type-modal');
+    coItemTypeModalClose = document.querySelector('.co-item-type-modal-close');
+    coExistingItemModal = document.getElementById('co-existing-item-modal');
+    coExistingItemModalClose = document.querySelector('.co-existing-item-modal-close');
+    importPreviewModal = document.getElementById('import-preview-modal');
+    importPreviewModalClose = document.querySelector('.import-preview-modal-close');
+    libraryPickerModal = document.getElementById('library-picker-modal');
+    libraryPickerModalClose = document.getElementById('library-picker-modal-close');
+    libraryPickerTitle = document.getElementById('library-picker-title');
+    libraryPickerSearch = document.getElementById('library-picker-search');
+    libraryPickerList = document.getElementById('library-picker-list');
+    libraryPickerCrewMultiplier = document.getElementById('library-picker-crew-multiplier');
+    libraryPickerCrewCount = document.getElementById('library-picker-crew-count');
+
+    navDashboard = document.getElementById('nav-dashboard');
+    navProjects = document.getElementById('nav-projects');
+    navMaterialsLibrary = document.getElementById('nav-materials-library');
+    navDupaLibrary = document.getElementById('nav-dupa-library');
+    navLibraryManagement = document.getElementById('nav-library-management');
+    navDocumentation = document.getElementById('nav-documentation');
+    navBrandLink = document.getElementById('nav-brand-link');
+    navDataManagement = document.getElementById('nav-data-management');
+    themeManagerView = document.getElementById('theme-manager-view');
+    navThemeManager = document.getElementById('nav-theme-manager');
+
+    const showDataManagement = () => {
+        showView(dataManagementView);
+        setActiveNav(navDataManagement);
+    };
+    const showThemeManager = () => {
+        if (!themeManagerView) {
+            alert("Error: The HTML element for the Theme Manager view could not be found. Please check your index.html file.");
+            return;
+        }
+        showView(themeManagerView);
+        setActiveNav(navThemeManager);
+    };
+
+    navSyncSettings.addEventListener('click', (e) => { e.preventDefault(); showSyncSettings(); });
+    navDataManagement.addEventListener('click', (e) => { e.preventDefault(); showDataManagement(); });
+    navThemeManager.addEventListener('click', (e) => { e.preventDefault(); showThemeManager(); });
+
+    navDashboard.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
+    navProjects.addEventListener('click', (e) => { e.preventDefault(); showProjects(); });
+    navMaterialsLibrary.addEventListener('click', (e) => { e.preventDefault(); showMaterialsLibrary(); });
+    navDupaLibrary.addEventListener('click', (e) => { e.preventDefault(); showDupaLibrary(); });
+    navLibraryManagement.addEventListener('click', (e) => { e.preventDefault(); showLibraryManagement(); });
+    navDocumentation.addEventListener('click', (e) => { e.preventDefault(); showDocumentation(); });
+    navBrandLink.addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
+    
+
+    const backToHub = () => { if(currentHubProjectId) showProjectSummary(currentHubProjectId); };
+
+    document.getElementById('back-to-projects-from-summary').addEventListener('click', showProjects);
+    document.getElementById('view-past-reports-btn').addEventListener('click', () => showAccomplishmentList(currentConstructionProjectId));
+    document.getElementById('back-to-accomplishment-list').addEventListener('click', () => showAccomplishmentList(currentConstructionProjectId));
+
+    backToTakeoffListBtn = document.getElementById('back-to-takeoff-list');
+    backToDupaProjectsBtn = document.getElementById('back-to-dupa-projects');
+    backToDupaQuantitiesBtn = document.getElementById('back-to-dupa-quantities');
+    backToSequencingProjectsBtn = document.getElementById('back-to-sequencing-projects');
+    backToBoqProjectsBtn = document.getElementById('back-to-boq-projects');
+    backToBoqViewBtn = document.getElementById('back-to-boq-view');
+    backToPertCpmViewBtn = document.getElementById('back-to-pert-cpm-view');
+    backToPertCpmViewFromSCurveBtn = document.getElementById('back-to-pert-cpm-view-from-s-curve');
+    backToPertCpmFromNetworkBtn = document.getElementById('back-to-pert-cpm-from-network-btn');
+    backToPertCpmFromResourceBtn = document.getElementById('back-to-pert-cpm-from-resource-btn');
+    backToRevisedBoqProjectsBtn = document.getElementById('back-to-revised-boq-projects');
+    backToRevisedBoqViewBtn = document.getElementById('back-to-revised-boq-view');
+    
+    backToRevisedPertCpmBtn = document.getElementById('back-to-revised-boq-view');
+    backToRevisedPertCpmFromNetworkBtn = document.getElementById('back-to-revised-pert-cpm-from-network-btn');
+    backToRevisedPertCpmFromResourceBtn = document.getElementById('back-to-revised-pert-cpm-from-resource-btn');
+    
+    backToTakeoffListBtn.addEventListener('click', backToHub);
+    backToDupaProjectsBtn.addEventListener('click', backToHub);
+    backToDupaQuantitiesBtn.addEventListener('click', () => showDupaQuantitiesForProject(currentDupaProjectId, dupaProjectName.textContent));
+    backToSequencingProjectsBtn.addEventListener('click', backToHub);
+    backToBoqProjectsBtn.addEventListener('click', backToHub);
+    
+    // All baseline report "Back" buttons now point to the hub
+    backToBoqViewBtn.addEventListener('click', backToHub);
+    backToPertCpmViewBtn.addEventListener('click', backToHub);
+    backToPertCpmViewFromSCurveBtn.addEventListener('click', backToHub);
+    backToPertCpmFromNetworkBtn.addEventListener('click', backToHub);
+    backToPertCpmFromResourceBtn.addEventListener('click', backToHub);
+
+    // All revised report "Back" buttons now point to the hub
+    backToRevisedBoqProjectsBtn.addEventListener('click', backToHub);
+    backToRevisedBoqViewBtn.addEventListener('click', backToHub);
+    backToRevisedPertCpmFromNetworkBtn.addEventListener('click', backToHub);
+    if (backToRevisedPertCpmFromResourceBtn) backToRevisedPertCpmFromResourceBtn.addEventListener('click', backToHub);
+
+    document.getElementById('back-to-co-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-accomplishment-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-tracking-gantt-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-tracking-s-curve-projects').addEventListener('click', backToHub);
+    document.getElementById('back-to-lookahead-projects').addEventListener('click', backToHub);
+
+
+    
+    
+    projectSummaryView.addEventListener('click', async (e) => {
+        const target = e.target.closest('.hub-buttons button');
+        if (!target) return;
+
+        const projectId = parseInt(target.dataset.id);
+        const projectName = target.dataset.name;
+
+        if (!projectId || !projectName) return;
+
+        switch (target.id) {
+            case 'hub-btn-takeoff':
+                setActiveNav(navProjects);
+                showView(takeoffView);
+                showQuantitiesForProject(projectId, projectName);
+                break;
+            case 'hub-btn-dupa':
+                setActiveNav(navProjects);
+                showView(dupaView);
+                showDupaQuantitiesForProject(projectId, projectName);
+                break;
+            case 'hub-btn-sequencing':
+                setActiveNav(navProjects);
+                showView(sequencingView);
+                showSequencesForProject(projectId, projectName);
+                break;
+            case 'hub-btn-boq':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                showBoqForProject(projectId, projectName, true);
+                break;
+            case 'hub-btn-pert':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showPertCpmForProject();
+                break;
+            case 'hub-btn-gantt':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showGanttChartForProject();
+                break;
+            case 'hub-btn-scurve':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showSCurveForProject();
+                break;
+            case 'hub-btn-network':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showNetworkDiagram();
+                break;
+            case 'hub-btn-resource-schedule':
+                setActiveNav(navProjects);
+                showView(reportsView);
+                await showBoqForProject(projectId, projectName, false);
+                showManpowerEquipmentSchedule();
+                break;
+            case 'hub-btn-change-orders':
+                setActiveNav(navProjects);
+                showView(changeOrdersView);
+                showChangeOrdersForProject(projectId, projectName);
+                break;
+            case 'hub-btn-accomplishment':
+                setActiveNav(navProjects);
+                showView(accomplishmentView);
+                showAccomplishmentForm(projectId, projectName);
+                break;
+            case 'hub-btn-tracking-gantt':
+                setActiveNav(navProjects);
+                showView(trackingGanttView);
+                showTrackingGanttChart(projectId, projectName);
+                break;
+            case 'hub-btn-tracking-scurve':
+                setActiveNav(navProjects);
+                showView(trackingSCurveView);
+                renderTrackingSCurve(projectId, projectName);
+                break;
+            case 'hub-btn-revised-boq':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                showRevisedBoqForProject(projectId, projectName, true);
+                break;
+            case 'hub-btn-revised-pert':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                await showRevisedBoqForProject(projectId, projectName, false);
+                showRevisedPertCpmForProject();
+                break;
+            case 'hub-btn-revised-network':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                await showRevisedBoqForProject(projectId, projectName, false);
+                showRevisedNetworkDiagram();
+                break;
+            case 'hub-btn-revised-resources':
+                setActiveNav(navProjects);
+                showView(revisedReportsView);
+                await showRevisedBoqForProject(projectId, projectName, false);
+                showRevisedResourceSchedule();
+                break;
+            case 'hub-btn-lookahead':
+                setActiveNav(navProjects);
+                showView(lookaheadView);
+                showLookAheadReportView(projectId, projectName);
+                break;
+        }
+    });
+
+    // THIS IS THE FIX: Move the allViews array initialization to the END of the function.
+    allViews = [dashboardView, projectsView, projectSummaryView, takeoffView, dupaView, sequencingView, reportsView, accomplishmentView, accomplishmentListView, accomplishmentDetailView, trackingGanttView, trackingSCurveView, lookaheadView, changeOrdersView, revisedReportsView, materialsLibraryView, dupaLibraryView, libraryManagementView, settingsView, documentationView, dataManagementView, themeManagerView, revisedPertCpmNetworkView, revisedResourceScheduleView];
+}
+</file>
+
 <file path="js/projects.js">
 // Author: -REPLACE WITH YOUR NAME-
 // OS support: -REPLACE WITH YOUR OS SUPPORT-
@@ -11753,8 +11799,15 @@ const showProjectSummary = async (projectId) => {
         const lockedBoq = await db.boqs.get({ projectId });
         const approvedCOs = await db.changeOrders.where({ projectId, status: 'Approved' }).count();
 
-        const boqDependentButtons = document.querySelectorAll('.construction-phase-btn');
-        boqDependentButtons.forEach(btn => {
+        // Baseline reports are always enabled
+        document.querySelectorAll('.baseline-report-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.title = '';
+        });
+
+        // Construction buttons depend on the BOQ lock state
+        const constructionButtons = document.querySelectorAll('.construction-phase-btn');
+        constructionButtons.forEach(btn => {
             if (lockedBoq) {
                 btn.disabled = false;
                 btn.title = '';
@@ -11763,17 +11816,18 @@ const showProjectSummary = async (projectId) => {
                 btn.title = 'This module requires a locked Bill of Quantities (BOQ).';
             }
         });
-
-        const revisedReportsBtn = document.getElementById('hub-btn-revised-reports');
-        if (lockedBoq && approvedCOs > 0) {
-            revisedReportsBtn.disabled = false;
-            revisedReportsBtn.title = '';
-        } else {
-            revisedReportsBtn.disabled = true;
-            if (lockedBoq) {
-                 revisedReportsBtn.title = 'This module requires at least one approved change order.';
+        
+        // Revised Report buttons require a locked BOQ AND approved change orders
+        const revisedReportButtons = document.querySelectorAll('.revised-report-btn');
+        revisedReportButtons.forEach(btn => {
+            if (lockedBoq && approvedCOs > 0) {
+                btn.disabled = false;
+                btn.title = '';
+            } else {
+                btn.disabled = true;
+                btn.title = 'Requires a locked BOQ and at least one approved change order.';
             }
-        }
+        });
 
     } catch (error) {
         console.error('Failed to show project summary:', error);
@@ -12379,6 +12433,7 @@ const generateAndLockBoq = async () => {
         boqData: boqData
     });
     await showBoqForProject(currentBoqProjectId, boqProjectName.textContent.replace('Bill of Quantities: ', ''));
+    showProjectSummary(currentBoqProjectId); // Refresh hub to enable buttons
 };
 
 const promptToGenerateBoq = () => {
@@ -12427,28 +12482,45 @@ const showBoqForProject = async (projectId, projectName) => {
     resourceScheduleView.classList.add('hidden');
     boqDisplayView.classList.remove('hidden');
 
+    const lockToggleBtn = document.getElementById('boq-lock-toggle-btn');
     const lockedBoq = await db.boqs.where({ projectId: projectId }).first();
 
     if (lockedBoq) {
-        boqStatusMessage.textContent = `This BOQ was generated and locked on ${lockedBoq.generatedAt.toLocaleString()}. Data can no longer be edited.`;
-        deleteBoqBtn.classList.remove('hidden');
+        boqStatusMessage.textContent = `This BOQ was generated and locked on ${lockedBoq.generatedAt.toLocaleString()}. Construction modules are enabled.`;
+        lockToggleBtn.textContent = 'Unlock Data & Delete BOQ';
+        lockToggleBtn.className = 'btn btn-danger';
         viewPertCpmBtn.classList.remove('hidden');
         displayBoqFromData(lockedBoq.boqData);
     } else {
-        boqStatusMessage.textContent = '';
-        deleteBoqBtn.classList.add('hidden');
-        viewPertCpmBtn.classList.add('hidden');
-        boqTbody.innerHTML = '<tr><td colspan="6">No locked BOQ found for this project.</td></tr>';
-        boqTfoot.innerHTML = '';
-        promptToGenerateBoq();
+        boqStatusMessage.textContent = `This is a PRELIMINARY report based on live data. Lock the BOQ to enable construction modules.`;
+        lockToggleBtn.textContent = 'Lock BOQ & Enable Construction';
+        lockToggleBtn.className = 'btn btn-primary';
+        viewPertCpmBtn.classList.remove('hidden');
+
+        // Generate and display a temporary, unlocked BOQ for viewing
+        const quantities = await db.quantities.where('projectId').equals(projectId).toArray();
+        const dupas = await db.dupas.where('quantityId').anyOf(quantities.map(q => q.id)).toArray();
+        const dupaMap = new Map(dupas.map(d => [d.quantityId, d]));
+        const boqData = quantities.reduce((acc, q) => {
+            const category = q.category || 'Uncategorized';
+            if (!acc[category]) acc[category] = [];
+            const dupa = dupaMap.get(q.id);
+            const totalAmount = calculateDupaTotalCost(dupa);
+            const unitPrice = (q.quantity > 0) ? (totalAmount / q.quantity) : 0;
+            acc[category].push({
+                quantityId: q.id, scopeOfWork: q.scopeOfWork, quantity: q.quantity,
+                unit: q.unit, unitPrice: unitPrice, totalAmount: totalAmount
+            });
+            return acc;
+        }, {});
+        displayBoqFromData(boqData);
     }
 };
 
-const handleDeleteBoq = () => {
+const handleDeleteBoq = async () => {
     const modal = document.getElementById('delete-boq-modal');
     if (!modal) {
-        console.error('Delete Confirmation Modal not found in the HTML file.');
-        alert('Error: Could not find the confirmation dialog. Please ensure the HTML is up to date.');
+        alert('Error: Could not find the confirmation dialog.');
         return;
     }
 
@@ -12458,69 +12530,63 @@ const handleDeleteBoq = () => {
 
     const confirmHandler = async () => {
         confirmBtn.removeEventListener('click', confirmHandler);
-        cancelBtn.removeEventListener('click', cancelHandler);
-        closeBtn.removeEventListener('click', cancelHandler);
-
         modal.style.display = 'none';
-
-        if (!currentBoqProjectId) {
-            alert('Error: No project selected.');
-            return;
-        }
 
         try {
             await db.transaction('rw', db.tables.map(t => t.name), async () => {
-                // Delete the BOQ record itself
                 const boqToDelete = await db.boqs.where({ projectId: currentBoqProjectId }).first();
-                if (boqToDelete) {
-                    await db.boqs.delete(boqToDelete.id);
-                }
-
-                // Reset progress for original quantities
-                const quantitiesToReset = await db.quantities.where({ projectId: currentBoqProjectId }).toArray();
-                const quantityIds = quantitiesToReset.map(q => q.id);
+                if (boqToDelete) await db.boqs.delete(boqToDelete.id);
+                
+                const quantities = await db.quantities.where({ projectId: currentBoqProjectId }).toArray();
+                const quantityIds = quantities.map(q => q.id);
                 if (quantityIds.length > 0) {
-                    await db.accomplishments.where('taskId').anyOf(quantityIds).and(record => record.type === 'quantity').delete();
+                    await db.accomplishments.where('taskId').anyOf(quantityIds).and(r => r.type === 'quantity').delete();
                     await db.quantities.where('projectId').equals(currentBoqProjectId).modify({ percentComplete: null });
                 }
 
-                // --- NEW: Find and reset progress for change order items ---
                 const changeOrders = await db.changeOrders.where({ projectId: currentBoqProjectId }).toArray();
                 const changeOrderIds = changeOrders.map(co => co.id);
                 if (changeOrderIds.length > 0) {
                     const changeOrderItems = await db.changeOrderItems.where('changeOrderId').anyOf(changeOrderIds).toArray();
-                    const changeOrderItemIds = changeOrderItems.map(item => item.id);
-
-                    if (changeOrderItemIds.length > 0) {
-                        await db.accomplishments.where('taskId').anyOf(changeOrderItemIds).and(record => record.type === 'changeOrderItem').delete();
-                        await db.changeOrderItems.where('id').anyOf(changeOrderItemIds).modify({ percentComplete: null });
+                    const coItemIds = changeOrderItems.map(item => item.id);
+                    if (coItemIds.length > 0) {
+                        await db.accomplishments.where('taskId').anyOf(coItemIds).and(r => r.type === 'changeOrderItem').delete();
+                        await db.changeOrderItems.where('id').anyOf(coItemIds).modify({ percentComplete: null });
                     }
                 }
                 
-                // Reset the project's start date
                 await db.projects.update(currentBoqProjectId, { startDate: null });
             });
 
-            alert("BOQ and all construction progress deleted successfully. Pre-construction data is now unlocked.");
-            showProjectSummary(currentBoqProjectId);
+            alert("BOQ unlocked and all construction progress deleted.");
+            showBoqForProject(currentBoqProjectId, boqProjectName.textContent.replace('Bill of Quantities: ', ''));
+            showProjectSummary(currentBoqProjectId); // Refresh hub to disable buttons
         } catch (error) {
-            console.error("Failed to delete BOQ and related data:", error);
-            alert("An error occurred during the deletion process. Please check the console for details.");
+            console.error("Failed to delete BOQ:", error);
+            alert("An error occurred during deletion.");
         }
     };
 
     const cancelHandler = () => {
         confirmBtn.removeEventListener('click', confirmHandler);
-        cancelBtn.removeEventListener('click', cancelHandler);
-        closeBtn.removeEventListener('click', cancelHandler);
         modal.style.display = 'none';
     };
 
     confirmBtn.addEventListener('click', confirmHandler);
     cancelBtn.addEventListener('click', cancelHandler);
     closeBtn.addEventListener('click', cancelHandler);
-
     modal.style.display = 'block';
+};
+
+const handleBoqLockToggle = async () => {
+    const lockedBoq = await db.boqs.where({ projectId: currentBoqProjectId }).first();
+    if (lockedBoq) {
+        handleDeleteBoq(); // This function already contains a confirmation modal
+    } else {
+        if (confirm("Are you sure you want to lock this BOQ? All pre-construction data will be locked and cannot be edited unless the BOQ is unlocked.")) {
+            generateAndLockBoq();
+        }
+    }
 };
 
 const showPertCpmForProject = async () => {
@@ -12561,6 +12627,7 @@ const showGanttChartForProject = async () => {
     sCurveDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.add('hidden');
     resourceScheduleView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.remove('hidden');
     ganttChartProjectName.textContent = `Gantt Chart: ${boqProjectName.textContent.replace('Bill of Quantities: ', '')}`;
     
@@ -12632,11 +12699,20 @@ const showGanttChartForProject = async () => {
 };
 
 
+function getChartColors() {
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    return {
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkMode ? '#f1f1f1' : '#212529',
+    };
+}
+
 const showSCurveForProject = async () => {
     pertCpmDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.add('hidden');
     resourceScheduleView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.remove('hidden');
     sCurveProjectName.textContent = `S-Curve: ${boqProjectName.textContent.replace('Bill of Quantities: ', '')}`;
 
@@ -12718,6 +12794,7 @@ const showNetworkDiagram = async () => {
     ganttChartDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.add('hidden');
     resourceScheduleView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.remove('hidden');
     networkDiagramProjectName.textContent = `Network Diagram: ${boqProjectName.textContent.replace('Bill of Quantities: ', '')}`;
 
@@ -12773,10 +12850,12 @@ const showNetworkDiagram = async () => {
 };
 
 const showManpowerEquipmentSchedule = async () => {
+    boqDisplayView.classList.add('hidden');
     pertCpmDisplayView.classList.add('hidden');
     ganttChartDisplayView.classList.add('hidden');
     sCurveDisplayView.classList.add('hidden');
     pertCpmNetworkView.classList.add('hidden');
+    boqDisplayView.classList.add('hidden');
     resourceScheduleView.classList.remove('hidden');
 
     const resourceScheduleProjectName = document.getElementById('resource-schedule-project-name');
@@ -12785,41 +12864,26 @@ const showManpowerEquipmentSchedule = async () => {
     const scheduleContainer = document.getElementById('resource-schedule-container');
     scheduleContainer.innerHTML = 'Loading schedule...';
 
-    const pertData = await getPertCpmData(currentBoqProjectId, true);
+    const pertData = await getPertCpmData(currentBoqProjectId, false);
     if (!pertData || pertData.projectDuration === 0) {
         scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
         return;
     }
 
-    const { tasks, projectDuration } = pertData;
-    const { allDupas } = await getAllTasksForReport(currentBoqProjectId, true);
-    const dupaMap = new Map();
-    allDupas.forEach(d => {
-        const key = d.quantityId || d.changeOrderItemId;
-        dupaMap.set(key, d);
-    });
-
+    const { tasks, projectDuration, allDupas } = pertData;
+    const dupaMap = new Map(allDupas.map(d => [d.quantityId || d.changeOrderItemId, d]));
     const dailyResources = {};
 
     for (const [taskId, task] of tasks.entries()) {
         if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
 
-        const numericId = parseInt(taskId.split('-')[1]);
-        const dupa = dupaMap.get(numericId);
+        const dupa = dupaMap.get(parseInt(taskId.split('-')[1]));
         if (!dupa || !dupa.directCosts) continue;
 
-        const totalLaborCost = dupa.directCosts
-            .filter(dc => dc.type === 'labor')
-            .reduce((sum, item) => sum + (item.costType === 'lot' ? (item.amount || 0) : ((item.mandays || 0) * (item.rate || 0))), 0);
+        const totalLaborCost = dupa.directCosts.filter(dc => dc.type === 'labor').reduce((sum, item) => sum + ((item.mandays || 0) * (item.rate || 0)), 0);
+        const totalMaterialCost = dupa.directCosts.filter(dc => dc.type === 'material').reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
+        const totalEquipmentCost = dupa.directCosts.filter(dc => dc.type === 'equipment').reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
         
-        const totalMaterialCost = dupa.directCosts
-            .filter(dc => dc.type === 'material')
-            .reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
-
-        const totalEquipmentCost = dupa.directCosts
-            .filter(dc => dc.type === 'equipment')
-            .reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
-
         const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
         const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
         const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
@@ -12852,9 +12916,9 @@ const showManpowerEquipmentSchedule = async () => {
             let unit = '';
 
             if (dc.type === 'labor') {
-                if (dc.costType === 'lot') {
+                if (dc.unit && dc.unit.toLowerCase() === 'lot') {
                     resourceName = dc.laborType;
-                    dailyAmount = (dc.amount || 0) / task.duration;
+                    dailyAmount = ((dc.mandays || 0) * (dc.rate || 0)) / task.duration;
                     unit = 'PHP/day';
                 } else {
                     resourceName = dc.laborType;
@@ -12863,16 +12927,13 @@ const showManpowerEquipmentSchedule = async () => {
                 }
             } else if (dc.type === 'equipment') {
                 resourceName = dc.name;
-                dailyAmount = dc.hours / task.duration;
+                dailyAmount = (dc.hours || 0) / task.duration;
                 unit = 'hrs';
             }
 
             if (resourceName) {
                 if (!dailyResources[resourceName]) {
-                    dailyResources[resourceName] = {
-                        unit: unit,
-                        schedule: new Array(projectDuration).fill(0)
-                    };
+                    dailyResources[resourceName] = { unit: unit, schedule: new Array(projectDuration).fill(0) };
                 }
                 for (let day = task.es; day < task.ef; day++) {
                     if (day < projectDuration) {
@@ -12888,10 +12949,8 @@ const showManpowerEquipmentSchedule = async () => {
         return;
     }
 
-    let tableHtml = '<table id="resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
-    for (let i = 1; i <= projectDuration; i++) {
-        tableHtml += `<th>${i}</th>`;
-    }
+    let tableHtml = '<table id="resource-schedule-table" class="resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
+    for (let i = 1; i <= projectDuration; i++) tableHtml += `<th>${i}</th>`;
     tableHtml += '</tr></thead><tbody>';
 
     const laborResources = [];
@@ -12901,24 +12960,16 @@ const showManpowerEquipmentSchedule = async () => {
 
     Object.keys(dailyResources).sort().forEach(name => {
         if (financialResources.includes(name)) return;
-        const unit = dailyResources[name].unit;
-        if (unit === 'md') laborResources.push(name);
-        else if (unit === 'hrs') equipmentResources.push(name);
-        else if (unit === 'PHP/day') subcontractorResources.push(name);
+        const data = dailyResources[name];
+        if (data.unit === 'md') laborResources.push(name);
+        else if (data.unit === 'hrs') equipmentResources.push(name);
+        else if (data.unit === 'PHP/day') subcontractorResources.push(name);
     });
 
     const renderGroup = (groupName, resources) => {
         if (resources.length > 0) {
             let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
-            if (groupName === 'Financials') {
-                 const groupTotal = resources.reduce((total, resourceName) => {
-                    return total + dailyResources[resourceName].schedule.reduce((sum, daily) => sum + daily, 0);
-                }, 0);
-                headerHtml += `<td colspan="${projectDuration}" style="text-align: right;"><strong>Total: ${groupTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong></td>`;
-            } else {
-                 headerHtml += `<td colspan="${projectDuration}"></td>`;
-            }
-            headerHtml += `</tr>`;
+            headerHtml += `<td colspan="${projectDuration}"></td></tr>`;
             tableHtml += headerHtml;
 
             resources.forEach(resourceName => {
@@ -12935,24 +12986,149 @@ const showManpowerEquipmentSchedule = async () => {
                 });
                 tableHtml += '</tr>';
             });
+        }
+    };
 
-            if (groupName === 'Financials') {
-                const dailyTotals = new Array(projectDuration).fill(0);
-                resources.forEach(resourceName => {
-                    const schedule = dailyResources[resourceName].schedule;
-                    for (let i = 0; i < projectDuration; i++) {
-                        dailyTotals[i] += schedule[i];
-                    }
-                });
+    renderGroup('Labor', laborResources);
+    renderGroup('Equipment', equipmentResources);
+    renderGroup('Subcontractors', subcontractorResources);
+    renderGroup('Financials', financialResources);
+    
+    tableHtml += '</tbody></table>';
+    scheduleContainer.innerHTML = `<div class="dupa-section"><div class="table-container">${tableHtml}</div></div>`;
+};
 
-                tableHtml += `<tr style="font-weight: bold; border-top: 2px solid var(--dark-color);">
-                                <td class="sticky-col">Daily Total (PHP)</td>`;
-                dailyTotals.forEach(total => {
-                    const displayTotal = total > 0 ? total.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '-';
-                    tableHtml += `<td>${displayTotal}</td>`;
-                });
-                tableHtml += `</tr>`;
+
+const showRevisedResourceSchedule = async () => {
+    revisedBoqDisplayView.classList.add('hidden');
+    revisedPertCpmDisplayView.classList.add('hidden');
+    revisedResourceScheduleView.classList.remove('hidden');
+    document.getElementById('revised-resource-schedule-project-name').textContent = `Revised Resource Schedule: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
+    const scheduleContainer = document.getElementById('revised-resource-schedule-container');
+    scheduleContainer.innerHTML = 'Loading schedule...';
+
+    const pertData = await getPertCpmData(currentBoqProjectId, true);
+    if (!pertData || pertData.projectDuration === 0) {
+        scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
+        return;
+    }
+
+    const { tasks, projectDuration, allDupas } = pertData;
+    const dupaMap = new Map(allDupas.map(d => [d.quantityId || d.changeOrderItemId, d]));
+    const dailyResources = {};
+
+    for (const [taskId, task] of tasks.entries()) {
+        if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
+
+        const dupa = dupaMap.get(parseInt(taskId.split('-')[1]));
+        if (!dupa || !dupa.directCosts) continue;
+
+        const totalLaborCost = dupa.directCosts.filter(dc => dc.type === 'labor').reduce((sum, item) => sum + ((item.mandays || 0) * (item.rate || 0)), 0);
+        const totalMaterialCost = dupa.directCosts.filter(dc => dc.type === 'material').reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
+        const totalEquipmentCost = dupa.directCosts.filter(dc => dc.type === 'equipment').reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
+        
+        const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
+        const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
+        const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
+        const subtotal = totalDirectCost + ocmCost + profitCost;
+        const taxCost = subtotal * ((dupa.indirectCosts?.taxes || 0) / 100);
+        const totalIndirectCost = ocmCost + profitCost + taxCost;
+        
+        const costItems = [
+            { name: 'Labor Cost', total: totalLaborCost },
+            { name: 'Material Cost', total: totalMaterialCost },
+            { name: 'Equipment Cost', total: totalEquipmentCost },
+            { name: 'Indirect Costs', total: totalIndirectCost }
+        ];
+
+        costItems.forEach(item => {
+            if (item.total > 0) {
+                const dailyAmount = item.total / task.duration;
+                if (!dailyResources[item.name]) {
+                    dailyResources[item.name] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
+                }
+                for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) dailyResources[item.name].schedule[day] += dailyAmount;
+                }
             }
+        });
+        
+        dupa.directCosts.forEach(dc => {
+            let resourceName = '';
+            let dailyAmount = 0;
+            let unit = '';
+
+            if (dc.type === 'labor') {
+                if (dc.unit && dc.unit.toLowerCase() === 'lot') {
+                    resourceName = dc.laborType;
+                    dailyAmount = ((dc.mandays || 0) * (dc.rate || 0)) / task.duration;
+                    unit = 'PHP/day';
+                } else {
+                    resourceName = dc.laborType;
+                    dailyAmount = (dc.mandays || 0) / task.duration;
+                    unit = 'md';
+                }
+            } else if (dc.type === 'equipment') {
+                resourceName = dc.name;
+                dailyAmount = (dc.hours || 0) / task.duration;
+                unit = 'hrs';
+            }
+
+            if (resourceName) {
+                if (!dailyResources[resourceName]) {
+                    dailyResources[resourceName] = { unit: unit, schedule: new Array(projectDuration).fill(0) };
+                }
+                for (let day = task.es; day < task.ef; day++) {
+                    if (day < projectDuration) {
+                        dailyResources[resourceName].schedule[day] += dailyAmount;
+                    }
+                }
+            }
+        });
+    }
+
+    if (Object.keys(dailyResources).length === 0) {
+        scheduleContainer.innerHTML = '<p>No resources found in DUPAs.</p>';
+        return;
+    }
+
+    let tableHtml = '<table id="revised-resource-schedule-table" class="resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
+    for (let i = 1; i <= projectDuration; i++) tableHtml += `<th>${i}</th>`;
+    tableHtml += '</tr></thead><tbody>';
+
+    const laborResources = [];
+    const equipmentResources = [];
+    const subcontractorResources = [];
+    const financialResources = ['Labor Cost', 'Material Cost', 'Equipment Cost', 'Indirect Costs'].filter(name => dailyResources[name]);
+
+    Object.keys(dailyResources).sort().forEach(name => {
+        if (financialResources.includes(name)) return;
+        const data = dailyResources[name];
+        if (data.unit === 'md') laborResources.push(name);
+        else if (data.unit === 'hrs') equipmentResources.push(name);
+        else if (data.unit === 'PHP/day') subcontractorResources.push(name);
+    });
+
+    const renderGroup = (groupName, resources) => {
+        if (resources.length > 0) {
+            let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
+            headerHtml += `<td colspan="${projectDuration}"></td></tr>`;
+            tableHtml += headerHtml;
+
+            resources.forEach(resourceName => {
+                const data = dailyResources[resourceName];
+                tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
+                data.schedule.forEach(amount => {
+                    let displayAmount = '-';
+                    if (amount > 0) {
+                        displayAmount = (data.unit.startsWith('PHP'))
+                            ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                            : amount.toFixed(2);
+                    }
+                    tableHtml += `<td>${displayAmount}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
         }
     };
 
@@ -12962,7 +13138,102 @@ const showManpowerEquipmentSchedule = async () => {
     renderGroup('Financials', financialResources);
 
     tableHtml += '</tbody></table>';
-    scheduleContainer.innerHTML = tableHtml;
+    scheduleContainer.innerHTML = `<div class="dupa-section"><div class="table-container">${tableHtml}</div></div>`;
+};
+
+const showRevisedBoqForProject = async (projectId, projectName, showTheView = true) => {
+    currentBoqProjectId = projectId;
+    revisedBoqProjectName.textContent = `Revised BOQ: ${projectName}`;
+    
+    // Always fetch and render the data in the background
+    const { allTasks, allDupas } = await getAllTasksForReport(projectId, true);
+    const dupaMap = new Map();
+    allDupas.forEach(d => {
+        const key = d.quantityId || d.changeOrderItemId;
+        dupaMap.set(key, d);
+    });
+
+    const originalItems = allTasks.filter(task => !task.changeOrderId);
+    const changeOrderItems = allTasks.filter(task => task.changeOrderId);
+
+    const groupedOriginals = originalItems.reduce((acc, task) => {
+        const category = task.category || 'Uncategorized';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(task);
+        return acc;
+    }, {});
+
+    let tableHtml = '<table id="revised-boq-table"><thead><tr><th>Scope of Work</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th>Total Amount</th><th>Actions</th></tr></thead><tbody>';
+    let grandTotal = 0;
+
+    const sortedCategories = Object.keys(groupedOriginals).sort();
+    for (const category of sortedCategories) {
+        const categoryTasks = groupedOriginals[category];
+        const categorySubtotal = categoryTasks.reduce((sum, task) => {
+            const dupa = dupaMap.get(task.id);
+            return sum + calculateDupaTotalCost(dupa);
+        }, 0);
+        grandTotal += categorySubtotal;
+
+        tableHtml += `<tr class="category-header-row">
+                        <td colspan="5"><strong>${category}</strong></td>
+                        <td style="text-align: right;"><strong>${categorySubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
+                      </tr>`;
+
+        categoryTasks.forEach(task => {
+            const dupa = dupaMap.get(task.id);
+            const totalAmount = calculateDupaTotalCost(dupa);
+            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
+            tableHtml += `
+                <tr>
+                    <td>${task.displayName}</td>
+                    <td>${task.quantity.toLocaleString()}</td>
+                    <td>${task.unit}</td>
+                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td></td>
+                </tr>
+            `;
+        });
+    }
+
+    if (changeOrderItems.length > 0) {
+        const coSubtotal = changeOrderItems.reduce((sum, task) => {
+            const dupa = dupaMap.get(task.id);
+            return sum + calculateDupaTotalCost(dupa);
+        }, 0);
+        grandTotal += coSubtotal;
+
+        tableHtml += `<tr class="category-header-row">
+                        <td colspan="5"><strong>Change Orders</strong></td>
+                        <td style="text-align: right;"><strong>${coSubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
+                      </tr>`;
+
+        changeOrderItems.forEach(task => {
+            const dupa = dupaMap.get(task.id);
+            const totalAmount = calculateDupaTotalCost(dupa);
+            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
+            tableHtml += `
+                <tr>
+                    <td>${task.displayName}</td>
+                    <td>${task.quantity.toLocaleString()}</td>
+                    <td>${task.unit}</td>
+                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
+                    <td class="actions-cell"><button class="btn btn-secondary view-co-dupa-details-btn" data-co-item-id="${task.id}">View DUPA</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    tableHtml += `</tbody><tfoot><tr class="boq-summary-row"><td colspan="5" style="text-align:right;">Revised Grand Total</td><td style="text-align: right;">${grandTotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td></tr></tfoot></table>`;
+    revisedBoqTableContainer.innerHTML = tableHtml;
+
+    // Only manage view visibility if this function was called to be shown
+    if (showTheView) {
+        revisedPertCpmDisplayView.classList.add('hidden');
+        revisedBoqDisplayView.classList.remove('hidden');
+    }
 };
 
 const showDupaDetails = async (quantityId) => {
@@ -13107,6 +13378,7 @@ const showCoItemDupaDetails = async (coItemId) => {
 
 
 const showRevisedNetworkDiagram = async () => {
+    revisedBoqDisplayView.classList.add('hidden');
     revisedPertCpmDisplayView.classList.add('hidden');
     revisedPertCpmNetworkView.classList.remove('hidden');
     document.getElementById('revised-network-diagram-project-name').textContent = `Revised Network Diagram: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
@@ -13156,282 +13428,7 @@ const showRevisedNetworkDiagram = async () => {
     }
 };
 
-const showRevisedResourceSchedule = async () => {
-    revisedPertCpmDisplayView.classList.add('hidden');
-    revisedResourceScheduleView.classList.remove('hidden');
-    document.getElementById('revised-resource-schedule-project-name').textContent = `Revised Resource Schedule: ${revisedBoqProjectName.textContent.replace('Revised BOQ: ', '')}`;
-    const scheduleContainer = document.getElementById('revised-resource-schedule-container');
-    scheduleContainer.innerHTML = 'Loading schedule...';
 
-    const pertData = await getPertCpmData(currentBoqProjectId, true);
-    if (!pertData || pertData.projectDuration === 0) {
-        scheduleContainer.innerHTML = '<p>No data available to generate schedule.</p>';
-        return;
-    }
-
-    const { tasks, projectDuration } = pertData;
-    const { allDupas } = await getAllTasksForReport(currentBoqProjectId, true);
-    const dupaMap = new Map();
-    allDupas.forEach(d => {
-        const key = d.quantityId || d.changeOrderItemId;
-        dupaMap.set(key, d);
-    });
-
-    const dailyResources = {};
-
-    for (const [taskId, task] of tasks.entries()) {
-        if (taskId === 'PROJECT_START' || taskId === 'PROJECT_END' || !task.duration || task.duration <= 0) continue;
-
-        const numericId = parseInt(taskId.split('-')[1]);
-        const dupa = dupaMap.get(numericId);
-        if (!dupa || !dupa.directCosts) continue;
-
-        const totalLaborCost = dupa.directCosts
-            .filter(dc => dc.type === 'labor')
-            .reduce((sum, item) => sum + (item.costType === 'lot' ? (item.amount || 0) : ((item.mandays || 0) * (item.rate || 0))), 0);
-        
-        const totalMaterialCost = dupa.directCosts
-            .filter(dc => dc.type === 'material')
-            .reduce((sum, item) => sum + ((item.quantity || 0) * (item.unitPrice || 0)), 0);
-
-        const totalEquipmentCost = dupa.directCosts
-            .filter(dc => dc.type === 'equipment')
-            .reduce((sum, item) => sum + ((item.hours || 0) * (item.rate || 0)), 0);
-
-        const totalDirectCost = totalLaborCost + totalMaterialCost + totalEquipmentCost;
-        const ocmCost = totalDirectCost * ((dupa.indirectCosts?.ocm || 0) / 100);
-        const profitCost = totalDirectCost * ((dupa.indirectCosts?.profit || 0) / 100);
-        const subtotal = totalDirectCost + ocmCost + profitCost;
-        const taxCost = subtotal * ((dupa.indirectCosts?.taxes || 0) / 100);
-        const totalIndirectCost = ocmCost + profitCost + taxCost;
-        
-        const costItems = [
-            { name: 'Labor Cost', total: totalLaborCost },
-            { name: 'Material Cost', total: totalMaterialCost },
-            { name: 'Equipment Cost', total: totalEquipmentCost },
-            { name: 'Indirect Costs', total: totalIndirectCost }
-        ];
-
-        costItems.forEach(item => {
-            if (item.total > 0) {
-                const dailyAmount = item.total / task.duration;
-                if (!dailyResources[item.name]) {
-                    dailyResources[item.name] = { unit: "PHP", schedule: new Array(projectDuration).fill(0) };
-                }
-                for (let day = task.es; day < task.ef; day++) {
-                    if (day < projectDuration) dailyResources[item.name].schedule[day] += dailyAmount;
-                }
-            }
-        });
-        
-        dupa.directCosts.forEach(dc => {
-            let resourceName = '';
-            let dailyAmount = 0;
-            let unit = '';
-
-            if (dc.type === 'labor') {
-                if (dc.costType === 'lot') {
-                    resourceName = dc.laborType;
-                    dailyAmount = (dc.amount || 0) / task.duration;
-                    unit = 'PHP/day';
-                } else {
-                    resourceName = dc.laborType;
-                    dailyAmount = (dc.mandays || 0) / task.duration;
-                    unit = 'md';
-                }
-            } else if (dc.type === 'equipment') {
-                resourceName = dc.name;
-                dailyAmount = dc.hours / task.duration;
-                unit = 'hrs';
-            }
-
-            if (resourceName) {
-                if (!dailyResources[resourceName]) {
-                    dailyResources[resourceName] = {
-                        unit: unit,
-                        schedule: new Array(projectDuration).fill(0)
-                    };
-                }
-                for (let day = task.es; day < task.ef; day++) {
-                    if (day < projectDuration) {
-                        dailyResources[resourceName].schedule[day] += dailyAmount;
-                    }
-                }
-            }
-        });
-    }
-
-    if (Object.keys(dailyResources).length === 0) {
-        scheduleContainer.innerHTML = '<p>No resources found in DUPAs.</p>';
-        return;
-    }
-
-    let tableHtml = '<table id="revised-resource-schedule-table"><thead><tr><th class="sticky-col">Resource</th>';
-    for (let i = 1; i <= projectDuration; i++) {
-        tableHtml += `<th>${i}</th>`;
-    }
-    tableHtml += '</tr></thead><tbody>';
-
-    const laborResources = [];
-    const equipmentResources = [];
-    const subcontractorResources = [];
-    const financialResources = ['Labor Cost', 'Material Cost', 'Equipment Cost', 'Indirect Costs'].filter(name => dailyResources[name]);
-
-    Object.keys(dailyResources).sort().forEach(name => {
-        if (financialResources.includes(name)) return;
-        const unit = dailyResources[name].unit;
-        if (unit === 'md') laborResources.push(name);
-        else if (unit === 'hrs') equipmentResources.push(name);
-        else if (unit === 'PHP/day') subcontractorResources.push(name);
-    });
-
-    const renderGroup = (groupName, resources) => {
-        if (resources.length > 0) {
-            let headerHtml = `<tr class="category-header-row"><td class="sticky-col">${groupName}</td>`;
-            if (groupName === 'Financials') {
-                 const groupTotal = resources.reduce((total, resourceName) => {
-                    return total + dailyResources[resourceName].schedule.reduce((sum, daily) => sum + daily, 0);
-                }, 0);
-                headerHtml += `<td colspan="${projectDuration}" style="text-align: right;"><strong>Total: ${groupTotal.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</strong></td>`;
-            } else {
-                 headerHtml += `<td colspan="${projectDuration}"></td>`;
-            }
-            headerHtml += `</tr>`;
-            tableHtml += headerHtml;
-
-            resources.forEach(resourceName => {
-                const data = dailyResources[resourceName];
-                tableHtml += `<tr><td class="sticky-col">${resourceName} (${data.unit})</td>`;
-                data.schedule.forEach(amount => {
-                    let displayAmount = '-';
-                    if (amount > 0) {
-                        displayAmount = (data.unit.startsWith('PHP'))
-                            ? amount.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-                            : amount.toFixed(2);
-                    }
-                    tableHtml += `<td>${displayAmount}</td>`;
-                });
-                tableHtml += '</tr>';
-            });
-            
-            if (groupName === 'Financials') {
-                const dailyTotals = new Array(projectDuration).fill(0);
-                resources.forEach(resourceName => {
-                    const schedule = dailyResources[resourceName].schedule;
-                    for (let i = 0; i < projectDuration; i++) {
-                        dailyTotals[i] += schedule[i];
-                    }
-                });
-
-                tableHtml += `<tr style="font-weight: bold; border-top: 2px solid var(--dark-color);">
-                                <td class="sticky-col">Daily Total (PHP)</td>`;
-                dailyTotals.forEach(total => {
-                    const displayTotal = total > 0 ? total.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '-';
-                    tableHtml += `<td>${displayTotal}</td>`;
-                });
-                tableHtml += `</tr>`;
-            }
-        }
-    };
-
-    renderGroup('Labor', laborResources);
-    renderGroup('Equipment', equipmentResources);
-    renderGroup('Subcontractors', subcontractorResources);
-    renderGroup('Financials', financialResources);
-
-    tableHtml += '</tbody></table>';
-    scheduleContainer.innerHTML = tableHtml;
-};
-
-const showRevisedBoqForProject = async (projectId, projectName) => {
-    currentBoqProjectId = projectId;
-    revisedBoqProjectName.textContent = `Revised BOQ: ${projectName}`;
-    revisedPertCpmDisplayView.classList.add('hidden');
-    revisedBoqDisplayView.classList.remove('hidden');
-
-    const { allTasks, allDupas } = await getAllTasksForReport(projectId, true);
-    const dupaMap = new Map();
-    allDupas.forEach(d => {
-        const key = d.quantityId || d.changeOrderItemId;
-        dupaMap.set(key, d);
-    });
-
-    const originalItems = allTasks.filter(task => !task.changeOrderId);
-    const changeOrderItems = allTasks.filter(task => task.changeOrderId);
-
-    const groupedOriginals = originalItems.reduce((acc, task) => {
-        const category = task.category || 'Uncategorized';
-        if (!acc[category]) acc[category] = [];
-        acc[category].push(task);
-        return acc;
-    }, {});
-
-    let tableHtml = '<table id="revised-boq-table"><thead><tr><th>Scope of Work</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th>Total Amount</th><th>Actions</th></tr></thead><tbody>';
-    let grandTotal = 0;
-
-    const sortedCategories = Object.keys(groupedOriginals).sort();
-    for (const category of sortedCategories) {
-        const categoryTasks = groupedOriginals[category];
-        const categorySubtotal = categoryTasks.reduce((sum, task) => {
-            const dupa = dupaMap.get(task.id);
-            return sum + calculateDupaTotalCost(dupa);
-        }, 0);
-        grandTotal += categorySubtotal;
-
-        tableHtml += `<tr class="category-header-row">
-                        <td colspan="5"><strong>${category}</strong></td>
-                        <td style="text-align: right;"><strong>${categorySubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
-                      </tr>`;
-
-        categoryTasks.forEach(task => {
-            const dupa = dupaMap.get(task.id);
-            const totalAmount = calculateDupaTotalCost(dupa);
-            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
-            tableHtml += `
-                <tr>
-                    <td>${task.displayName}</td>
-                    <td>${task.quantity.toLocaleString()}</td>
-                    <td>${task.unit}</td>
-                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td></td>
-                </tr>
-            `;
-        });
-    }
-
-    if (changeOrderItems.length > 0) {
-        const coSubtotal = changeOrderItems.reduce((sum, task) => {
-            const dupa = dupaMap.get(task.id);
-            return sum + calculateDupaTotalCost(dupa);
-        }, 0);
-        grandTotal += coSubtotal;
-
-        tableHtml += `<tr class="category-header-row">
-                        <td colspan="5"><strong>Change Orders</strong></td>
-                        <td style="text-align: right;"><strong>${coSubtotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</strong></td>
-                      </tr>`;
-
-        changeOrderItems.forEach(task => {
-            const dupa = dupaMap.get(task.id);
-            const totalAmount = calculateDupaTotalCost(dupa);
-            const unitPrice = (task.quantity !== 0) ? (totalAmount / task.quantity) : 0;
-            tableHtml += `
-                <tr>
-                    <td>${task.displayName}</td>
-                    <td>${task.quantity.toLocaleString()}</td>
-                    <td>${task.unit}</td>
-                    <td style="text-align: right;">${unitPrice.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td style="text-align: right;">${totalAmount.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td>
-                    <td class="actions-cell"><button class="btn btn-secondary view-co-dupa-details-btn" data-co-item-id="${task.id}">View DUPA</button></td>
-                </tr>
-            `;
-        });
-    }
-
-    tableHtml += `</tbody><tfoot><tr class="boq-summary-row"><td colspan="5" style="text-align:right;">Revised Grand Total</td><td style="text-align: right;">${grandTotal.toLocaleString('en-ph', { style: 'currency', currency: 'PHP' })}</td></tr></tfoot></table>`;
-    revisedBoqTableContainer.innerHTML = tableHtml;
-};
 
 const showRevisedPertCpmForProject = async () => {
     revisedBoqDisplayView.classList.add('hidden');
@@ -13466,8 +13463,7 @@ const showRevisedPertCpmForProject = async () => {
     revisedPertCpmTableContainer.innerHTML = tableHtml;
 };
 function initializeReportsModule() {
-
-    deleteBoqBtn.addEventListener('click', handleDeleteBoq);
+    document.getElementById('boq-lock-toggle-btn').addEventListener('click', handleBoqLockToggle);
     viewPertCpmBtn.addEventListener('click', showPertCpmForProject);
     viewSCurveBtn.addEventListener('click', showSCurveForProject);
     viewGanttChartBtn.addEventListener('click', showGanttChartForProject);
@@ -13505,7 +13501,6 @@ function initializeReportsModule() {
             showCoItemDupaDetails(coItemId);
         }
     });
-
     
     viewRevisedPertCpmBtn.addEventListener('click', showRevisedPertCpmForProject);
     
@@ -13641,9 +13636,13 @@ function startApp() {
 window.addEventListener('load', () => {
     db.open().then(async () => {
         console.log("Database opened successfully.");
-        loadAndApplyTheme(); // Add this line
+        loadAndApplyTheme(); 
         await populateInitialDataIfNeeded();
-        mermaid.initialize({ startOnLoad: false });
+        const isDarkMode = document.body.classList.contains('dark-theme');
+        mermaid.initialize({ 
+            startOnLoad: false,
+            theme: isDarkMode ? 'dark' : 'default'
+        });
     }).catch(err => {
         console.error("Failed to open db: ", err.stack || err);
     });
@@ -14473,6 +14472,14 @@ const showTrackingGanttChart = async (projectId, projectName) => {
 }, 100);
 };
 
+function getChartColors() {
+    const isDarkMode = document.body.classList.contains('dark-theme');
+    return {
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkMode ? '#f1f1f1' : '#212529',
+    };
+}
+
 const renderTrackingSCurve = async (projectId, projectName) => {
     currentConstructionProjectId = projectId;
     trackingSCurveChartView.classList.remove('hidden');
@@ -14586,6 +14593,8 @@ const renderTrackingSCurve = async (projectId, projectName) => {
         }
     }
 
+    const colors = getChartColors();
+
     if (trackingSCurveChart) trackingSCurveChart.destroy();
     trackingSCurveChart = new Chart(trackingSCurveCanvas, {
         type: 'line',
@@ -14605,9 +14614,47 @@ const renderTrackingSCurve = async (projectId, projectName) => {
             ]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } },
-            plugins: { title: { display: true, text: 'Planned vs. Actual S-Curve (As-Built)' } }
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: value => value + '%',
+                        color: colors.textColor
+                    },
+                    grid: {
+                        color: colors.gridColor
+                    },
+                    title: {
+                        color: colors.textColor
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: colors.textColor
+                    },
+                    grid: {
+                        color: colors.gridColor
+                    },
+                    title: {
+                        color: colors.textColor
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Planned vs. Actual S-Curve (As-Built)',
+                    color: colors.textColor
+                },
+                legend: {
+                    labels: {
+                        color: colors.textColor
+                    }
+                }
+            }
         }
     });
 };
@@ -15530,13 +15577,46 @@ body {
     position: sticky;
     left: 0;
     z-index: 10;
-    background-color: #f8f9fa;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    background-color: #fff;
+    white-space: nowrap;
+    text-align: left;
+    padding-left: 10px;
+}
+#resource-schedule-table tbody tr:not(.category-header-row):nth-child(even),
+#revised-resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) {
+    background-color: var(--light-color);
 }
 
+#resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) .sticky-col,
+#revised-resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) .sticky-col {
+    background-color: var(--light-color);
+}
+.resource-schedule-table th,
+.resource-schedule-table td {
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 8px 5px;
+}
+
+.resource-schedule-table th:not(.sticky-col),
+.resource-schedule-table td:not(.sticky-col) {
+    width: 75px;
+    min-width: 75px;
+    text-align: right;
+}
 #resource-schedule-table thead .sticky-col {
     z-index: 20;
     background-color: var(--light-color);
 }
+
+#resource-schedule-table,
+#revised-resource-schedule-table {
+    table-layout: fixed;
+}
+
 
 .category-header-row .sticky-col {
     background-color: #e9ecef;
@@ -16342,6 +16422,178 @@ body.dark-theme .gantt-popup-wrapper .pointer {
     border-radius: 50%;
     border: 1px solid rgba(0,0,0,0.1);
 }
+/* --- Comprehensive Dark Mode Overrides --- */
+body.dark-theme .summary-card,
+body.dark-theme .table-container,
+body.dark-theme .dashboard-chart-container,
+body.dark-theme .dashboard-list-container,
+body.dark-theme .dashboard-gantt-container,
+body.dark-theme .project-dashboard-header,
+body.dark-theme .summary-secondary-details,
+body.dark-theme .manual-card,
+body.dark-theme .modal-content,
+body.dark-theme .sequencing-section,
+body.dark-theme .dupa-section,
+body.dark-theme .lookahead-task,
+body.dark-theme .report-controls,
+body.dark-theme .kpi-card,
+body.dark-theme #lookahead-kpi-container {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content a:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table tbody tr:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table thead th {
+    background-color: #343a40; /* A slightly darker header for tables */
+}
+
+body.dark-theme .category-header-row td {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+body.dark-theme .list-item {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .list-item:hover {
+    background-color: var(--background-color);
+}
+/* --- Comprehensive Dark Mode Overrides --- */
+body.dark-theme .summary-card,
+body.dark-theme .table-container,
+body.dark-theme .dashboard-chart-container,
+body.dark-theme .dashboard-list-container,
+body.dark-theme .dashboard-gantt-container,
+body.dark-theme .project-dashboard-header,
+body.dark-theme .summary-secondary-details,
+body.dark-theme .manual-card,
+body.dark-theme .modal-content,
+body.dark-theme .sequencing-section,
+body.dark-theme .dupa-section,
+body.dark-theme .lookahead-task,
+body.dark-theme .report-controls,
+body.dark-theme .kpi-card,
+body.dark-theme #lookahead-kpi-container,
+body.dark-theme .chart-container,
+body.dark-theme .gantt-chart-container {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-content a:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table tbody tr:hover {
+    background-color: var(--background-color);
+}
+
+body.dark-theme #projects-table thead th,
+body.dark-theme .dupa-table thead th,
+body.dark-theme #sequences-overview-table thead th,
+body.dark-theme #boq-table thead th,
+body.dark-theme #pert-cpm-table thead th,
+body.dark-theme #co-table thead th,
+body.dark-theme #revised-boq-table thead th,
+body.dark-theme #revised-pert-cpm-table thead th,
+body.dark-theme #accomplishment-table thead th,
+body.dark-theme #accomplishment-history-table thead th,
+body.dark-theme #accomplishment-detail-table thead th,
+body.dark-theme #materials-table thead th,
+body.dark-theme #resources-table thead th,
+body.dark-theme #crews-table thead th,
+body.dark-theme #crew-composition-table thead th {
+    background-color: #343a40;
+}
+
+body.dark-theme .category-header-row td {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+body.dark-theme .list-item {
+    background-color: var(--nav-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .list-item:hover {
+    background-color: var(--background-color);
+}
+
+/* --- Dark Mode Gantt Chart Specific Styles --- */
+body.dark-theme .gantt .grid-background {
+    fill: var(--background-color);
+}
+
+body.dark-theme .gantt .grid-header,
+body.dark-theme .gantt .grid-row {
+    fill: var(--nav-background);
+}
+
+body.dark-theme .gantt .grid-row:nth-child(even) {
+    fill: var(--background-color);
+}
+
+body.dark-theme .gantt .tick, 
+body.dark-theme .gantt .grid-row line,
+body.dark-theme .gantt .upper-head .grid-header-line,
+body.dark-theme .gantt .lower-head .grid-header-line {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .gantt .upper-text, 
+body.dark-theme .gantt .lower-text,
+body.dark-theme .gantt .bar-label,
+body.dark-theme .gantt .gantt-container .bar-group .bar-label {
+    fill: var(--dark-color);
+}
+/* --- Dark Mode Table Specifics --- */
+body.dark-theme #pert-cpm-table tr.critical-path td,
+body.dark-theme #revised-pert-cpm-table tr.critical-path td {
+    background-color: rgba(220, 53, 69, 0.3); /* Translucent red for critical path */
+}
+
+body.dark-theme .sticky-col {
+    background-color: var(--nav-background);
+}
+
+body.dark-theme #resource-schedule-table thead .sticky-col,
+body.dark-theme #revised-resource-schedule-table thead .sticky-col {
+    background-color: #343a40;
+}
+
+body.dark-theme .category-header-row .sticky-col {
+    background-color: #343a40;
+}
+body.dark-theme .mermaid-container {
+    background-color: var(--background-color);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.hub-main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+    align-items: start;
+}
 </file>
 
 <file path="index.html">
@@ -16648,84 +16900,148 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                         </div>
 
                     <div class="project-dashboard-hub">
-                        <div class="hub-section">
-                            <h3>Pre-construction</h3>
-                            <div class="hub-buttons">
-                                <button id="hub-btn-takeoff" class="btn btn-primary">
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.5 2a.5.5 0 0 0-.5-.5h-13a.5.5 0 0 0 0 1h13a.5.5 0 0 0 .5-.5zM12 3v2h2v-2h-2zm-2 2v-2h2v2h-2zm-2 0v-2h2v2h-2zm-2 0v-2h2v2H6zm-2 0v-2h2v2H4zM2 3v2h2v-2H2zm13.5 3a.5.5 0 0 0-.5-.5h-13a.5.5 0 0 0 0 1h13a.5.5 0 0 0 .5-.5z"/></svg> <span>Take Off</span></div>
-                                        <span class="hub-button-desc">Define the project's scope of work and item quantities.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-dupa" class="btn btn-primary">
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4z"/><path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-4z"/></svg> <span>DUPA</span></div>
-                                        <span class="hub-button-desc">Analyze unit costs for labor, materials, and equipment.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-sequencing" class="btn btn-primary">
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-diagram-3" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6h-1A1.5 1.5 0 0 1 6 4.5v-1zM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zM5 10.5A1.5 1.5 0 0 1 6.5 9h3A1.5 1.5 0 0 1 11 10.5v1A1.5 1.5 0 0 1 9.5 13h-3A1.5 1.5 0 0 1 5 11.5v-1zM6.5 10a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-3zM3 10.5a.5.5 0 0 0-1 0v1a.5.5 0 0 0 1 0v-1zm10 0a.5.5 0 0 1 1 0v1a.5.5 0 0 1-1 0v-1z"/><path d="M5.5 13a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5z"/><path d="M5 11.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V13h-1V12h-1v1H5v-.5z"/></svg> <span>Task Sequencing</span></div>
-                                        <span class="hub-button-desc">Set task dependencies to build the project schedule.</span>
-                                    </div>
-                                </button>
-                            </div>
+    <div class="hub-main-grid">
+        
+        <div>
+            <div class="hub-section">
+                <h3>Pre-construction</h3>
+                <div class="hub-buttons">
+                    <button id="hub-btn-takeoff" class="btn btn-primary">
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.5 2a.5.5 0 0 0-.5-.5h-13a.5.5 0 0 0 0 1h13a.5.5 0 0 0 .5-.5zM12 3v2h2v-2h-2zm-2 2v-2h2v2h-2zm-2 0v-2h2v2h-2zm-2 0v-2h2v2H6zm-2 0v-2h2v2H4zM2 3v2h2v-2H2zm13.5 3a.5.5 0 0 0-.5-.5h-13a.5.5 0 0 0 0 1h13a.5.5 0 0 0 .5-.5z"/></svg> <span>Take Off</span></div>
+                            <span class="hub-button-desc">Define the project's scope of work and item quantities.</span>
                         </div>
-
-                        <div class="hub-section">
-                            <h3>Construction</h3>
-                            <div class="hub-buttons">
-                                <button id="hub-btn-change-orders" class="btn btn-primary construction-phase-btn" disabled>
-                                     <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/><path d="M8.5 4.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5a.5.5 0 0 1 1 0zm-2 7a.5.5 0 0 1 0-1h5a.5.5 0 0 1 0 1h-5z"/></svg> <span>Change Orders</span></div>
-                                        <span class="hub-button-desc">Manage variation orders and scope modifications.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-accomplishment" class="btn btn-primary construction-phase-btn" disabled>
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.854.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L3.5 6.793l6.646-6.647a.5.5 0 0 1 .708 0z"/><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5h-3a.5.5 0 0 1 0-1h3z"/></svg> <span>Accomplishment</span></div>
-                                        <span class="hub-button-desc">File daily progress reports to track work completion.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-tracking-gantt" class="btn btn-primary construction-phase-btn" disabled>
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5h1zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/><path d="M3 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/></svg> <span>Tracking Gantt</span></div>
-                                        <span class="hub-button-desc">Visualize planned vs. actual schedule progress.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-tracking-scurve" class="btn btn-primary construction-phase-btn" disabled>
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 5.013C0 4.453.448 4 1 4c.435 0 .825.277 1.25.438C3.58 4.965 5.26 6.38 7.29 6.84c1.94.437 3.51-.59 4.75-1.78C13.2 4.102 14.03 3.5 15 3.5c.552 0 1 .453 1 1.013v.355C16 5.453 15.552 6 15 6c-.435 0-.825-.277-1.25-.438-1.32-.497-2.99-.034-4.24 1.154-1.94.437-3.51.59-4.75 1.78C3.8 9.898 2.97 10.5 2 10.5c-.552 0-1-.453-1-1.013v-.355z"/></svg> <span>Tracking S-Curve</span></div>
-                                        <span class="hub-button-desc">Compare planned vs. actual completion rate over time.</span>
-                                    </div>
-                                </button>
-                            </div>
+                    </button>
+                    <button id="hub-btn-dupa" class="btn btn-primary">
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4z"/><path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-4z"/></svg> <span>DUPA</span></div>
+                            <span class="hub-button-desc">Analyze unit costs for labor, materials, and equipment.</span>
                         </div>
-                        
-                        <div class="hub-section">
-                            <h3>Reports</h3>
-                            <div class="hub-buttons">
-                                <button id="hub-btn-reports" class="btn btn-outline-primary">
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 2A1.5 1.5 0 0 1 6 3.5v9A1.5 1.5 0 0 1 4.5 14h-2A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2h2zm2 0A1.5 1.5 0 0 1 8 3.5v9A1.5 1.5 0 0 1 6.5 14h-2v-1h2a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-2v-1h2z"/><path d="M2.5 1a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11zm9 3.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2z"/></svg> <span>Baseline Reports</span></div>
-                                        <span class="hub-button-desc">Generate BOQ, PERT-CPM, Gantt, and S-Curve.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-revised-reports" class="btn btn-outline-primary construction-phase-btn" disabled>
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg> <span>Revised Reports</span></div>
-                                        <span class="hub-button-desc">View reports updated with approved change orders.</span>
-                                    </div>
-                                </button>
-                                <button id="hub-btn-lookahead" class="btn btn-outline-primary construction-phase-btn" disabled>
-                                    <div class="hub-button-content">
-                                        <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> <span>Look-Ahead</span></div>
-                                        <span class="hub-button-desc">Plan upcoming tasks and resource requirements.</span>
-                                    </div>
-                                </button>
-                            </div>
+                    </button>
+                    <button id="hub-btn-sequencing" class="btn btn-primary">
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-diagram-3" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6h-1A1.5 1.5 0 0 1 6 4.5v-1zM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zM5 10.5A1.5 1.5 0 0 1 6.5 9h3A1.5 1.5 0 0 1 11 10.5v1A1.5 1.5 0 0 1 9.5 13h-3A1.5 1.5 0 0 1 5 11.5v-1zM6.5 10a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-3zM3 10.5a.5.5 0 0 0-1 0v1a.5.5 0 0 0 1 0v-1zm10 0a.5.5 0 0 1 1 0v1a.5.5 0 0 1-1 0v-1z"/><path d="M5.5 13a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5z"/><path d="M5 11.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V13h-1V12h-1v1H5v-.5z"/></svg> <span>Task Sequencing</span></div>
+                            <span class="hub-button-desc">Set task dependencies to build the project schedule.</span>
                         </div>
-                    </div>
+                    </button>
+                </div>
+            </div>
+            <div class="hub-section">
+                <h3>Construction</h3>
+                <div class="hub-buttons">
+                    <button id="hub-btn-accomplishment" class="btn btn-primary construction-phase-btn" disabled>
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.854.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L3.5 6.793l6.646-6.647a.5.5 0 0 1 .708 0z"/><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5h-3a.5.5 0 0 1 0-1h3z"/></svg> <span>Accomplishment</span></div>
+                            <span class="hub-button-desc">File daily progress reports to track work completion.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-change-orders" class="btn btn-primary construction-phase-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/><path d="M8.5 4.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5a.5.5 0 0 1 1 0zm-2 7a.5.5 0 0 1 0-1h5a.5.5 0 0 1 0 1h-5z"/></svg> <span>Change Orders</span></div>
+                            <span class="hub-button-desc">Manage variation orders and scope modifications.</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="hub-section">
+                <h3>Baseline Reports</h3>
+                <div class="hub-buttons">
+                    <button id="hub-btn-boq" class="btn btn-outline-primary baseline-report-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 2A1.5 1.5 0 0 1 6 3.5v9A1.5 1.5 0 0 1 4.5 14h-2A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2h2zm2 0A1.5 1.5 0 0 1 8 3.5v9A1.5 1.5 0 0 1 6.5 14h-2v-1h2a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-2v-1h2z"/><path d="M2.5 1a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11zm9 3.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2z"/></svg> <span>Bill of Quantities</span></div>
+                            <span class="hub-button-desc">Generate the locked project budget and scope.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-pert" class="btn btn-outline-primary baseline-report-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5-.5zM8 15a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 1 0v5a.5.5 0 0 1-.5-.5zM4.5 15a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 1 0v8a.5.5 0 0 1-.5-.5zM1.5 15a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 1 0v2a.5.5 0 0 1-.5-.5zM15 15h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1z"/></svg> <span>PERT-CPM</span></div>
+                            <span class="hub-button-desc">Calculate the project's critical path and task float.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-gantt" class="btn btn-outline-primary baseline-report-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5h1zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/><path d="M3 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/></svg> <span>Gantt Chart</span></div>
+                            <span class="hub-button-desc">Visualize the project timeline and dependencies.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-scurve" class="btn btn-outline-primary baseline-report-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 5.013C0 4.453.448 4 1 4c.435 0 .825.277 1.25.438C3.58 4.965 5.26 6.38 7.29 6.84c1.94.437 3.51-.59 4.75-1.78C13.2 4.102 14.03 3.5 15 3.5c.552 0 1 .453 1 1.013v.355C16 5.453 15.552 6 15 6c-.435 0-.825-.277-1.25-.438-1.32-.497-2.99-.034-4.24 1.154-1.94.437-3.51.59-4.75 1.78C3.8 9.898 2.97 10.5 2 10.5c-.552 0-1-.453-1-1.013v-.355z"/></svg> <span>S-Curve</span></div>
+                            <span class="hub-button-desc">Analyze the planned cash flow and completion rate.</span>
+                        </div>
+                    </button>
+                     <button id="hub-btn-network" class="btn btn-outline-primary baseline-report-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.404 3.012a.5.5 0 0 1 .596-.596L15.586 7H13.5a.5.5 0 0 1 0-1h1.685L11.002.79a.5.5 0 0 1-.596.596zM11 1a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM5 1a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM5 8a.5.5 0 0 0 0 1h1.528l-1.002 2.15a.5.5 0 0 0 .894.444l1.24-2.661a.5.5 0 0 0 0-.466L6.42 6.305a.5.5 0 0 0-.894.444L6.528 9H5z"/></svg> <span>Network Diagram</span></div>
+                            <span class="hub-button-desc">View a flowchart of the project's task logic.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-resource-schedule" class="btn btn-outline-primary baseline-report-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg> <span>Resource Schedule</span></div>
+                            <span class="hub-button-desc">Forecast the daily cost of resources over time.</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="hub-section">
+                <h3>Construction Reports</h3>
+                <div class="hub-buttons">
+                    <button id="hub-btn-tracking-scurve" class="btn btn-outline-primary construction-phase-btn" disabled>
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 5.013C0 4.453.448 4 1 4c.435 0 .825.277 1.25.438C3.58 4.965 5.26 6.38 7.29 6.84c1.94.437 3.51-.59 4.75-1.78C13.2 4.102 14.03 3.5 15 3.5c.552 0 1 .453 1 1.013v.355C16 5.453 15.552 6 15 6c-.435 0-.825-.277-1.25-.438-1.32-.497-2.99-.034-4.24 1.154-1.94.437-3.51.59-4.75 1.78C3.8 9.898 2.97 10.5 2 10.5c-.552 0-1-.453-1-1.013v-.355z"/></svg> <span>Tracking S-Curve</span></div>
+                            <span class="hub-button-desc">Compare completion rate over time.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-tracking-gantt" class="btn btn-outline-primary construction-phase-btn" disabled>
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5h1zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/><path d="M3 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/></svg> <span>Tracking Gantt</span></div>
+                            <span class="hub-button-desc">Visualize planned vs. actual schedule progress.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-lookahead" class="btn btn-outline-primary construction-phase-btn" disabled>
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> <span>Look-Ahead</span></div>
+                            <span class="hub-button-desc">Plan upcoming tasks and resource needs.</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="hub-section">
+                <h3>Revised Reports</h3>
+                <div class="hub-buttons">
+                    <button id="hub-btn-revised-boq" class="btn btn-outline-primary revised-report-btn construction-phase-btn" disabled>
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 2A1.5 1.5 0 0 1 6 3.5v9A1.5 1.5 0 0 1 4.5 14h-2A1.5 1.5 0 0 1 1 12.5v-9A1.5 1.5 0 0 1 2.5 2h2zm2 0A1.5 1.5 0 0 1 8 3.5v9A1.5 1.5 0 0 1 6.5 14h-2v-1h2a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-2v-1h2z"/><path d="M2.5 1a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11zm9 3.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2z"/></svg> <span>Revised BOQ</span></div>
+                            <span class="hub-button-desc">View budget updated with change orders.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-revised-pert" class="btn btn-outline-primary revised-report-btn construction-phase-btn" disabled>
+                        <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5-.5zM8 15a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 1 0v5a.5.5 0 0 1-.5-.5zM4.5 15a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 1 0v8a.5.5 0 0 1-.5-.5zM1.5 15a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 1 0v2a.5.5 0 0 1-.5-.5zM15 15h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1z"/></svg> <span>Revised PERT-CPM</span></div>
+                            <span class="hub-button-desc">See the critical path with change orders included.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-revised-network" class="btn btn-outline-primary revised-report-btn construction-phase-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.404 3.012a.5.5 0 0 1 .596-.596L15.586 7H13.5a.5.5 0 0 1 0-1h1.685L11.002.79a.5.5 0 0 1-.596.596zM11 1a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM5 1a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM5 8a.5.5 0 0 0 0 1h1.528l-1.002 2.15a.5.5 0 0 0 .894.444l1.24-2.661a.5.5 0 0 0 0-.466L6.42 6.305a.5.5 0 0 0-.894.444L6.528 9H5z"/></svg> <span>Revised Network</span></div>
+                            <span class="hub-button-desc">View the revised flowchart of task logic.</span>
+                        </div>
+                    </button>
+                    <button id="hub-btn-revised-resources" class="btn btn-outline-primary revised-report-btn construction-phase-btn" disabled>
+                         <div class="hub-button-content">
+                            <div class="hub-button-header"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg> <span>Revised Resources</span></div>
+                            <span class="hub-button-desc">Forecast daily costs including change orders.</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
             <div id="takeoff-view" class="hidden">
@@ -16901,13 +17217,13 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="boq-display-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-boq-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <button id="back-to-boq-projects" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="boq-project-name"></h1>
                             <p id="boq-status-message" class="status-message"></p>
                         </div>
                         <div>
                             <button id="view-pert-cpm-btn" class="btn btn-primary hidden">View PERT-CPM</button>
-                            <button id="delete-boq-btn" class="btn btn-danger hidden">Delete BOQ & Unlock Data</button>
+                            <button id="boq-lock-toggle-btn" class="btn"></button>
                         </div>
                     </header>
                     <div class="table-container">
@@ -16930,7 +17246,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="pert-cpm-display-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-boq-view" class="btn btn-secondary">&larr; Back to BOQ</button>
+                            <button id="back-to-boq-view" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="pert-cpm-project-name"></h1>
                         </div>
                         <div>
@@ -16960,7 +17276,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="gantt-chart-display-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-pert-cpm-view" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <button id="back-to-pert-cpm-view" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="gantt-chart-project-name"></h1>
                         </div>
                         <div class="gantt-controls">
@@ -16982,7 +17298,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="s-curve-display-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-pert-cpm-view-from-s-curve" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <button id="back-to-pert-cpm-view-from-s-curve" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="s-curve-project-name"></h1>
                         </div>
                     </header>
@@ -16993,7 +17309,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="pert-cpm-network-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-pert-cpm-from-network-btn" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <button id="back-to-pert-cpm-from-network-btn" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="network-diagram-project-name"></h1>
                         </div>
                     </header>
@@ -17004,7 +17320,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="resource-schedule-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-pert-cpm-from-resource-btn" class="btn btn-secondary">&larr; Back to PERT-CPM</button>
+                            <button id="back-to-pert-cpm-from-resource-btn" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="resource-schedule-project-name"></h1>
                         </div>
                     </header>
@@ -17032,7 +17348,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="revised-boq-display-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-revised-boq-projects" class="btn btn-secondary">&larr; Back to Projects</button>
+                            <button id="back-to-revised-boq-projects" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="revised-boq-project-name"></h1>
                         </div>
                         <div>
@@ -17044,7 +17360,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="revised-pert-cpm-display-view" class="hidden">
                     <header class="page-header">
                         <div>
-                           <button id="back-to-revised-boq-view" class="btn btn-secondary">&larr; Back to Revised BOQ</button>
+                           <button id="back-to-revised-boq-view" class="btn btn-secondary">&larr; Back to Project Hub</button>
                            <h1 id="revised-pert-cpm-project-name"></h1>
                         </div>
                         <div>
@@ -17057,7 +17373,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="revised-pert-cpm-network-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-revised-pert-cpm-from-network-btn" class="btn btn-secondary">&larr; Back to Revised PERT-CPM</button>
+                            <button id="back-to-revised-pert-cpm-from-network-btn" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="revised-network-diagram-project-name"></h1>
                         </div>
                     </header>
@@ -17068,7 +17384,7 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 <div id="revised-resource-schedule-view" class="hidden">
                     <header class="page-header">
                         <div>
-                            <button id="back-to-revised-pert-cpm-from-resource-btn" class="btn btn-secondary">&larr; Back to Revised PERT-CPM</button>
+                            <button id="back-to-revised-pert-cpm-from-resource-btn" class="btn btn-secondary">&larr; Back to Project Hub</button>
                             <h1 id="revised-resource-schedule-project-name"></h1>
                         </div>
                     </header>
@@ -17421,42 +17737,42 @@ body.dark-theme .gantt-popup-wrapper .pointer {
                 </div>
             </div>
             <div id="theme-manager-view" class="hidden">
-    <header class="page-header">
-        <h1>Theme Manager</h1>
-    </header>
-
-    <div class="summary-card" style="text-align: left; max-width: 800px; margin-bottom: 2rem;">
-        <h2 class="card-title">Display Mode</h2>
-        <div class="setting-item">
-            <div class="setting-label">
-                <label for="dark-mode-toggle">Dark Mode</label>
-                <p>Reduces eye strain in low-light environments.</p>
+                <header class="page-header">
+                    <h1>Theme Manager</h1>
+                </header>
+            
+                <div class="summary-card" style="text-align: left; max-width: 800px; margin-bottom: 2rem;">
+                    <h2 class="card-title">Display Mode</h2>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <label for="dark-mode-toggle">Dark Mode</label>
+                            <p>Reduces eye strain in low-light environments.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dark-mode-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            
+                <div class="summary-card" style="text-align: left; max-width: 800px; margin-bottom: 2rem;">
+                    <h2 class="card-title">Color Themes</h2>
+                    <p style="color: var(--grey-color); margin-top: -0.5rem; margin-bottom: 1.5rem;">Select a pre-defined color palette for the application.</p>
+                    <div id="theme-picker-container">
+                    </div>
+                </div>
+                
+                <div class="summary-card" style="text-align: left; max-width: 800px;">
+                    <h2 class="card-title">Custom Accent Color</h2>
+                     <div class="setting-item">
+                        <div class="setting-label">
+                            <label for="custom-color-picker">Custom Accent</label>
+                            <p>Overrides the theme's primary color for buttons, links, and highlights.</p>
+                        </div>
+                    </div>
+                    <input type="color" id="custom-color-picker">
+                </div>
             </div>
-            <label class="toggle-switch">
-                <input type="checkbox" id="dark-mode-toggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-    </div>
-
-    <div class="summary-card" style="text-align: left; max-width: 800px; margin-bottom: 2rem;">
-        <h2 class="card-title">Color Themes</h2>
-        <p style="color: var(--grey-color); margin-top: -0.5rem; margin-bottom: 1.5rem;">Select a pre-defined color palette for the application.</p>
-        <div id="theme-picker-container">
-            </div>
-    </div>
-    
-    <div class="summary-card" style="text-align: left; max-width: 800px;">
-        <h2 class="card-title">Custom Accent Color</h2>
-         <div class="setting-item">
-            <div class="setting-label">
-                <label for="custom-color-picker">Custom Accent</label>
-                <p>Overrides the theme's primary color for buttons, links, and highlights.</p>
-            </div>
-            </div>
-            <input type="color" id="custom-color-picker">
-        </div>
-    </div>
         </main>
         <footer class="app-footer">
             <p>© 2025 Momentum alpha 2.0 | Daniel Pollentes. All Rights Reserved.</p>

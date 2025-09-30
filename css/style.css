@@ -607,10 +607,14 @@ body {
     position: sticky;
     left: 0;
     z-index: 10;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
     background-color: #fff;
     white-space: nowrap;
+    text-align: left;
+    padding-left: 10px;
 }
-
 #resource-schedule-table tbody tr:not(.category-header-row):nth-child(even),
 #revised-resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) {
     background-color: var(--light-color);
@@ -620,7 +624,19 @@ body {
 #revised-resource-schedule-table tbody tr:not(.category-header-row):nth-child(even) .sticky-col {
     background-color: var(--light-color);
 }
+.resource-schedule-table th,
+.resource-schedule-table td {
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 8px 5px;
+}
 
+.resource-schedule-table th:not(.sticky-col),
+.resource-schedule-table td:not(.sticky-col) {
+    width: 75px;
+    min-width: 75px;
+    text-align: right;
+}
 #resource-schedule-table thead .sticky-col {
     z-index: 20;
     background-color: var(--light-color);
@@ -629,8 +645,8 @@ body {
 #resource-schedule-table,
 #revised-resource-schedule-table {
     table-layout: fixed;
-    width: 100%;
 }
+
 
 .category-header-row .sticky-col {
     background-color: #e9ecef;
